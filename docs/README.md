@@ -4,6 +4,8 @@ Bienvenido al repositorio central de documentación de **KoonolApp**. Este espac
 
 ---
 
+---
+
 ## 🎯 1. Objetivo y Alcance del Sistema
 
 KoonolApp es una solución interna (Intranet/ERP) desarrollada con el objetivo primordial de **digitalizar y automatizar los procesos operativos y formatos físicos** de la organización que no son absorbidos por el sistema central SAP Business One.
@@ -12,6 +14,8 @@ El alcance del sistema está estrictamente limitado a la eficiencia operativa e 
 
 - 🚫 **No se gestionan transacciones comerciales directas:** El sistema no contempla módulos de compraventa, gestión de divisas ni cálculo de impuestos.
 - 🤝 **Complementariedad:** Funciona como un ecosistema satélite que extiende las capacidades operativas de la empresa sin duplicar las facultades financieras del ERP central.
+
+---
 
 ---
 
@@ -60,44 +64,92 @@ Todos los usuarios del sistema, independientemente de su nivel o departamento, c
 
 ---
 
+---
+
 ## 💾 3. Arquitectura de Datos y Políticas Globales
 
-### 🔄 3.1 Sincronización de Catálogos Maestros
+### 🏷️ 3.1 Estándares de Nomenclatura y Convenciones de Base de Datos
+
+Con el objetivo de garantizar la consistencia del esquema relacional, optimizar la escritura de consultas SQL y estandarizar el mapeo de objetos en el Backend, se establecen las siguientes directrices obligatorias de diseño técnico:
+
+- 🔤 **Idioma y Formato (Casing):** Todos los nombres de tablas, columnas, restricciones (_constraints_) y variables deben escribirse estrictamente en **idioma inglés** y bajo el formato **`snake_case`** (letras minúsculas separadas por guiones bajos, sin excepciones).
+
+- 📚 **Reglas de Pluralización de Tablas:** El nombre de la tabla (o la última palabra de la misma) representa el sustantivo principal o entidad abstracta guardada:
+  - **Sustantivos Contables $\rightarrow$ Plural:** Si los registros corresponden a elementos que se pueden contar individualmente, la última palabra debe ir en plural (por ejemplo: `users`, `quality_non_conformities`, `vehicle_daily_inspections`).
+  - **Sustantivos Incontables $\rightarrow$ Singular:** Si la última palabra representa un sustantivo incontable (_uncountable noun_) o un proceso/concepto abstracto en inglés, se mantiene en singular (por ejemplo:. `vacation_control`, `warehouse_equipment`).
+
+- ✏️ **Sustantivos Modificadores (Noun Adjuncts):** Cualquier palabra que anteceda al sustantivo principal actúa como adjetivo o modificador y **debe ir estrictamente en singular**, independientemente de si en el mundo real hace referencia a múltiples elementos.
+  - **Estructura:**
+
+  ```text
+  [module_prefix]_[modifier]_[main_noun]
+  ```
+
+  - **Donde:**
+    - `module_prefix`: módulo o prefijo en singular.
+    - `modifier`: modificador en singular.
+    - `main_noun`: sustantivo principal (singular o plural según las reglas anteriores).
+
+  - **Ejemplos:**
+    - `vehicle_daily_inspections` ✅
+    - `provider_sample_deliveries` ✅
+
+  - **Evitar:**
+    - `vehicles_daily_inspections` ❌
+    - `provider_samples_deliveries` ❌
+
+- 📂 **Estructura Jerárquica y Detalle:** Para mantener la trazabilidad relacional, las tablas compuestas siguen el orden explícito `[padre]_[hijo]`. Para el caso específico de renglones, partidas o desgloses, se utiliza el sufijo `_details` (por ejmplo: `rd_ticket_receipt_details`).
+
+- 🔑 **Llaves Primarias (Primary Keys):** Toda tabla dentro del ecosistema debe poseer una llave primaria única **(uuid)** nombrada categóricamente como `id`. Queda estrictamente desestimado el uso de nombres compuestos para identificar la clave primaria de la propia tabla (por ejemplo, evitar estructurar la tabla de usuarios con una PK llamada `id_user` o `user_id`).
+
+- 🔗 **Llaves Foráneas (Foreign Keys):** Toda columna que actúe como una llave foránea para relacionar entidades deberá iniciar obligatoriamente con el prefijo `id_`, seguido del nombre de la entidad referenciada en singular y en idioma inglés (por ejemplo: `id_user`, `id_department`).
+
+#### 💡 Tabla Resumen de Nomenclatura
+
+| Concepto / Tipo                | Regla Aplicada           | Nombre Correcto             | Nombre Incorrecto (Evitar)  |
+| :----------------------------- | :----------------------- | :-------------------------- | :-------------------------- |
+| **Entidad Contable**           | Plural al final          | `vehicle_daily_inspections` | `vehicles_daily_inspection` |
+| **Entidad Incontable**         | Singular al final        | `warehouse_equipment`       | `warehouse_equipments`      |
+| **Modificadores (_Adjuncts_)** | Prefijos en singular     | `client_sample_feedbacks`   | `clients_samples_feedbacks` |
+| **Detalle / Partida**          | Sufijo `_details`        | `rd_ticket_receipt_details` | `rd_ticket_receipt_items`   |
+| **Llave Foránea**              | Prefijo `id_` + Singular | `id_user`                   | `user_id` / `id_user`       |
+
+### 🔄 3.2 Sincronización de Catálogos Maestros
 
 Para optimizar la integridad de los datos, las entidades compartidas (Empleados, Clientes y Proveedores) operan bajo el siguiente esquema:
 
 1. 📥 **Carga Inicial:** Se realiza una carga masiva única en la base de datos de KoonolApp.
 2. ⚡ **Sincronización Automatizada vía Webhooks:** El backend se conecta directamente a SAP Business One mediante la capa de servicios (_Service Layer_). El intercambio de datos se gestiona en tiempo real a través de webhooks disparados ante eventos de creación o modificación, manteniendo actualizados los registros maestros de forma reactiva.
 
-### 📜 3.2 Política de Auditoría de Datos
+### 📜 3.3 Política de Auditoría de Datos y Normalización
 
-Con el fin de garantizar el rastreo de operaciones y la seguridad de la información, el esquema de auditoría interna se aplicará de forma diferenciada según la naturaleza y el ciclo de vida de los datos:
+Con el fin de garantizar el rastreo de operaciones, la seguridad de la información y la integridad del modelo relacional bajo la Tercera Forma Normal (3NF), el esquema de auditoría interna se aplicará de forma jerárquica según la naturaleza de la entidad:
 
-- 🔄 **Tablas Modificables:** Para aquellos registros sujetos a actualizaciones constantes o cambios de estado a lo largo del tiempo, es obligatoria la inclusión del ciclo de vida completo:
+- 🔄 **Tablas Independientes y Encabezados Modificables:** Para aquellas entidades primarias o encabezados de documentos/formatos (por ejemplo: `vehicles`, `vacation_requests`) sujetas a actualizaciones o cambios de estado a lo largo de su ciclo de vida, es obligatoria la inclusión del ciclo completo de auditoría:
   - `created_at` (Fecha y hora exacta de la creación del registro).
   - `updated_at` (Fecha y hora exacta de la última modificación realizada).
-  - `id_user` (Identificador del usuario responsable de la inserción o modificación).
+  - **Llave de Auditoría/Responsable:** `id_user` o su equivalente semántico según el contexto.
 
-- 🔒 **Tablas Inmutables (Bitácoras, Logs y Registros Históricos):** Para aquellas entidades que funcionan estrictamente como un histórico de control operativo y que, por regla de negocio, **no admiten modificaciones ni eliminaciones** una vez guardadas (por ejemplo: bitácoras de acceso de vehículos/personal o registros de inspecciones de calidad), se omitirá el campo de actualización. Estas tablas requerirán únicamente el registro de origen:
+- 🔒 **Tablas Inmutables Independientes (Bitácoras, Logs y Registros Únicos):** Para aquellas entidades independientes que funcionan estrictamente como un histórico operativo y que no admiten modificaciones ni eliminaciones una vez guardadas (por ejemplo: bitácoras de acceso de vehículos o personal), se omitirá el campo de actualización, requiriendo únicamente el registro de origen:
   - `created_at` (Fecha y hora exacta del asentamiento del registro).
-  - `id_user` (Identificador del usuario u operario que generó el registro).
+  - **Llave de Auditoría/Responsable:** `id_user` o su equivalente semántico según el contexto.
 
-### 🏷️ 3.3 Estándares de Nomenclatura y Convenciones de Base de Datos
+- 🧩 **Tablas de Detalle y Entidades Dependientes (Exención por Herencia 3NF):** En estructuras relacionales de tipo Encabezado-Detalle (por ejemplo: `quality_glass_plastic_details`, `quality_complaint_items`), **las tablas de detalle no deben incluir columnas de auditoría ni llaves de usuario**.
+  - **Justificación de Arquitectura:** La autoría, marca temporal y ciclo de vida son heredados de forma implícita desde la tabla de encabezado padre mediante la llave foránea (`id_header`). Dado que el proceso es ejecutado de principio a fin por un único usuario en una sola transacción inmutable, duplicar estos campos en el detalle vulnera la 3NF al introducir dependencias transitivas redundantes.
 
-Con el objetivo de garantizar la consistencia del esquema relacional, optimizar la escritura de consultas SQL y estandarizar el mapeo de objetos en el Backend, se establecen las siguientes directrices obligatorias de diseño técnico:
+---
 
-- 🔤 **Idioma y Formato (Casing):** Todos los nombres de tablas, columnas, restricciones (constraints) y variables dentro de la base de datos deben ser escritos estrictamente en **idioma inglés** y bajo el formato **snake_case** (letras minúsculas separadas por guiones bajos; por ejemplo: `gate_logs`, `vehicle_inspections`, `first_name`).
-- 🔑 **Llaves Primarias (Primary Keys):** Toda tabla dentro del ecosistema debe poseer una llave primaria única **(uuid)** nombrada categóricamente como `id`. Queda estrictamente desestimado el uso de nombres compuestos para identificar la clave primaria de la propia tabla (por ejemplo, evitar estructurar la tabla de usuarios con una PK llamada `id_user` o `user_id`).
-- 🔗 **Llaves Foráneas (Foreign Keys):** Toda columna que actúe como una llave foránea para relacionar entidades deberá iniciar obligatoriamente con el prefijo `id_`, seguido del nombre de la entidad referenciada en singular y en idioma inglés (por ejemplo: `id_user`, `id_department`, `id_vehicle`).
+#### 👤 Flexibilidad Semántica en Llaves de Auditoría (`id_user` vs. Roles Contextuales)
 
-### 🗑️ 3.4 Política de Eliminación de Datos (Soft Deletes)
+El campo que identifica al usuario responsable no está restringido a llamarse únicamente `id_user`. El nombre de la columna **debe adaptarse al contexto del proceso de negocio**, respetando siempre el idioma inglés, el formato `snake_case` y el prefijo `id_`:
 
-Con el propósito de salvaguardar la integridad histórica de la información y garantizar el cumplimiento de las auditorías internas, se restringe la eliminación física (_hard delete_) de registros mutables en el sistema mediante sentencias SQL `DELETE`.
+- **Uso General/Estándar:** `id_user` (Recomendado para tablas operativas genéricas o catálogos simples).
+- **Aclaración de Ciclo de Vida:** `id_created_by` / `id_updated_by` (Útil en tablas con múltiples intervenciones de usuarios distintos a lo largo del tiempo).
+- **Roles Operativos de Negocio:** `id_inspector_user`, `id_registered_by`, `id_guard`, etc. (Recomendado cuando el nombre del campo aporta claridad inmediata sobre el rol específico que ejecutó la acción en ese formulario o formato).
 
-- 🔄 **Borrado Lógico (_Soft Delete_):** Toda entidad susceptible a ser dada de baja operativa por el usuario (por ejemplo: desactivación de un empleado, anulación de un folio o baja de un vehículo) deberá implementar una columna obligatoria llamada `deleted_at` (de tipo _timestamp_ y con valor por defecto `NULL`).
-- 📊 **Persistencia de Datos:** Si el campo `deleted_at` se encuentra en estado `NULL`, el registro se considerará activo y visible para la operación regular. Al ejecutarse una baja, el backend asentará la fecha y hora exacta de la acción en dicha columna. El registro se ocultará de las interfaces de usuario (Frontend/Mobile), pero permanecerá intacto en la base de datos para fines analíticos e históricos.
+---
 
-### 🚦 3.5 Gestión y Flexibilidad de Estados Operativos
+### 🚦 3.4 Gestión y Flexibilidad de Estados Operativos
 
 Debido a la naturaleza diversa de los formatos físicos y flujos operativos digitalizados en KoonolApp, los estados lógicos variarán significativamente según el proceso de cada departamento. Para garantizar la flexibilidad operativa sin perder la uniformidad técnica, se establecen las siguientes directrices:
 
@@ -105,29 +157,28 @@ Debido a la naturaleza diversa de los formatos físicos y flujos operativos digi
 - 🔤 **Formato de Valores:** Los estados lógicos almacenados como cadenas de texto (_strings_) deben definirse estrictamente en **idioma español**, en **letras mayúsculas** y bajo el formato **SCREAMING_SNAKE_CASE** (por ejemplo: `PENDIENTE`, `EN_PROCESO`, `ACEPTADO_CLIENTE`, `ARCHIVADO`).
 - 📂 **Documentación Descentralizada:** Los diagramas de transición de estados y el significado de cada estatus no se centralizan de forma global; estos deberán quedar explícitamente detallados e ilustrados mediante diagramas Mermaid dentro del archivo técnico de su respectivo módulo operativo en la carpeta `/modules`.
 
----
+### 🗑️ 3.5 Política de Eliminación de Datos (Soft Deletes)
 
-## 📂 4. Índice de Módulos Funcionales
+Con el propósito de salvaguardar la integridad histórica de la información y garantizar el cumplimiento de las auditorías internas, se restringe la eliminación física (_hard delete_) de registros mutables en el sistema mediante sentencias SQL `DELETE`.
 
-La documentación detallada de cada vertical operativa se encuentra segmentada en los siguientes documentos técnicos, los cuales unifican reglas de negocio, historias de usuario y diagramas de flujo en formato `Mermaid.js`:
-
-- 📦 [Módulo: Core/Acceso](./modules/core.md) - _Accesos, Roles y Departamentos._
-- 🛒 [Módulo: Social](./modules/social.md) - _Comunicación comunal intra e inter departamental.._
-- 🧪 [Módulo: Productividad](./modules/productividad.md) - _Gestión de tareas intra e inter departamental._
+- 🔄 **Borrado Lógico (_Soft Delete_):** Toda entidad susceptible a ser dada de baja operativa por el usuario (por ejemplo: desactivación de un empleado, anulación de un folio o baja de un vehículo) deberá implementar una columna obligatoria llamada `deleted_at` (de tipo _timestamp_ y con valor por defecto `NULL`).
+- 📊 **Persistencia de Datos:** Si el campo `deleted_at` se encuentra en estado `NULL`, el registro se considerará activo y visible para la operación regular. Al ejecutarse una baja, el backend asentará la fecha y hora exacta de la acción en dicha columna. El registro se ocultará de las interfaces de usuario (Frontend/Mobile), pero permanecerá intacto en la base de datos para fines analíticos e históricos.
 
 ---
 
-## 🛠️ 5. Guía para la Creación de Nuevos Módulos
+---
+
+## 🛠️ 4. Guía para la Creación de Nuevos Módulos
 
 KoonolApp está diseñada bajo un enfoque modular y descentralizado. Si la operación requiere digitalizar un nuevo proceso que dé origen a un nuevo módulo, se deberá seguir estrictamente el estándar de nomenclatura y la estructura formal ya establecida en el repositorio.
 
-### 🔄 5.1 Procedimiento de Documentación
+### 🔄 4.1 Procedimiento de Documentación
 
 1.  **Creación del Archivo Técnico:** Generar un nuevo archivo Markdown dentro de la ruta `docs/modules/nombre-modulo.md`.
 2.  **Estructura Interna del Módulo:** El nuevo archivo deberá contener, de manera obligatoria, las secciones: _Reglas de Negocio_, _Historias de Usuario (con criterios de aceptación)_ y _Diagramas de Flujo (en Mermaid.js)_.
-3.  **Indexación Global:** Registrar el nuevo módulo en la **Sección 4** de este documento (`docs/README.md`) mediante un enlace relativo para mantener el índice actualizado.
+3.  **Indexación Global:** Registrar el nuevo módulo en la **Sección 5** de este documento (`docs/README.md`) mediante un enlace relativo para mantener el índice actualizado.
 
-### 🏷️ 5.2 Estándares de Nomenclatura (IDs únicos)
+### 🏷️ 4.2 Estándares de Nomenclatura (IDs únicos)
 
 Para asegurar la trazabilidad del código y el orden de las pruebas, cada regla de negocio, historia de usuario y criterio de aceptación debe usar la estructura de identificadores lógicos del sistema:
 
@@ -151,7 +202,7 @@ Para asegurar la trazabilidad del código y el orden de las pruebas, cada regla 
 
 ---
 
-### 📝 5.3 Estructura Estándar del Archivo Técnico
+### 📝 4.3 Estructura Estándar del Archivo Técnico
 
 Cada nuevo archivo Markdown generado en la ruta `docs/modules/nombre-modulo.md` debe replicar exactamente la siguiente plantilla estructural:
 
@@ -191,6 +242,20 @@ graph TD
 // Código estructurado de Mermaid.js
 \```
 ````
+
+---
+
+---
+
+## 📂 5. Índice de Módulos Funcionales
+
+La documentación detallada de cada vertical operativa se encuentra segmentada en los siguientes documentos técnicos, los cuales unifican reglas de negocio, historias de usuario y diagramas de flujo en formato `Mermaid.js`:
+
+- 📦 [Módulo: Core/Acceso](./modules/core.md) - _Accesos, Roles y Departamentos._
+- 🛒 [Módulo: Social](./modules/social.md) - _Comunicación comunal intra e inter departamental.._
+- 🧪 [Módulo: Productividad](./modules/productividad.md) - _Gestión de tareas intra e inter departamental._
+
+---
 
 ---
 

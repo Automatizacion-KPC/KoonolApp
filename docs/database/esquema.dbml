@@ -50,14 +50,55 @@ Table posts {
   id uuid [primary key, not null]
   id_user uuid [not null]
   id_target_department uuid
-  post_type varchar [not null]  // 'GLOBAL' o 'DEPARTMENTAL'
+  post_type varchar [not null]             // 'GLOBAL' o 'DEPARTMENTAL'
   title varchar
   body text
   docs jsonb
-  status varchar
+  pinned boolean
+  status varchar                           // 'ACTIVO', 'ELIMINADO', 'ARCHIVADO'
   created_at timestamp [default: `now()`]
   updated_at timestamp
   deleted_at timestamp
+}
+
+Table post_reactions {
+  id uuid [primary key, not null]
+  id_post uuid [not null]                       // Post reaccionado
+  id_user uuid [not null]                       // Usuario que reacciona
+  reaction_type varchar [default: 'LIKE']       // 'LIKE', 'ME_ENCANTA', 'APLAUSO', 'GRACIAS', etc.
+  created_at timestamp [default: `now()`]
+
+  indexes {
+    (id_post, id_user) [unique]                 // Un usuario solo puede tener 1 reacción activa por post
+  }
+}
+
+Table post_comments {
+  id uuid [primary key, not null]
+  id_post uuid [not null]                       // Post principal
+  id_parent_comment uuid                        // Null = Comentario de primer nivel | Not Null = Respuesta a un comentario
+  id_user uuid [not null]
+  comment text [not null]
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+  deleted_at timestamp
+
+  indexes {
+    id_post
+    id_parent_comment
+  }
+}
+
+Table post_comment_reactions {
+  id uuid [primary key, not null]
+  id_comment uuid [not null]                    // Comentario reaccionado
+  id_user uuid [not null]                       // Usuario que reacciona
+  reaction_type varchar [default: 'LIKE']       // 'LIKE', 'ME_ENCANTA', 'APLAUSO', etc.
+  created_at timestamp [default: `now()`]
+
+  indexes {
+    (id_comment, id_user) [unique]              // Un usuario solo puede tener 1 reacción activa por comentario
+  }
 }
 
 
@@ -73,7 +114,7 @@ Table personal_notes {
   favorite boolean
   is_reminder boolean [default: false]
   reminder_at timestamp
-  status varchar [default: 'ACTIVA']              // 'ACTIVA', 'ARCHIVADO'
+  status varchar [default: 'ACTIVA']        // 'ACTIVA', 'ARCHIVADO'
   created_at timestamp [default: `now()`]
   updated_at timestamp
   deleted_at timestamp
@@ -86,12 +127,14 @@ Table tasks {
   id_department uuid
   title varchar [not null]
   body text
-  priority varchar [default: 'MEDIA']             // BAJA, MEDIA, ALTA
-  status varchar [default: 'PENDIENTE']           // PENDIENTE, EN_PROCESO, COMPLETADA
+  receiver_comments text
+  priority varchar [default: 'MEDIA']        // BAJA, MEDIA, ALTA
+  status varchar [default: 'PENDIENTE']      // PENDIENTE, EN_PROCESO, COMPLETADA
   deadline timestamp
   created_at timestamp [default: `now()`]
   updated_at timestamp
   deleted_at timestamp
+  id_updated_by uuid
 }
 
 
@@ -99,45 +142,11 @@ Table tasks {
 // MODULO: Recepción de Muestras de Proveedores
 //-------------------//
 
-Table provider_samples {
-  id uuid [primary key, not null]
-  folio varchar [unique, not null]                 // Ej. 'SMP-2026-001'
-  id_provider uuid [not null]
-  product_name varchar [not null]
-  brand_manufacturer varchar                       // Marca o fabricante original
-  
-  // Datos de Control Sanitario y Calidad
-  lot_number varchar
-  expiration_date date
-  production_date date
-  quantity_received numeric [not null]
-  unit_of_measure varchar [not null]               // Ej. 'GR', 'L', 'ML'
-
-  // Flujo de Custodia y Trazabilidad
-  id_received_by_purchasing uuid [not null]
-  received_at timestamp [default: `now()`]
-  id_accepted_by_rd uuid
-  accepted_at_rd timestamp
-  status varchar [default: 'RECIBIDO_COMPRAS']     // 'RECIBIDO_COMPRAS', 'ENTREGADO_A_ID'
-
-  purchasing_notes text                            // Notas de Compras al recibir
-  rd_notes text                                    // Notas del ingeniero de I+D
-  
-  documents jsonb                                  // Ficha técnica digital o certificados (CoA, Hoja de seguridad) enviado por el proveedor
-
-  rd_review text
-  rd_estimated_review_date date
-  rd_review_date date
-
-  update_at timestamp
-  id_updated_by uuid
-}
-
 Table providers {
   id uuid [primary key, not null]
-  gov_id varchar [not null, unique]                // RFC
-  name varchar [not null, unique]                  // Razón social o nombre comercial
-  sap_id varchar [not null, unique]                // Identificador único del SAP
+  gov_id varchar [not null, unique]             // RFC
+  name varchar [not null, unique]               // Razón social o nombre comercial
+  sap_id varchar [not null, unique]             // Identificador único del SAP
   contact_name varchar
   contact_email varchar
   contact_phone varchar
@@ -148,6 +157,39 @@ Table providers {
   id_updated_by uuid
 }
 
+Table provider_sample_deliveries {
+  id uuid [primary key, not null]
+  folio varchar [unique, not null]               // 'SMP-2026-001'
+  id_provider uuid [not null]
+  product_name varchar [not null]
+  brand_manufacturer varchar                     // Marca o fabricante original
+
+  // Datos de Control Sanitario y Calidad
+  lot_number varchar
+  expiration_date date
+  production_date date
+  quantity_received numeric [not null]
+  unit_of_measure varchar [not null]              // 'GR', 'L', 'ML'
+
+  // Flujo de Custodia y Trazabilidad
+  id_received_by_purchasing uuid [not null]       // Comprador que recibe
+  received_at timestamp [default: `now()`]
+  id_accepted_by_rd uuid                          // Investigador que recibe
+  accepted_at_rd timestamp
+  status varchar [default: 'RECIBIDO_COMPRAS']    // 'RECIBIDO_COMPRAS', 'ENTREGADO_A_ID'
+
+  purchasing_notes text                           // Notas de Compras al recibir
+  rd_notes text                                   // Notas del ingeniero de I+D
+
+  documents jsonb                                 // Ficha técnica digital o certificados (CoA, Hoja de seguridad) enviado por el proveedor
+
+  rd_feedback text
+  rd_estimated_feedback_date date
+  rd_feedback_date date
+
+  updated_at timestamp
+  id_updated_by uuid
+}
 
 
 //-------------------//
@@ -156,9 +198,9 @@ Table providers {
 
 Table clients {
   id uuid [primary key, not null]
-  gov_id varchar [unique]                          // RFC
-  name varchar [not null, unique]                  // Razón social o nombre comercial
-  sap_id varchar [not null, unique]                // Identificador único para enlace con SAP Service Layer
+  gov_id varchar [unique]                      // RFC
+  name varchar [not null, unique]              // Razón social o nombre comercial
+  sap_id varchar [not null, unique]            // Identificador único para enlace con SAP Service Layer
   contact_name varchar
   contact_email varchar
   contact_phone varchar
@@ -175,10 +217,7 @@ Table rd_tickets {
   folio varchar [unique, not null]
   id_requested_by uuid [not null]
   id_assigned_to uuid                               
-  created_at timestamp [default: `now()`]
-  updated_at timestamp
-  deleted_at timestamp
-  
+
   // Datos del Cliente y Proyecto
   lead boolean                                   // True = Prospecto manual, False = Cliente SAP
   id_client uuid                                 // Vinculado si lead = false
@@ -187,41 +226,45 @@ Table rd_tickets {
   contact_name varchar
   contact_phone varchar
   contact_email varchar
-  
+
   // Viabilidad Comercial
   estimated_consumption varchar                   // Consumo mensual estimado
   target_price varchar                            // Precio esperado / Target de precio
-  has_reference_sample boolean [default: false]   // ¿Hay muestra de referencia del cliente?
-  
+  has_reference_sample boolean [default: false]   // ¿Muestra de referencia del cliente?
+
   // Segmentación del Formulario
   ticket_type varchar [not null]                  // 'MUESTRA', 'DESARROLLO', 'VISITA_TECNICA'
   product_segment varchar                         // 'CARNICOS', 'SAZONADORES', 'SABORIZANTES', 'COLORANTES', 'ADITIVOS', 'GENERAL'
-  
+
   // Flujo de Estados unificado
   status varchar [default: 'PENDIENTE']           // PENDIENTE, LEIDO, EN_PROCESO, CANCELADO, COMPLETADO, ACEPTADO_CLIENTE, RECHAZADO_CLIENTE
-  
+
   // CONTENEDOR DINÁMICO
   technical_specifications jsonb
+
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+  deleted_at timestamp
+  id_updated_by uuid
 }
 
 Table rd_ticket_receipts {
   id uuid [primary key, not null]
-  id_ticket uuid [not null, unique]                // Relación 1:1 con el ticket origen
-  folio_receipt varchar [unique, not null]         // El folio del acuse físico/digital
-  
-  issued_at date [not null]                        // "Fecha de emisión" del formato
-  feedback_expected_at date                        // "Fecha de Retroalimentación" pactada o estimada
-  
+  id_ticket uuid [not null, unique]           // Relación 1:1 con el ticket origen
+  folio_receipt varchar [unique, not null]    // El folio del acuse
+  issued_at date [not null]                   // "Fecha de emisión" del formato
+  feedback_expected_at date                   // "Fecha de Retroalimentación" pactada o estimada
+
   // Datos de entrega física
-  id_delivered_by_user uuid [not null]             // Ejecutivo de venta que entrega el paquete al cliente
-  attention_to varchar                             // "Atención de:" (Persona específica en la planta del cliente)
-  delivery_address text                            // Dirección
-  
-  status varchar [default: 'ENTREGADO']            // 'ENTREGADO', 'CON_RETROALIMENTACION'
-  general_notes text
-  
+  id_delivered_by_user uuid [not null]        // Ejecutivo de venta que entrega el paquete al cliente
+  attention_to varchar                        // "Atención de:" (Persona específica en la planta del cliente)
+  delivery_address text                       // Dirección
+
+  status varchar [default: 'ENTREGADO']       // 'ENTREGADO', 'CON_RETROALIMENTACION'
+
   created_at timestamp [default: `now()`]
   updated_at timestamp
+  id_updated_by uuid                          // Vendedor que cambia el estatus
 }
 
 Table rd_ticket_receipt_details {
@@ -229,14 +272,19 @@ Table rd_ticket_receipt_details {
   id_receipt uuid [not null]                       // Enlace a la cabecera del acuse
   quantity numeric [not null]
   unit_of_measure varchar [not null]               // Ej. 'GR', 'L', 'ML'
-
   product_name varchar [not null]                  // Nombre de la mezcla, sazonador o aditivo desarrollado
   dosage_and_usage text [not null]                 // "Dosis y Modo de Uso" (Instrucciones de aplicación para el cliente)
-  
   product_availability varchar [not null]          // DP, DS, SP        
-  
-  feedback_notes text                              // Retroalimentación específica del cliente para este producto
-  is_approved_by_client boolean                    // ¿Le gustó/sirvió el producto al cliente?
+}
+
+Table client_sample_feedback {
+  id uuid [primary key, not null]
+  id_sample_receipt uuid [not null]           // Relacion 1:1 con el detalle de la muestra
+  feedback_notes text                         // Retroalimentación específica del cliente para este producto
+  is_approved_by_client boolean               // ¿Le gustó/sirvió el producto al cliente?
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+  id_registered_by uuid [not null]           // Vendedor que llena la retroalimentacion
 }
 
 
@@ -277,6 +325,8 @@ Table employee_brigades {
   status boolean [default: true]                  // Por si se da de baja de la brigada pero sigue en la empresa
   created_at timestamp [default: `now()`]
   updated_at timestamp
+  id_created_by uuid
+  id_updated_by uuid
 }
 
 Table vacation_control {
@@ -285,8 +335,11 @@ Table vacation_control {
   year_corresponding integer [not null]          //Año de vigencia
   total_days_allocated integer [not null]        //Dias correspondientes por ley/antigüedad
   days_taken integer [default: 0]
-  days_remaining integer
+  days_remaining integer [default: 0]
+  created_at timestamp
   updated_at timestamp
+  id_created_by uuid
+  id_updated_by uuid
 }
 
 Table vacation_requests {
@@ -295,14 +348,14 @@ Table vacation_requests {
   start_date date [not null]
   end_date date [not null]
   requested_days integer [not null]
-  
+
   status varchar [default: 'PENDIENTE_JEFE']      // 'PENDIENTE_JEFE', 'APROBADO_JEFE', 'RECHAZADO_JEFE', 'APROBADO_RH', 'RECHAZADO_RH'       
-  
-  id_manager_approver uuid                        // Responsable de Área que firmó/aprobó
-  id_hr_approver uuid                             // Usuario de RH que dio el visto bueno final
-  
+
   manager_notes text                              // Comentarios del jefe
   hr_notes text                                   // Comentarios de RH
+
+  id_manager_approver uuid                        // Responsable de Área que firmó/aprobó
+  id_hr_approver uuid                             // Usuario de RH que dio el visto bueno final
   created_at timestamp [default: `now()`]
   updated_at timestamp
 }
@@ -316,9 +369,9 @@ Table attendance_permits {
   justification text [not null]                   //'PERMISO SIN GOCE DE SUELDO', 'PERMISO CON GOCE DE SUELDO', 'SUSPENSION DEL TRABAJO', 'DEVOLUCION DE HORAS', 'OTROS'
   reason text [not null]                          // Justificación del empleado
   evidence_document text                          // URL de justificante médico o constancia
-  
+
   status varchar [default: 'PENDIENTE_JEFE']      // 'PENDIENTE_JEFE', 'APROBADO_JEFE', 'RECHAZADO_JEFE', 'APROBADO_RH', 'RECHAZADO_RH'
-  
+
   id_manager_approver uuid
   id_hr_approver uuid
   manager_notes text
@@ -333,9 +386,9 @@ Table money_loans {
   amount_requested numeric [not null]             // Monto solicitado
   installments_terms integer [not null]           // Número de quincenas/meses para pagar
   reason text                                     // Motivo del préstamo
-  
+
   status varchar [default: 'PENDIENTE']           // 'PENDIENTE', 'APROBADO', 'RECHAZADO', 'LIQUIDADO'
-  
+
   id_approver uuid                                // Quien autoriza el recurso financiero
   notes text
   created_at timestamp [default: `now()`]
@@ -356,21 +409,20 @@ Table vehicles {
   model varchar [not null]
   year integer
   color varchar
-  vehicle_type varchar [not null]                 // AUTO, SUV, PICK_UP, UTILITARIO, CAMION, MOTOCICLETA, OTRO
+  vehicle_type varchar [not null]             // AUTO, SUV, PICK_UP, UTILITARIO, CAMION, MOTOCICLETA, OTRO
   load_capacity_kg numeric
-  reference_consumption_kml numeric               // Consumo de referencia ficha técnica (KM/L)
-  
+  reference_consumption_kml numeric           // Consumo de referencia ficha técnica (KM/L)
+
   // Control de Seguro
-  insurance_start_date date                       // Inicio de vigencia del seguro
-  insurance_end_date date                         // Fin de vigencia del seguro
-  
-  
+  insurance_start_date date                   // Inicio de vigencia del seguro
+  insurance_end_date date                     // Fin de vigencia del seguro
+
   // Datos Operativos Internos
-  current_odometer integer [default: 0]           // Kilometraje actual
-  next_maintenance_odometer integer               // Kilometraje objetivo para el próximo servicio
-  status varchar [default: 'DISPONIBLE']          // DISPONIBLE, EN_RUTA, EN_TALLER, INACTIVO, SIN_SEGURO, 
-  notes text                                      // Campo de observaciones o notas generales
-  
+  current_odometer integer [default: 0]       // Kilometraje actual
+  next_maintenance_odometer integer           // Kilometraje objetivo para el próximo servicio
+  status varchar [default: 'DISPONIBLE']      // DISPONIBLE, EN_RUTA, EN_TALLER, INACTIVO, SIN_SEGURO, 
+  notes text                                  // Campo de observaciones o notas generales
+
   created_at timestamp [default: `now()`]
   updated_at timestamp
   deleted_at timestamp
@@ -382,7 +434,7 @@ Table fuel_logs {
   id uuid [primary key, not null]
   id_vehicle uuid [not null]
   id_registered_by uuid [not null]
-  fuel_type varchar [not null]
+  fuel_type varchar [not null]             // GASOLINA, DIESEL
   odometer_at_loading integer [not null]
   liters numeric [not null]
   cost_per_liter numeric
@@ -433,31 +485,30 @@ Table gate_logs {
   external_driver_name varchar                    
   company_provenance varchar                      
 
-  id_guard uuid [not null]
   general_conditions text                         
   pictures jsonb
   
+  id_guard_entry uuid [not null]
+  id_guard_exit uuid
   created_at timestamp [default: `now()`]         
 }
 
 Table haulers {
   id uuid [primary key, not null]
   name varchar
-
   created_at timestamp [default: `now()`]
   updated_at timestamp
   deleted_at timestamp
-  
   id_created_by uuid
   id_updated_by uuid
 }
 
 Table gate_personnel_access_logs {
   id uuid [primary key, not null]
-  
+
   person_type varchar [not null]                   // 'EMPLEADO', 'CONTRATISTA', 'VISITA', 'PROVEEDOR', 'CLIENTE'
   id_user uuid
-  
+
   external_name varchar
   external_company varchar
   external_id_number varchar                       // No. de INE
@@ -468,9 +519,8 @@ Table gate_personnel_access_logs {
   exit_timestamp timestamp                         // Es NULL mientras la persona siga DENTRO de las instalaciones
   status varchar [default: 'DENTRO']               // 'DENTRO', 'FUERA'
 
-  id_guard_entry uuid [not null]                   // Guardia que le dio acceso
-  id_guard_exit uuid                               // Guardia que registró la salida
-  
+  id_guard_entry uuid [not null]
+  id_guard_exit uuid
   created_at timestamp [default: `now()`]
 }
 
@@ -484,12 +534,12 @@ Table warehouse_equipment {
   internal_code varchar [unique, not null]         // Ej. 'MNT-01', 'PTN-05'
   id_department uuid [not null]
   id_assigned_employee uuid                        // Operador principal asignado
-  
+
   equipment_type varchar [not null]                // 'MONTACARGAS_ELECTRICO', 'MONTACARGAS_GAS', 'PATIN_HIDRAULICO', 'PATIN_ELECTRICO', 'OTROS'
   brand varchar [not null]
   model varchar [not null]
   series_number varchar [unique]                   // Número de serie del fabricante
-  year integer
+  year_model integer
   load_capacity_kg numeric [not null]
   acquisition_date date
   location varchar                                // 'BODEGA_1', 'BODEGA_2'
@@ -499,10 +549,10 @@ Table warehouse_equipment {
   current_horometer numeric [default: 0]          // Horas actuales de uso
   next_maintenance_horometer numeric              // Horas objetivo para el próximo servicio
   next_maintenance_date date                      // Para los patines, el servicio se agenda por fecha
-  
+
   status varchar [default: 'DISPONIBLE']          // DISPONIBLE, EN_USO, EN_TALLER, INACTIVO
   notes text
-  
+
   created_at timestamp [default: `now()`]
   updated_at timestamp
   deleted_at timestamp
@@ -513,16 +563,15 @@ Table warehouse_equipment {
 Table equipment_maintenances {
   id uuid [primary key, not null]
   id_equipment uuid [not null]
-  id_registered_by uuid [not null]                // Usuario que reporta o coordina
+  id_registered_by uuid [not null]
   maintenance_type varchar [not null]             // 'PREVENTIVO', 'CORRECTIVO', 'REVISION_DIARIA'
-  
   horometer_at_service numeric                    // Horas del equipo al momento del servicio
   description text [not null]
   parts_replaced text                             // Refacciones utilizadas
   workshop_name varchar                           // Nombre de Taller
   total_cost numeric [not null, default: 0]
   invoice_document jsonb                          // PDF/XML de la factura del taller externo
-  
+
   created_at timestamp [default: `now()`]
   updated_at timestamp
 }
@@ -532,18 +581,17 @@ Table equipment_maintenances {
 // MODULO: Calidad, Inspección de Vehículos
 //-------------------//
 
-// 1. FORMATO: Inspección Diaria Pre-Carga
-Table vehicles_daily_inspections {
+// Inspección Diaria (Pre-Carga)
+Table vehicle_daily_inspections {
   id uuid [primary key, not null]
   folio varchar [unique, not null]                 // 'IVI-AA-####'
   id_vehicle uuid [not null]
   id_inspector_user uuid [not null]
-
   id_driver_user uuid                              // Chofer asignado a la ruta del día
-  
+
   odor_free boolean [not null]                     // Libre de malos olores
   odor_description varchar                         // En caso de que exista olor
-  
+
   floor_has_holes boolean [not null]
   floor_has_splinters boolean [not null]
   floor_has_sharp_objects boolean [not null]
@@ -573,7 +621,6 @@ Table vehicles_daily_inspections {
   has_live_or_dead_roaches boolean [not null]
   has_live_or_dead_flies boolean [not null]
 
-
   cabin_is_dust_free boolean [not null]
   cabin_has_bottles boolean [not null]
   cabin_has_trash boolean [not null]
@@ -583,21 +630,19 @@ Table vehicles_daily_inspections {
   fumigation_service_date date
   pest_control_company_name varchar
 
-  
   status varchar [default: 'APROBADO']             // APROBADO, RECHAZADO
   notes text
   created_at timestamp [default: `now()`]
 }
 
-// 2. FORMATO: Inspección Post-Lavado Semanal
+// Inspección Post-Lavado Semanal
 Table vehicle_wash_inspections {
   id uuid [primary key, not null]
   folio varchar [unique, not null]                 // 'VLV-AA-####'
   id_vehicle uuid [not null]
   id_inspector_user uuid [not null]
-  
   id_driver_user uuid                              // Chofer asignado a la ruta del día
-  
+
   floor_is_clean boolean [not null]
   floor_is_dry boolean [not null]
 
@@ -624,7 +669,7 @@ Table vehicle_wash_inspections {
   created_at timestamp [default: `now()`]
 }
 
-// 3. FORMATO: Inspección de Recepción de Mercancía
+// Inspección de Recepción de Mercancía
 Table vehicle_reception_inspections {
   id uuid [primary key, not null]
   folio varchar [unique, not null]                 // 'IVE-AA-####'
@@ -633,7 +678,7 @@ Table vehicle_reception_inspections {
   inspection_date date [not null]                  // FECHA DE REVISIÓN
   inspection_time time [not null]
   invoices_included jsonb                          // FACTURAS QUE INCLUYE
-  
+
   // Origen de la carga
   is_internal_vehicle boolean [not null]
   id_vehicle uuid                                  // Nulo si viene de fletera
@@ -667,7 +712,7 @@ Table vehicle_reception_inspections {
   allergen_nuts boolean [default: false]            // FRUTOS SECOS
 
   comes_on_pallets boolean [not null]
- 
+  
   floor_has_holes boolean [not null]
   floor_has_splinters boolean [not null]
   floor_has_sharp_objects boolean [not null]
@@ -702,7 +747,6 @@ Table vehicle_reception_inspections {
   has_live_or_dead_roaches boolean [not null]
   has_live_or_dead_flies boolean [not null]
 
-  
   status varchar [default: 'APROBADO']             // APROBADO, RECHAZADO, CUARENTENA
   rejection_reason text
   
@@ -715,49 +759,49 @@ Table vehicle_reception_inspections {
 //-------------------//
 
 // Catálogo Centralizado de Vidrio y Plástico Quebradizo
-Table quality_glass_plastic_catalog {
+Table glass_brittle_plastics {
   id uuid [primary key, not null]
-  
+
   // CLASIFICACIÓN DEL RECURSO
-  resource_scope varchar [not null]          // 'INFRAESTRUCTURA_PLANTA', 'EQUIPO_MOVIL'
-  
+  resource_scope varchar [not null]         // 'INFRAESTRUCTURA_PLANTA', 'EQUIPO_MOVIL'
+
   // SUB-TIPO ESPECÍFICO
-  resource_type varchar [not null]           // 'ALMACEN_1', 'ALMACEN_2', 'VEHICULO_PROPIO', 'VEHICULO_RENTADO'
-  
+  resource_type varchar [not null]          // 'ALMACEN_1', 'ALMACEN_2', 'VEHICULO_PROPIO', 'VEHICULO_RENTADO'
+
   // DATOS DE IDENTIFICACIÓN
-  category varchar [not null]           // 'LAMPARA_ILUMINACION', 'LAMPARA_UV', 'LAMPARA_EMERGENCIA', 'GABINETE_REDES', 'VENTANA', 'PUERTA', 'TORRETA_ALARMA', 'MONTACARGAS'
-  concept_code varchar [unique, not null]    // Ej: 'A1-1', 'A2-1', 'LAM1115p', 'DID1FG25', 'TTALM1'
-  
+  category varchar [not null]               // 'LAMPARA_ILUMINACION', 'LAMPARA_UV', 'LAMPARA_EMERGENCIA', 'GABINETE_REDES', 'VENTANA', 'PUERTA', 'TORRETA_ALARMA', 'MONTACARGAS'
+  concept_code varchar [unique, not null]   // Ej: 'A1-1', 'A2-1', 'LAM1115p', 'DID1FG25', 'TTALM1'
+
   // UBICACIÓN FÍSICA O ASIGNACIÓN DE MODELO
-  location_or_model varchar [not null]       // En infraestructura: 'Pasillo AB', 'Andén 6'. En montacargas: 'Mod.115P HYSTER', 'Mod.FORKLIFT TRUCK'
-  
-  is_active boolean [default: true]          // Por si se da de baja un montacargas o se remodela un área
+  location_or_model varchar [not null]      // En infraestructura: 'Pasillo AB', 'Andén 6'. En montacargas: 'Mod.115P HYSTER', 'Mod.FORKLIFT TRUCK'
+
+  is_active boolean [default: true]         // Por si se da de baja un montacargas o se remodela un área
+
   created_at timestamp [default: `now()`]
+  updated_at timestamp
+  id_created_by uuid
+  id_updated_by uuid
 }
 
 Table quality_glass_plastic_verifications {
   id uuid [primary key, not null]
   folio varchar [unique, not null]                 // 'CAL-VVP-AA-####'
   id_inspector_user uuid [not null]
-
   inspection_date date [not null] 
   inspection_time time [not null]
-  
   status varchar [default: 'COMPLETADO']           // 'COMPLETADO', 'CON_OBSERVACIONES'
   general_notes text                               // Comentarios globales de la revisión del mes
-  
   created_at timestamp [default: `now()`]
 }
 
 Table quality_glass_plastic_details {
   id uuid [primary key, not null]
   id_verification uuid [not null]
-  id_catalog_item uuid [not null]
-  
+  id_glass_brittle_plastic uuid [not null]
+
   structure_status varchar [not null]              //  'C': CONFORME, 'NC': NO CONFORME
   operation_status varchar [not null]              //  'C': CONFORME, 'NC': NO CONFORME
   access_status varchar [not null]                 //  'C': CONFORME, 'NC': NO CONFORME
-  
   observations text                                // OBSERVACIONES: El o los desperfectos detectados
   corrective_action varchar                        // ACCIÓN CORRECTIVA: Solo admite 'REVISION' o 'CAMBIO'
 }
@@ -771,13 +815,14 @@ Table products {
   id uuid [primary key, not null]
   sap_id varchar [unique, not null]      // Clave del artículo en SAP
   name varchar [not null]
-  
   inventory_uom varchar [not null]       // Unidad Base de Inventario en SAP (ej: 'KG' o 'L')
   sales_uom varchar                      // Unidad de Venta en SAP (ej: 'SCO', 'BOL', 'CJA')
   conversion_factor numeric [default: 1] // Factor de empaque. Cantidad por unidad de venta
-
   is_active boolean [default: true]
-  synced_at timestamp [default: `now()`]  // Fecha de última sincronización
+  created_at timestamp [default: `now()`]
+  updated_at timestamp
+  id_created_by uuid
+  id_updated_by uuid
 }
 
 // Núcleo unificado para No Conformidades de Clientes (CAL-FOR-01 y CAL-FOR-02)
@@ -786,7 +831,7 @@ Table quality_customer_complaints {
   form_type varchar [not null]                    // 'CAL-FOR-01' (Con Posesión) o 'CAL-FOR-02' (Sin Posesión)
   folio varchar [unique, not null]                // 'NCC-CP-AA-###' o 'NCC-SP-AA-###'
   status varchar [default: 'ABIERTO']             // 'ABIERTO', 'AUTORIZADO', 'RECOLECTADO', 'RECIBIDO_ALMACEN', 'DICTAMINADO', 'CERRADO'
-  
+
   // Datos Generales del Documentos
   id_reported_by uuid [not null]                  // Usuario de ventas o Calidad que reporta
   reported_date date [not null]
@@ -796,7 +841,7 @@ Table quality_customer_complaints {
   invoice_reference varchar [not null]            // No. Factura o Remisión
   invoice_date date [not null]                    // Fecha de emisión de la factura
   id_sales_executive uuid [not null]              // Ejecutivo de ventas asignado
-  
+
   // Desviaciones Globales (Exclusivos para Ruta Sin Posesión / CAL-FOR-02)
   is_dev_not_found boolean [default: false]             // El cliente no se encontraba
   is_dev_outside_hours boolean [default: false]         // Fuera de horario
@@ -808,12 +853,11 @@ Table quality_customer_complaints {
   final_solution text                                   // Dictamen / Resolución final del folio
 
   // Firmas y Fechas de Control
-  id_created_by_user uuid [not null]
   id_quality_reviewer uuid                        // Coordinador de Calidad y Desarrollo
   quality_signature_at timestamp
   id_admin_authorizer uuid                        // Gerente Administrativo
   admin_signature_at timestamp
-  
+
   created_at timestamp [default: `now()`]
   updated_at timestamp
 }
@@ -825,7 +869,7 @@ Table quality_complaint_items {
   id_product uuid [not null]  
   lot_number varchar [not null]
   expiration_date date [not null]
-  unit_package varchar [not null]               // Empaque unitario (SCO, BOL, BID)
+  unit_package varchar [not null]               // Empaque unitario. "sales_uom" (SCO, BOL, BID)
   pieces_quantity numeric [not null]            // Número de bultos/piezas devueltas
   reported_weight_kg numeric [not null]         // Cantidad total neta KG
 
@@ -841,22 +885,22 @@ Table quality_complaint_items {
   is_dev_out_of_spec_chemical boolean [default: false]   // Metales, pureza, humedad
   is_dev_functional_failure boolean [default: false]     // Viscosidad, efectividad
   is_dev_caked_product boolean [default: false]          // Apelmazado
-  
+
   is_dev_wrong_product boolean [default: false]
   is_dev_incomplete_weight boolean [default: false]
-  
+
   other_dev text                                        
-  
+
   // Relatoría y Evidencias Iniciales (CAL-FOR-01)
   problem_description text [not null]
   has_photo_evidence boolean [default: false]     // Obligatorio para CAL-FOR-01
   photos_url jsonb
 
   //Acción Inmediata (Exclusivo para CAL-FOR-02 / Sin Posesión)
-  replace_product boolean [default: false]               // (SP)
-  complete_product boolean [default: false]              // (SP)
-  other_action boolean [default: false]                  // (SP)
-  other_action_details text                              // (SP)
+  replace_product boolean [default: false]
+  complete_product boolean [default: false]
+  other_action boolean [default: false]
+  other_action_details text
 }
 
 // Matriz del Plan de Acción
@@ -867,6 +911,7 @@ Table quality_complaint_action_plans {
   action_to_do text [not null]
   id_responsible_user uuid [not null]
   commitment_date date [not null]
+  created_at timestamp [default: `now()`]
 }
 
 
@@ -877,16 +922,19 @@ Table quality_complaint_action_plans {
 // CAL-FOR-16: Autorización de Recolección (SOLO aplica si form_type = 'CAL-FOR-01')
 Table quality_recollection_authorizations {
   id uuid [primary key, not null]
-  id_complaint uuid [not null, unique]            // Enlace 1:1 con la queja origen
-  folio varchar [unique, not null]                // 'CAL-FOR-16-AA-###'
-  
-  id_driver_user uuid [not null]                  // Chofer asignado
-  id_vehicle uuid [not null]                      // Unidad interna de la empresa
-  scheduled_date date [not null]                  // Fecha programada de recolección
+  id_complaint uuid [not null, unique]        // Enlace 1:1 con la queja origen
+  folio varchar [unique, not null]            // 'CAL-FOR-16-AA-###'
+
+  id_driver_user uuid [not null]              // Chofer asignado
+  id_vehicle uuid [not null]                  // Unidad interna de la empresa
+  scheduled_date date [not null]              // Fecha programada de recolección
   observations text 
-  
-  status boolean [default: false]                 // Para saber si ya fue recolectado
+
+  status boolean [default: false]             // Para saber si ya fue recolectado
   created_at timestamp [default: `now()`]
+  updated_at timestamp
+  id_assigned_by uuid                         //Mando que programa la recolección
+  id_updated_by uuid
 }
 
 // Renglones autorizados para el Chofer
@@ -898,9 +946,9 @@ Table quality_recollection_authorization_details {
   // Queja original
   id_complaint_item uuid [not null]
 
-  pieces_to_recollect numeric [not null]           // Cuántos bultos tiene permiso de subir al camión Ej: 3.25
-  weight_per_package numeric [not null]            // Ej: 1 kg
-  total_weight_kg numeric [not null]       // Ej: 3.25 kg
+  pieces_to_recollect numeric [not null]    // Cuántos bultos tiene permiso de subir al camión Ej: 3.25
+  weight_per_package numeric [not null]     // Ej: 1 kg
+  total_weight_kg numeric [not null]        // Ej: 3.25 kg
 }
 
 
@@ -911,17 +959,17 @@ Table quality_recollection_authorization_details {
 // ALM-FOR-01: Recepción de Producto en Almacén
 Table quality_warehouse_receptions {
   id uuid [primary key, not null]
-  folio varchar [unique, not null]                // Folio 'ALM-AA-###'
-  id_quality_inspector uuid [not null]            // Personal de Calidad/Almacén que recibe
-  reception_date date [not null]                  // Fecha de recepción
-  reception_time time [not null]                  // Hora
-  
+  folio varchar [unique, not null]             // Folio 'ALM-AA-###'
+  id_inspector_user uuid [not null]            // Personal de Calidad/Almacén que recibe
+  reception_date date [not null]
+  reception_time time [not null]
+
   // Datos Generales de Identificación
   id_client uuid [not null]                       // Cliente
   id_sales_executive uuid [not null]              // Ejecutivo
   invoice_reference varchar [not null]            // No. Factura/remisión
   return_type varchar [not null]                  // Devolución: 'PARCIAL' o 'TOTAL'
-  
+
   // Orígenes opcionales para amarre del flujo
   id_recollection_authorization uuid              // Enlace a CAL-FOR-16 (Si viene de Devolución Posterior)
   id_complaint uuid                               // Enlace a queja (Se llena cuando Calidad dictamina el CAL-FOR-02)
@@ -951,15 +999,17 @@ Table quality_warehouse_receptions {
   act_order_cancellation boolean [default: false]
 
   general_observations text                       // Línea de observaciones inferior
-  
+
   created_at timestamp [default: `now()`]
+  updated_at timestamp
+
+  id_updated_by uuid
 }
 
 // Renglones de la Recepción en Almacén
 Table quality_warehouse_reception_details {
   id uuid [primary key, not null]
   id_reception uuid [not null]                    // Cabecera de ALM-FOR-01
-  
   id_product uuid [not null]                      // Producto (Vínculo a tu tabla local de artículos)
 
   // Lo que ingresa físicamente a la planta (Validación ciega)
@@ -978,10 +1028,10 @@ Table quality_non_conformities {
   id uuid [primary key, not null]
   folio varchar [unique, not null]                 // Ej. 'NC-AA-###'
   status varchar [default: 'ABIERTA']              // 'ABIERTA', 'EN_PROCESO', 'VERIFICADA', 'CERRADA'
-  
+
   source_type varchar [not null]                   // 'PRE_CARGA', 'POST_LAVADO', 'RECEPCION_MERCANCIA', 'VIDRIO_PLASTICO', 'RECLAMO_CLIENTE', 'RAMPA_ALMACEN', 'MANUAL'
   description text [not null]                      // Detalles del hallazgo
-  
+
   // APUNTADORES DE ORIGEN GLOBAL (Nullables)
   id_daily_inspection uuid                         // Viene de vehicles_daily_inspections (Pre-Carga)
   id_wash_inspection uuid                          // Viene de vehicle_wash_inspections (Post-Lavado)
@@ -989,8 +1039,9 @@ Table quality_non_conformities {
   id_warehouse_reception uuid                      // Viene de quality_warehouse_receptions (ALM-FOR-01 Rampa)
   id_customer_complaint uuid                       // Viene de quality_customer_complaints (CAL-FOR-01/02)
   id_glass_plastic_detail uuid                     // Viene de vidrio y plástico quebradizo
-  
-  id_created_by_user uuid [not null]
+
+  id_created_by uuid [not null]
+  id_updated_by uuid
   created_at timestamp [default: `now()`]
   updated_at timestamp
   deleted_at timestamp
@@ -1003,20 +1054,20 @@ Table quality_non_conformities {
 Table system_notifications {
   id uuid [primary key, not null]
   id_user uuid [not null]                          // Usuario destino
-  
+
   // Contenido de la notificación
   title varchar [not null]
   body text [not null]
   category varchar [not null]                      // 'CALIDAD', 'ALMACEN', 'LOGISTICA', 'SISTEMA'
   priority varchar [default: 'MEDIA']              // 'BAJA', 'MEDIA', 'ALTA', 'CRITICA'
-  
+
   // Control de Estados
   is_read boolean [default: false]
   read_at timestamp                                // Fecha y hora exacta en la que el usuario le dio clic
-  
+
   // Deep Linking, redireccionamiento
   redirect_url varchar                             // Ej: "/quality/complaints/view/uuid-aqui"
-  
+
   created_at timestamp [default: `now()`]
 }
 
@@ -1025,23 +1076,30 @@ Table system_notifications {
 //-------------------//
 
 // Usuarios
-Ref: users.id_created_by - users.id
-Ref: users.id_updated_by - users.id
 Ref: users.id_rol > roles.id
 Ref: users.id_department > departments.id
 Ref: users.id_employee - employees.id
+Ref: users.id_created_by > users.id
+Ref: users.id_updated_by > users.id
 
 // Roles
-Ref: roles.id_created_by - users.id
-Ref: roles.id_updated_by - users.id
+Ref: roles.id_created_by > users.id
+Ref: roles.id_updated_by > users.id
 
 // Departamentos
-Ref: departments.id_created_by - users.id
-Ref: departments.id_updated_by - users.id
+Ref: departments.id_created_by > users.id
+Ref: departments.id_updated_by > users.id
 
 // Posts
 Ref: posts.id_user > users.id
 Ref: posts.id_target_department > departments.id
+Ref: post_comments.id_post > posts.id
+Ref: post_comments.id_parent_comment > post_comments.id
+Ref: post_comments.id_user > users.id
+Ref: post_reactions.id_post > posts.id
+Ref: post_reactions.id_user > users.id
+Ref: post_comment_reactions.id_comment > post_comments.id
+Ref: post_comment_reactions.id_user > users.id
 
 // Notas
 Ref: personal_notes.id_user > users.id
@@ -1050,42 +1108,54 @@ Ref: personal_notes.id_user > users.id
 Ref: tasks.id_created_by > users.id
 Ref: tasks.id_assigned_to > users.id
 Ref: tasks.id_department > departments.id
+Ref: tasks.id_updated_by > users.id
+
+// Proveedores
+Ref: providers.id_created_by > users.id
+Ref: providers.id_updated_by > users.id
 
 // Recepcion Muestras
-Ref: provider_samples.id_provider > providers.id
-Ref: provider_samples.id_received_by_purchasing > users.id
-Ref: provider_samples.id_accepted_by_rd > users.id
-Ref: provider_samples.id_updated_by - users.id
+Ref: provider_sample_deliveries.id_provider > providers.id
+Ref: provider_sample_deliveries.id_received_by_purchasing > users.id
+Ref: provider_sample_deliveries.id_accepted_by_rd > users.id
+Ref: provider_sample_deliveries.id_updated_by > users.id
 
-// Proveedores y Clientes
-Ref: providers.id_created_by - users.id
-Ref: providers.id_updated_by - users.id
-Ref: clients.id_created_by - users.id
-Ref: clients.id_updated_by - users.id
+// Clientes
+Ref: clients.id_created_by > users.id
+Ref: clients.id_updated_by > users.id
 
 // I+D Tickets
 Ref: rd_tickets.id_requested_by > users.id
 Ref: rd_tickets.id_assigned_to > users.id
+Ref: rd_tickets.id_updated_by > users.id
 Ref: rd_tickets.id_client > clients.id
 Ref: rd_ticket_receipts.id_ticket - rd_tickets.id
 Ref: rd_ticket_receipts.id_delivered_by_user > users.id
+Ref: rd_ticket_receipts.id_updated_by > users.id
 Ref: rd_ticket_receipt_details.id_receipt > rd_ticket_receipts.id
+
+// Retroalimentacion del Cliente
+Ref: client_sample_feedback.id_sample_receipt - rd_ticket_receipt_details.id
+Ref: client_sample_feedback.id_registered_by > users.id
 
 // Empleados
 Ref: employees.id_department > departments.id
 Ref: employees.id_manager > employees.id
-Ref: employees.id_created_by - users.id
-Ref: employees.id_updated_by - users.id
-
+Ref: employees.id_created_by > users.id
+Ref: employees.id_updated_by > users.id
 
 // Brigadas Protección Civil
 Ref: employee_brigades.id_employee > employees.id
+Ref: employee_brigades.id_created_by > users.id
+Ref: employee_brigades.id_updated_by > users.id
 
 // Vacaciones
 Ref: vacation_requests.id_user_requested > users.id
 Ref: vacation_requests.id_manager_approver > users.id
 Ref: vacation_requests.id_hr_approver > users.id
 Ref: vacation_control.id_employee > employees.id
+Ref: vacation_control.id_created_by > users.id
+Ref: vacation_control.id_updated_by > users.id
 
 // Justificantes
 Ref: attendance_permits.id_user_requested > users.id
@@ -1099,8 +1169,8 @@ Ref: money_loans.id_approver > users.id
 // Vehiculos
 Ref: vehicles.id_department > departments.id
 Ref: vehicles.id_employee - employees.id
-Ref: vehicles.id_created_by - users.id
-Ref: vehicles.id_updated_by - users.id
+Ref: vehicles.id_created_by > users.id
+Ref: vehicles.id_updated_by > users.id
 
 // Cargas de Gas
 Ref: fuel_logs.id_vehicle > vehicles.id
@@ -1111,14 +1181,15 @@ Ref: vehicle_maintenances.id_vehicle > vehicles.id
 Ref: vehicle_maintenances.id_registered_by > users.id
 
 // Fleteras
-Ref: haulers.id_created_by - users.id
-Ref: haulers.id_updated_by - users.id
+Ref: haulers.id_created_by > users.id
+Ref: haulers.id_updated_by > users.id
 
 // Caseta
 Ref: gate_logs.id_vehicle > vehicles.id
 Ref: gate_logs.id_driver > users.id
 Ref: gate_logs.id_hauler > haulers.id
-Ref: gate_logs.id_guard > users.id
+Ref: gate_logs.id_guard_entry > users.id
+Ref: gate_logs.id_guard_exit > users.id
 Ref: gate_logs.id_department > departments.id
 Ref: gate_personnel_access_logs.id_user > users.id
 Ref: gate_personnel_access_logs.id_guard_entry > users.id
@@ -1127,26 +1198,32 @@ Ref: gate_personnel_access_logs.id_guard_exit > users.id
 // Patines y Montacargas
 Ref: warehouse_equipment.id_department > departments.id
 Ref: warehouse_equipment.id_assigned_employee > employees.id
-Ref: warehouse_equipment.id_created_by - users.id
-Ref: warehouse_equipment.id_updated_by - users.id
+Ref: warehouse_equipment.id_created_by > users.id
+Ref: warehouse_equipment.id_updated_by > users.id
 Ref: equipment_maintenances.id_equipment > warehouse_equipment.id
 Ref: equipment_maintenances.id_registered_by > users.id
 
 // Verificación de Vehículos
-Ref: vehicles_daily_inspections.id_vehicle > vehicles.id
-Ref: vehicles_daily_inspections.id_inspector_user > users.id
+Ref: vehicle_daily_inspections.id_vehicle > vehicles.id
+Ref: vehicle_daily_inspections.id_inspector_user > users.id
+Ref: vehicle_daily_inspections.id_driver_user > users.id
 Ref: vehicle_wash_inspections.id_vehicle > vehicles.id
 Ref: vehicle_wash_inspections.id_inspector_user > users.id
+Ref: vehicle_wash_inspections.id_driver_user > users.id
 Ref: vehicle_reception_inspections.id_vehicle > vehicles.id
 Ref: vehicle_reception_inspections.id_inspector_user > users.id
-Ref: vehicles_daily_inspections.id_driver_user > users.id
-Ref: vehicle_wash_inspections.id_driver_user > users.id
 Ref: vehicle_reception_inspections.id_hauler > haulers.id
 
 // Verificación de Vidrio y Plastico
+Ref: glass_brittle_plastics.id_created_by > users.id
+Ref: glass_brittle_plastics.id_updated_by > users.id
 Ref: quality_glass_plastic_verifications.id_inspector_user > users.id
 Ref: quality_glass_plastic_details.id_verification > quality_glass_plastic_verifications.id
-Ref: quality_glass_plastic_details.id_catalog_item > quality_glass_plastic_catalog.id
+Ref: quality_glass_plastic_details.id_glass_brittle_plastic > glass_brittle_plastics.id
+
+// Productos
+Ref: products.id_created_by > users.id
+Ref: products.id_updated_by > users.id
 
 // Relaciones del Módulo de Quejas y Dictámenes (CAL-FOR-01 / CAL-FOR-02)
 Ref: quality_complaint_items.id_complaint > quality_customer_complaints.id
@@ -1154,6 +1231,8 @@ Ref: quality_complaint_items.id_product > products.id
 Ref: quality_complaint_action_plans.id_complaint > quality_customer_complaints.id
 Ref: quality_recollection_authorizations.id_complaint - quality_customer_complaints.id
 Ref: quality_recollection_authorizations.id_vehicle > vehicles.id
+Ref: quality_recollection_authorizations.id_assigned_by > users.id
+Ref: quality_recollection_authorizations.id_updated_by > users.id
 
 // Relaciones del Detalle de Autorización de Recolección
 Ref: quality_recollection_authorization_details.id_recollection_authorization > quality_recollection_authorizations.id
@@ -1166,27 +1245,28 @@ Ref: quality_warehouse_receptions.id_complaint > quality_customer_complaints.id
 Ref: quality_warehouse_reception_details.id_reception > quality_warehouse_receptions.id
 Ref: quality_warehouse_reception_details.id_product > products.id
 Ref: quality_warehouse_receptions.id_sales_executive > users.id
+Ref: quality_warehouse_receptions.id_inspector_user > users.id
+Ref: quality_warehouse_receptions.id_updated_by > users.id 
 
 // Relaciones del Control de Firmas y Responsables contra la Tabla de Usuarios Internos
-Ref: quality_customer_complaints.id_created_by_user > users.id
 Ref: quality_customer_complaints.id_quality_reviewer > users.id
 Ref: quality_customer_complaints.id_admin_authorizer > users.id
 Ref: quality_complaint_action_plans.id_responsible_user > users.id
 Ref: quality_recollection_authorizations.id_driver_user > users.id
-Ref: quality_warehouse_receptions.id_quality_inspector > users.id
 Ref: quality_warehouse_receptions.id_client > clients.id
 Ref: quality_customer_complaints.id_reported_by > users.id
 Ref: quality_customer_complaints.id_sales_executive > users.id
 Ref: quality_customer_complaints.id_client > clients.id
 
 // Relaciones de las No Conformidades y Tablas de Calidad
-Ref: quality_non_conformities.id_daily_inspection > vehicles_daily_inspections.id
+Ref: quality_non_conformities.id_daily_inspection > vehicle_daily_inspections.id
 Ref: quality_non_conformities.id_wash_inspection > vehicle_wash_inspections.id
 Ref: quality_non_conformities.id_reception_inspection > vehicle_reception_inspections.id
 Ref: quality_non_conformities.id_warehouse_reception > quality_warehouse_receptions.id
 Ref: quality_non_conformities.id_customer_complaint > quality_customer_complaints.id
 Ref: quality_non_conformities.id_glass_plastic_detail > quality_glass_plastic_details.id
-Ref: quality_non_conformities.id_created_by_user > users.id
+Ref: quality_non_conformities.id_created_by > users.id
+Ref: quality_non_conformities.id_updated_by > users.id
 
 // Relaciones de Notificaciones
 Ref: system_notifications.id_user > users.id
