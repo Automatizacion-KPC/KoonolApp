@@ -19,6 +19,14 @@ Table users {
   last_connection timestamp
   id_created_by uuid
   id_updated_by uuid
+
+  indexes {
+    id_rol [name: 'idx_users_id_rol']
+    id_department [name: 'idx_users_id_department']
+    (username, status) [name: 'idx_users_username_status']
+    (id_rol, status) [name: 'idx_users_role_status']
+    (id_department, status) [name: 'idx_users_department_status']
+  }
 }
 
 Table roles {
@@ -56,9 +64,18 @@ Table posts {
   docs jsonb
   pinned boolean
   status varchar                           // 'ACTIVO', 'ELIMINADO', 'ARCHIVADO'
+  published_at timestamp
   created_at timestamp [default: `now()`]
   updated_at timestamp
   deleted_at timestamp
+
+  indexes {
+    id_user [name: 'idx_posts_id_user']
+    id_target_department [name: 'idx_posts_id_target_department']
+    (status, published_at) [name: 'idx_posts_status_published']
+    (id_target_department, status, published_at) [name: 'idx_posts_department_status_published']
+    (id_user, created_at) [name: 'idx_posts_user_created']
+  }
 }
 
 Table post_reactions {
@@ -69,7 +86,8 @@ Table post_reactions {
   created_at timestamp [default: `now()`]
 
   indexes {
-    (id_post, id_user) [unique]                 // Un usuario solo puede tener 1 reacción activa por post
+    id_user [name: 'idx_post_reactions_id_user']
+    (id_post, id_user) [unique, name: 'idx_post_reactions_posts_user']     // Un usuario solo puede tener 1 reacción activa por post
   }
 }
 
@@ -84,8 +102,9 @@ Table post_comments {
   deleted_at timestamp
 
   indexes {
-    id_post
-    id_parent_comment
+    id_user [name: 'idx_post_comments_id_user']
+    id_parent_comment [name: 'idx_post_comments_id_parent_comment']
+    (id_post, created_at) [name: 'idx_post_comments_posts_created']
   }
 }
 
@@ -97,7 +116,8 @@ Table post_comment_reactions {
   created_at timestamp [default: `now()`]
 
   indexes {
-    (id_comment, id_user) [unique]              // Un usuario solo puede tener 1 reacción activa por comentario
+    id_user [name: 'idx_post_comment_reactions_id_user']
+    (id_comment, id_user) [unique, name: 'idx_post_comment_reactions_comment_user']              // Un usuario solo puede tener 1 reacción activa por comentario
   }
 }
 
@@ -118,6 +138,13 @@ Table personal_notes {
   created_at timestamp [default: `now()`]
   updated_at timestamp
   deleted_at timestamp
+
+  indexes {
+    id_user [name: 'idx_personal_notes_user']
+    (id_user, status) [name: 'idx_personal_notes_user_status']
+    (id_user, favorite) [name: 'idx_personal_notes_user_favorite']
+    (id_user, reminder_at) [name: 'idx_personal_notes_user_reminder']
+  }
 }
 
 Table tasks {
@@ -135,6 +162,15 @@ Table tasks {
   updated_at timestamp
   deleted_at timestamp
   id_updated_by uuid
+
+  indexes {
+    id_assigned_to [name: 'idx_tasks_id_assigned_to']
+    id_created_by [name: 'idx_tasks_id_created_by']
+    id_department [name: 'idx_tasks_id_department']
+    (id_assigned_to, status, deadline) [name: 'idx_tasks_assigned_status_deadline']
+    (id_department, status, deadline) [name: 'idx_tasks_department_status_deadline']
+    (id_created_by, created_at) [name: 'idx_tasks_created_created']
+  }
 }
 
 
@@ -155,6 +191,11 @@ Table providers {
   updated_at timestamp
   id_created_by uuid
   id_updated_by uuid
+
+  indexes {
+    (status, created_at) [name: 'idx_providers_status_created']
+    name [type: gin, name: 'idx_providers_name_trgm']
+  }
 }
 
 Table provider_sample_deliveries {
@@ -189,6 +230,16 @@ Table provider_sample_deliveries {
 
   updated_at timestamp
   id_updated_by uuid
+
+  indexes {
+    id_provider [name: 'idx_provider_sample_deliveries_id_provider']
+    id_received_by_purchasing [name: 'idx_provider_sample_deliveries_id_received_by_purchasing']
+    id_accepted_by_rd [name: 'idx_provider_sample_deliveries_id_accepted_by_rd']
+    expiration_date [name: 'idx_provider_sample_deliveries_expiration_date']
+    (id_provider, status, received_at) [name: 'idx_provider_sample_deliveries_provider_status_received']
+    (id_accepted_by_rd, status) [name: 'idx_provider_sample_deliveries_rd_status']
+    (status, rd_estimated_feedback_date) [name: 'idx_provider_sample_deliveries_status_rd_feedback_date']
+  }
 }
 
 
@@ -210,6 +261,11 @@ Table clients {
   updated_at timestamp
   id_created_by uuid
   id_updated_by uuid
+
+    indexes {
+    (status, created_at) [name: 'idx_clients_status_created']
+    name [type: gin, name: 'idx_clients_name_trgm']
+  }
 }
 
 Table rd_tickets {
@@ -246,6 +302,19 @@ Table rd_tickets {
   updated_at timestamp
   deleted_at timestamp
   id_updated_by uuid
+
+  indexes {
+    id_client [name: 'idx_rd_tickets_id_client']
+    id_requested_by [name: 'idx_rd_tickets_id_requested_by']
+    id_assigned_to [name: 'idx_rd_tickets_id_assigned_to']
+    status [name: 'idx_rd_tickets_status']
+    (id_assigned_to, status, created_at) [name: 'idx_rd_tickets_assigned_status_created']
+    (id_requested_by, status, created_at) [name: 'idx_rd_tickets_requested_status_created']
+    (id_client, status, created_at) [name: 'idx_rd_tickets_client_status_created']
+    (ticket_type, status) [name: 'idx_rd_tickets_type_status']
+    (product_segment, status) [name: 'idx_rd_tickets_segment_status']
+    (ticket_type, product_segment, status) [name: 'idx_rd_tickets_type_segment_status']
+  }
 }
 
 Table rd_ticket_receipts {
@@ -265,6 +334,12 @@ Table rd_ticket_receipts {
   created_at timestamp [default: `now()`]
   updated_at timestamp
   id_updated_by uuid                          // Vendedor que cambia el estatus
+
+  indexes {
+    id_delivered_by_user [name: 'idx_rd_ticket_receipts_id_delivered_by']
+    (status, issued_at) [name: 'idx_rd_ticket_receipts_status_issued']
+    (id_delivered_by_user, status) [name: 'idx_rd_ticket_receipts_delivered_status']
+  }
 }
 
 Table rd_ticket_receipt_details {
@@ -274,7 +349,11 @@ Table rd_ticket_receipt_details {
   unit_of_measure varchar [not null]               // Ej. 'GR', 'L', 'ML'
   product_name varchar [not null]                  // Nombre de la mezcla, sazonador o aditivo desarrollado
   dosage_and_usage text [not null]                 // "Dosis y Modo de Uso" (Instrucciones de aplicación para el cliente)
-  product_availability varchar [not null]          // DP, DS, SP        
+  product_availability varchar [not null]          // DP, DS, SP
+  
+  indexes {
+    id_receipt [name: 'idx_rd_ticket_receipt_details_id_receipt']
+  }
 }
 
 Table client_sample_feedback {
@@ -285,6 +364,13 @@ Table client_sample_feedback {
   created_at timestamp [default: `now()`]
   updated_at timestamp
   id_registered_by uuid [not null]           // Vendedor que llena la retroalimentacion
+
+  indexes {
+    id_sample_receipt
+      [unique, name: 'uq_client_sample_feedback_sample_receipt']
+    id_registered_by
+      [name: 'idx_client_sample_feedback_registered_by']
+  }
 }
 
 
@@ -314,6 +400,13 @@ Table employees {
   deleted_at timestamp
   id_created_by uuid
   id_updated_by uuid
+
+  indexes {
+    id_department [name: 'idx_employees_id_department']
+    id_manager [name: 'idx_employees_id_manager']
+    (id_department, status) [name: 'idx_employees_department_status']
+    (status, hire_date) [name: 'idx_employees_status_hiredate']
+  }
 }
 
 Table employee_brigades {
@@ -340,6 +433,10 @@ Table vacation_control {
   updated_at timestamp
   id_created_by uuid
   id_updated_by uuid
+
+  indexes {
+    (id_employee, year_corresponding) [unique, name: 'uq_vacation_control_employee_year']
+  }
 }
 
 Table vacation_requests {
@@ -358,6 +455,15 @@ Table vacation_requests {
   id_hr_approver uuid                             // Usuario de RH que dio el visto bueno final
   created_at timestamp [default: `now()`]
   updated_at timestamp
+
+  indexes {
+    id_user_requested [name: 'idx_vacation_requests_id_user_requested']
+    id_manager_approver [name: 'idx_vacation_requests_id_manager_approver']
+    id_hr_approver [name: 'idx_vacation_requests_id_hr_approver']
+    (id_user_requested, status) [name: 'idx_vacation_requests_user_status']
+    (id_manager_approver, status) [name: 'idx_vacation_requests_manager_status']
+    (id_hr_approver, status) [name: 'idx_vacation_requests_hr_status']
+  }
 }
 
 Table attendance_permits {
@@ -378,6 +484,13 @@ Table attendance_permits {
   hr_notes text
   created_at timestamp [default: `now()`]
   updated_at timestamp
+
+  indexes {
+    id_user_requested [name: 'idx_attendance_permits_id_user_requested']
+    id_manager_approver [name: 'idx_attendance_permits_id_manager_approver']
+    id_hr_approver [name: 'idx_attendance_permits_id_hr_approver']
+    (id_user_requested, status) [name: 'idx_attendance_permits_user_status']
+  }
 }
 
 Table money_loans {
@@ -393,6 +506,12 @@ Table money_loans {
   notes text
   created_at timestamp [default: `now()`]
   updated_at timestamp
+
+  indexes {
+    id_user_requested [name: 'idx_money_loans_id_user_requested']
+    id_approver [name: 'idx_money_loans_id_approver']
+    (id_user_requested, status) [name: 'idx_money_loans_user_status']
+  }
 }
 
 
@@ -814,7 +933,7 @@ Table quality_glass_plastic_details {
 Table products {
   id uuid [primary key, not null]
   sap_id varchar [unique, not null]      // Clave del artículo en SAP
-  name varchar [not null]
+  name varchar [unique, not null]
   inventory_uom varchar [not null]       // Unidad Base de Inventario en SAP (ej: 'KG' o 'L')
   sales_uom varchar                      // Unidad de Venta en SAP (ej: 'SCO', 'BOL', 'CJA')
   conversion_factor numeric [default: 1] // Factor de empaque. Cantidad por unidad de venta
