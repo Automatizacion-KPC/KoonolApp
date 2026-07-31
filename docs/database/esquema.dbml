@@ -17,7 +17,7 @@ Table users {
   updated_at timestamp
   deleted_at timestamp
   last_connection timestamp
-  id_created_by uuid
+  id_created_by uuid [not null]
   id_updated_by uuid
 
   indexes {
@@ -35,7 +35,7 @@ Table roles {
   description text [not null]
   created_at timestamp  [default: `now()`]
   updated_at timestamp
-  id_created_by uuid
+  id_created_by uuid [not null]
   id_updated_by uuid
 }
 
@@ -45,7 +45,7 @@ Table departments {
   description text [not null]
   created_at timestamp  [default: `now()`]
   updated_at timestamp
-  id_created_by uuid
+  id_created_by uuid [not null]
   id_updated_by uuid
 }
 
@@ -189,7 +189,7 @@ Table providers {
   status boolean [default: true]
   created_at timestamp [default: `now()`]
   updated_at timestamp
-  id_created_by uuid
+  id_created_by uuid [not null]
   id_updated_by uuid
 
   indexes {
@@ -259,7 +259,7 @@ Table clients {
   status boolean [default: true]
   created_at timestamp [default: `now()`]
   updated_at timestamp
-  id_created_by uuid
+  id_created_by uuid [not null]
   id_updated_by uuid
 
     indexes {
@@ -358,7 +358,7 @@ Table rd_ticket_receipt_details {
 
 Table client_sample_feedback {
   id uuid [primary key, not null]
-  id_sample_receipt uuid [not null]           // Relacion 1:1 con el detalle de la muestra
+  id_sample_receipt uuid [not null, unique]           // Relacion 1:1 con el detalle de la muestra
   feedback_notes text                         // Retroalimentación específica del cliente para este producto
   is_approved_by_client boolean               // ¿Le gustó/sirvió el producto al cliente?
   created_at timestamp [default: `now()`]
@@ -366,10 +366,7 @@ Table client_sample_feedback {
   id_registered_by uuid [not null]           // Vendedor que llena la retroalimentacion
 
   indexes {
-    id_sample_receipt
-      [unique, name: 'uq_client_sample_feedback_sample_receipt']
-    id_registered_by
-      [name: 'idx_client_sample_feedback_registered_by']
+    id_registered_by [name: 'idx_client_sample_feedback_registered_by']
   }
 }
 
@@ -398,7 +395,7 @@ Table employees {
   created_at timestamp [default: `now()`]
   updated_at timestamp
   deleted_at timestamp
-  id_created_by uuid
+  id_created_by uuid [not null]
   id_updated_by uuid
 
   indexes {
@@ -431,7 +428,7 @@ Table vacation_control {
   days_remaining integer [default: 0]
   created_at timestamp
   updated_at timestamp
-  id_created_by uuid
+  id_created_by uuid [not null]
   id_updated_by uuid
 
   indexes {
@@ -521,7 +518,7 @@ Table money_loans {
 
 Table vehicles {
   id uuid [primary key, not null]
-  id_department uuid
+  id_department uuid [not null]
   id_employee uuid [unique]
   plates varchar [unique, not null]
   brand varchar [not null]
@@ -545,8 +542,15 @@ Table vehicles {
   created_at timestamp [default: `now()`]
   updated_at timestamp
   deleted_at timestamp
-  id_created_by uuid
+  id_created_by uuid [not null]
   id_updated_by uuid
+
+  indexes {
+    id_department [name: 'idx_vehicles_id_department']
+    insurance_end_date [name: 'idx_vehicles_insurance_end_date']
+    (id_department, status) [name: 'idx_vehicles_department_status']
+    (status, next_maintenance_odometer) [name: 'idx_vehicles_status_next_maintenance']
+  }
 }
 
 Table fuel_logs {
@@ -564,6 +568,14 @@ Table fuel_logs {
   fuel_level_picture text
   gas_pump_picture text
   created_at timestamp [default: `now()`]
+
+  indexes {
+    id_vehicle [name: 'idx_fuel_logs_id_vehicle']
+    id_registered_by [name: 'idx_fuel_logs_id_registered_by']
+    (id_vehicle, created_at) [name: 'idx_fuel_logs_vehicle_created']
+    (id_vehicle, odometer_at_loading) [name: 'idx_fuel_logs_vehicle_odometer']
+    (id_registered_by, created_at) [name: 'idx_fuel_logs_registered_created']
+  }
 }
 
 Table vehicle_maintenances {
@@ -579,6 +591,13 @@ Table vehicle_maintenances {
   invoice_document jsonb                          // Facturas adjuntas en formato digital
   created_at timestamp [default: `now()`]
   updated_at timestamp
+
+  indexes {
+    id_vehicle [name: 'idx_vehicle_maintenances_id_vehicle']
+    id_registered_by [name: 'idx_vehicle_maintenances_id_registered_by']
+    (id_vehicle, created_at) [name: 'idx_vehicle_maintenances_vehicle_created']
+    (id_vehicle, maintenance_type) [name: 'idx_vehicle_maintenances_vehicle_type']
+  }
 }
 
 
@@ -609,7 +628,21 @@ Table gate_logs {
   
   id_guard_entry uuid [not null]
   id_guard_exit uuid
-  created_at timestamp [default: `now()`]         
+  created_at timestamp [default: `now()`]
+  
+  indexes {
+    id_vehicle [name: 'idx_gate_logs_id_vehicle']
+    id_driver [name: 'idx_gate_logs_id_driver']
+    id_department [name: 'idx_gate_logs_id_department']
+    id_hauler [name: 'idx_gate_logs_id_hauler']
+    id_guard_entry [name: 'idx_gate_logs_id_guard_entry']
+    id_guard_exit [name: 'idx_gate_logs_id_guard_exit']
+    (registration_type, created_at) [name: 'idx_gate_logs_registration_created']
+    (log_type, created_at) [name: 'idx_gate_logs_type_created']
+    (id_vehicle, created_at) [name: 'idx_gate_logs_vehicle_created']
+    (id_driver, created_at) [name: 'idx_gate_logs_driver_created']
+    (id_hauler, created_at) [name: 'idx_gate_logs_hauler_created']
+  }
 }
 
 Table haulers {
@@ -618,7 +651,7 @@ Table haulers {
   created_at timestamp [default: `now()`]
   updated_at timestamp
   deleted_at timestamp
-  id_created_by uuid
+  id_created_by uuid [not null]
   id_updated_by uuid
 }
 
@@ -641,6 +674,15 @@ Table gate_personnel_access_logs {
   id_guard_entry uuid [not null]
   id_guard_exit uuid
   created_at timestamp [default: `now()`]
+
+  indexes {
+    id_user [name: 'idx_gate_personnel_access_logs_id_user']
+    id_guard_entry [name: 'idx_gate_personnel_access_logs_id_guard_entry']
+    id_guard_exit [name: 'idx_gate_personnel_access_logs_id_guard_exit']
+    (status, entry_timestamp) [name: 'idx_gate_personnel_access_logs_status_entry']
+    (person_type, entry_timestamp) [name: 'idx_gate_personnel_access_logs_person_entry']
+    (id_user, entry_timestamp) [name: 'idx_gate_personnel_access_logs_user_entry']
+  }
 }
 
 
@@ -675,8 +717,16 @@ Table warehouse_equipment {
   created_at timestamp [default: `now()`]
   updated_at timestamp
   deleted_at timestamp
-  id_created_by uuid
+  id_created_by uuid [not null]
   id_updated_by uuid
+
+  indexes {
+    id_department [name: 'idx_warehouse_equipment_id_department']
+    id_assigned_employee [name: 'idx_warehouse_equipment_id_assigned_employee']
+    (id_department, status) [name: 'idx_warehouse_equipment_department_status']
+    (status, next_maintenance_date) [name: 'idx_warehouse_equipment_status_next_date']
+    (status, next_maintenance_horometer) [name: 'idx_warehouse_equipment_status_next_horometer']
+  }
 }
 
 Table equipment_maintenances {
@@ -693,6 +743,13 @@ Table equipment_maintenances {
 
   created_at timestamp [default: `now()`]
   updated_at timestamp
+
+  indexes {
+    id_equipment [name: 'idx_equipment_maintenances_id_equipment']
+    id_registered_by [name: 'idx_equipment_maintenances_id_registered_by']
+    (id_equipment, created_at) [name: 'idx_equipment_maintenances_equipment_created']
+    (id_equipment, maintenance_type) [name: 'idx_equipment_maintenances_equipment_maintenance']
+  }
 }
 
 
@@ -752,6 +809,15 @@ Table vehicle_daily_inspections {
   status varchar [default: 'APROBADO']             // APROBADO, RECHAZADO
   notes text
   created_at timestamp [default: `now()`]
+
+  indexes {
+    id_vehicle [name: 'idx_vehicle_daily_inspections_id_vehicle']
+    id_inspector_user [name: 'idx_vehicle_daily_inspections_id_inspector_user']
+    id_driver_user [name: 'idx_vehicle_daily_inspections_id_driver_user']
+    (id_vehicle, created_at) [name: 'idx_vehicle_daily_inspections_vehicle_created']
+    (id_inspector_user, created_at) [name: 'idx_vehicle_daily_inspections_inspector_created']
+    (status, created_at) [name: 'idx_vehicle_daily_inspections_status_created']
+  }
 }
 
 // Inspección Post-Lavado Semanal
@@ -786,6 +852,14 @@ Table vehicle_wash_inspections {
   status varchar [default: 'APROBADO']             // APROBADO, RECHAZADO
   notes text
   created_at timestamp [default: `now()`]
+
+  indexes {
+    id_vehicle [name: 'idx_vehicle_wash_inspections_id_vehicle']
+    id_inspector_user [name: 'idx_vehicle_wash_inspections_id_inspector_user']
+    id_driver_user [name: 'idx_vehicle_wash_inspections_id_driver_user']
+    (id_vehicle, created_at) [name: 'idx_vehicle_wash_inspections_vehicle_created']
+    (status, created_at) [name: 'idx_vehicle_wash_inspections_status_created']
+  }
 }
 
 // Inspección de Recepción de Mercancía
@@ -870,6 +944,16 @@ Table vehicle_reception_inspections {
   rejection_reason text
   
   created_at timestamp [default: `now()`]
+
+indexes {
+    id_inspector_user [name: 'idx_vehicle_reception_inspections_id_inspector_user']
+    id_vehicle [name: 'idx_vehicle_reception_inspections_id_vehicle']
+    id_hauler [name: 'idx_vehicle_reception_inspections_id_hauler']
+    (inspection_date, inspection_time) [name: 'idx_vehicle_reception_inspections_datetime']
+    (status, inspection_date) [name: 'idx_vehicle_reception_inspections_status_date']
+    (id_vehicle, inspection_date) [name: 'idx_vehicle_reception_inspections_vehicle_date']
+    (id_hauler, inspection_date) [name: 'idx_vehicle_reception_inspections_hauler_date']
+  }
 }
 
 
@@ -898,8 +982,15 @@ Table glass_brittle_plastics {
 
   created_at timestamp [default: `now()`]
   updated_at timestamp
-  id_created_by uuid
+  id_created_by uuid [not null]
   id_updated_by uuid
+
+  indexes {
+    (resource_scope, is_active) [name: 'idx_glass_brittle_plastics_scope_active']
+    (resource_type, is_active) [name: 'idx_glass_brittle_plastics_type_active']
+    (category, is_active) [name: 'idx_glass_brittle_plastics_category_active']
+    (resource_scope, resource_type, is_active) [name: 'idx_glass_brittle_plastics_scope_type_active']
+  }
 }
 
 Table quality_glass_plastic_verifications {
@@ -911,6 +1002,13 @@ Table quality_glass_plastic_verifications {
   status varchar [default: 'COMPLETADO']           // 'COMPLETADO', 'CON_OBSERVACIONES'
   general_notes text                               // Comentarios globales de la revisión del mes
   created_at timestamp [default: `now()`]
+
+  indexes {
+    id_inspector_user [name: 'idx_quality_glass_plastic_verifications_id_inspector_user']
+    (inspection_date, inspection_time) [name: 'idx_quality_glass_plastic_inspections_datetime']
+    (status, inspection_date) [name: 'idx_quality_glass_plastic_verifications_status_date']
+    (id_inspector_user, inspection_date) [name: 'idx_quality_glass_plastic_verifications_inspector_date']
+  }
 }
 
 Table quality_glass_plastic_details {
@@ -923,6 +1021,13 @@ Table quality_glass_plastic_details {
   access_status varchar [not null]                 //  'C': CONFORME, 'NC': NO CONFORME
   observations text                                // OBSERVACIONES: El o los desperfectos detectados
   corrective_action varchar                        // ACCIÓN CORRECTIVA: Solo admite 'REVISION' o 'CAMBIO'
+
+  indexes {
+    id_verification [name: 'idx_quality_glass_plastic_details_id_verification']
+    id_glass_brittle_plastic [name: 'idx_quality_glass_plastic_details_id_glass_brittle_plastic']
+    (id_verification, structure_status) [name: 'idx_quality_glass_plastic_details_verification_structure']
+    (id_glass_brittle_plastic, structure_status) [name: 'idx_quality_glass_plastic_details_resource_structure']
+  }
 }
 
 
@@ -940,8 +1045,13 @@ Table products {
   is_active boolean [default: true]
   created_at timestamp [default: `now()`]
   updated_at timestamp
-  id_created_by uuid
+  id_created_by uuid [not null]
   id_updated_by uuid
+
+indexes {
+    is_active [name: 'idx_products_is_active']
+    name [type: gin, name: 'idx_products_name_trgm']
+  }
 }
 
 // Núcleo unificado para No Conformidades de Clientes (CAL-FOR-01 y CAL-FOR-02)
@@ -979,6 +1089,18 @@ Table quality_customer_complaints {
 
   created_at timestamp [default: `now()`]
   updated_at timestamp
+
+  indexes {
+    id_client [name: 'idx_quality_customer_complaints_id_client']
+    id_reported_by [name: 'idx_quality_customer_complaints_id_reported_by']
+    id_sales_executive [name: 'idx_quality_customer_complaints_id_sales_executive']
+    id_quality_reviewer [name: 'idx_quality_customer_complaints_id_quality_reviewer']
+    id_admin_authorizer [name: 'idx_quality_customer_complaints_id_admin_authorizer']
+    invoice_reference [name: 'idx_quality_customer_complaints_invoice_reference']
+    (status, reported_date) [name: 'idx_quality_customer_complaints_status_reported_date']
+    (id_client, status) [name: 'idx_quality_customer_complaints_client_status']
+    (id_sales_executive, status) [name: 'idx_quality_customer_complaints_sales_status']
+  }
 }
 
 // Partidas del Reporte (Detalle de Productos, Lotes y Cantidades)
@@ -1020,6 +1142,14 @@ Table quality_complaint_items {
   complete_product boolean [default: false]
   other_action boolean [default: false]
   other_action_details text
+
+  indexes {
+    id_complaint [name: 'idx_quality_complaint_items_id_complaint']
+    id_product [name: 'idx_quality_complaint_items_id_product']
+    expiration_date [name: 'idx_quality_complaint_items_expiration']
+    (id_complaint, id_product) [name: 'idx_quality_complaint_items_complaint_product']
+    (id_product, lot_number) [name: 'idx_quality_complaint_items_product_lot']
+  }
 }
 
 // Matriz del Plan de Acción
@@ -1031,6 +1161,13 @@ Table quality_complaint_action_plans {
   id_responsible_user uuid [not null]
   commitment_date date [not null]
   created_at timestamp [default: `now()`]
+
+indexes {
+    id_complaint [name: 'idx_quality_complaint_action_plans_id_complaint']
+    id_responsible_user [name: 'idx_quality_complaint_action_plans_id_responsible_user']
+    (id_responsible_user, commitment_date) [name: 'idx_quality_complaint_action_plans_responsible_commitment']
+    (id_complaint, action_index) [name: 'idx_quality_complaint_action_plans_complaint_action']
+  }
 }
 
 
@@ -1054,6 +1191,15 @@ Table quality_recollection_authorizations {
   updated_at timestamp
   id_assigned_by uuid                         //Mando que programa la recolección
   id_updated_by uuid
+
+  indexes {
+    id_driver_user [name: 'idx_quality_recollection_authorizations_id_driver']
+    id_vehicle [name: 'idx_quality_recollection_authorizations_id_vehicle']
+    id_assigned_by [name: 'idx_quality_recollection_authorizations_id_assigned_by']
+    (scheduled_date, status) [name: 'idx_quality_recollection_authorizations_schedule_status']
+    (id_driver_user, scheduled_date) [name: 'idx_quality_recollection_authorizations_driver_schedule']
+    (id_vehicle, scheduled_date) [name: 'idx_quality_recollection_authorizations_vehicle_schedule']
+  }
 }
 
 // Renglones autorizados para el Chofer
@@ -1068,6 +1214,12 @@ Table quality_recollection_authorization_details {
   pieces_to_recollect numeric [not null]    // Cuántos bultos tiene permiso de subir al camión Ej: 3.25
   weight_per_package numeric [not null]     // Ej: 1 kg
   total_weight_kg numeric [not null]        // Ej: 3.25 kg
+
+  indexes {
+    id_recollection_authorization [name: 'idx_quality_recollection_authorization_details_id_authorization']
+    id_product [name: 'idx_quality_recollection_authorization_details_id_product']
+    id_complaint_item [name: 'idx_quality_recollection_authorization_details_id_complaint_item']
+  }
 }
 
 
@@ -1123,6 +1275,17 @@ Table quality_warehouse_receptions {
   updated_at timestamp
 
   id_updated_by uuid
+
+  indexes {
+    id_inspector_user [name: 'idx_quality_warehouse_receptions_id_inspector_user']
+    id_client [name: 'idx_quality_warehouse_receptions_id_client']
+    id_sales_executive [name: 'idx_quality_warehouse_receptions_id_sales_executive']
+    id_recollection_authorization [name: 'idx_quality_warehouse_receptions_id_recollection_authorization']
+    id_complaint [name: 'idx_quality_warehouse_receptions_id_complaint']
+    (reception_date, reception_time) [name: 'idx_quality_warehouse_receptions_datetime']
+    (id_client, reception_date) [name: 'idx_quality_warehouse_receptions_client_date']
+    (id_sales_executive, reception_date) [name: 'idx_quality_warehouse_receptions_sales_date']
+  }
 }
 
 // Renglones de la Recepción en Almacén
@@ -1137,6 +1300,14 @@ Table quality_warehouse_reception_details {
   total_weight_kg numeric [not null]              // Cantidad total kg
   pieces_quantity numeric [not null]              // Número de piezas
   unit_package varchar [not null]                 // Empaque unitario (SCO, BOL, BID)
+
+  indexes {
+    id_reception [name: 'idx_quality_warehouse_reception_details_id_reception']
+    id_product [name: 'idx_quality_warehouse_reception_details_id_product']
+    expiration_date_received [name: 'idx_quality_warehouse_reception_details_expiration']
+    (id_reception, id_product) [name: 'idx_quality_warehouse_reception_details_reception_product']
+    (id_product, lot_number_received) [name: 'idx_quality_warehouse_reception_details_product_lot']
+  }
 }
 
 //-------------------//
@@ -1164,6 +1335,20 @@ Table quality_non_conformities {
   created_at timestamp [default: `now()`]
   updated_at timestamp
   deleted_at timestamp
+
+  indexes {
+    id_created_by [name: 'idx_quality_non_conformities_id_created_by']
+    id_updated_by [name: 'idx_quality_non_conformities_id_updated_by']
+    id_daily_inspection [name: 'idx_quality_non_conformities_id_daily_inspection']
+    id_wash_inspection [name: 'idx_quality_non_conformities_id_wash_inspection']
+    id_reception_inspection [name: 'idx_quality_non_conformities_id_reception_inspection']
+    id_warehouse_reception [name: 'idx_quality_non_conformities_id_warehouse_reception']
+    id_customer_complaint [name: 'idx_quality_non_conformities_id_customer_complaint']
+    id_glass_plastic_detail [name: 'idx_quality_non_conformities_id_glass_plastic_detail']
+    (status, created_at) [name: 'idx_quality_non_conformities_status_created']
+    (source_type, status) [name: 'idx_quality_non_conformities_source_status']
+    (id_created_by, status) [name: 'idx_quality_non_conformities_creator_status']
+  }
 }
 
 //-------------------//
@@ -1185,9 +1370,19 @@ Table system_notifications {
   read_at timestamp                                // Fecha y hora exacta en la que el usuario le dio clic
 
   // Deep Linking, redireccionamiento
-  redirect_url varchar                             // Ej: "/quality/complaints/view/uuid-aqui"
+  entity_type varchar       // QUALITY_NON_CONFORMITY, TASK, RD_TICKET...
+  entity_id uuid            // Registro específico
 
   created_at timestamp [default: `now()`]
+
+  indexes {
+    id_user [name: 'idx_system_notifications_id_user']
+    (id_user, is_read) [name: 'idx_system_notifications_user_read']
+    (id_user, created_at) [name: 'idx_system_notifications_user_created']
+    (id_user, priority, is_read) [name: 'idx_system_notifications_user_priority_read']
+    (id_user, category, created_at) [name: 'idx_system_notifications_user_category_created']
+    (entity_type, entity_id) [name: 'idx_system_notifications_entity']
+  }
 }
 
 //-------------------//
@@ -1264,7 +1459,7 @@ Ref: employees.id_created_by > users.id
 Ref: employees.id_updated_by > users.id
 
 // Brigadas Protección Civil
-Ref: employee_brigades.id_employee > employees.id
+Ref: employee_brigades.id_employee - employees.id
 Ref: employee_brigades.id_created_by > users.id
 Ref: employee_brigades.id_updated_by > users.id
 
