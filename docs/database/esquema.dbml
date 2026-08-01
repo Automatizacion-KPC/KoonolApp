@@ -21,8 +21,6 @@ Table users {
   id_updated_by uuid
 
   indexes {
-    id_rol [name: 'idx_users_id_rol']
-    id_department [name: 'idx_users_id_department']
     (username, status) [name: 'idx_users_username_status']
     (id_rol, status) [name: 'idx_users_role_status']
     (id_department, status) [name: 'idx_users_department_status']
@@ -70,11 +68,9 @@ Table posts {
   deleted_at timestamp
 
   indexes {
-    id_user [name: 'idx_posts_id_user']
-    id_target_department [name: 'idx_posts_id_target_department']
-    (status, published_at) [name: 'idx_posts_status_published']
-    (id_target_department, status, published_at) [name: 'idx_posts_department_status_published']
     (id_user, created_at) [name: 'idx_posts_user_created']
+    (id_target_department, status, published_at) [name: 'idx_posts_department_status_published']
+    (status, published_at) [name: 'idx_posts_status_published']
   }
 }
 
@@ -140,7 +136,6 @@ Table personal_notes {
   deleted_at timestamp
 
   indexes {
-    id_user [name: 'idx_personal_notes_user']
     (id_user, status) [name: 'idx_personal_notes_user_status']
     (id_user, favorite) [name: 'idx_personal_notes_user_favorite']
     (id_user, reminder_at) [name: 'idx_personal_notes_user_reminder']
@@ -164,9 +159,6 @@ Table tasks {
   id_updated_by uuid
 
   indexes {
-    id_assigned_to [name: 'idx_tasks_id_assigned_to']
-    id_created_by [name: 'idx_tasks_id_created_by']
-    id_department [name: 'idx_tasks_id_department']
     (id_assigned_to, status, deadline) [name: 'idx_tasks_assigned_status_deadline']
     (id_department, status, deadline) [name: 'idx_tasks_department_status_deadline']
     (id_created_by, created_at) [name: 'idx_tasks_created_created']
@@ -232,9 +224,7 @@ Table provider_sample_deliveries {
   id_updated_by uuid
 
   indexes {
-    id_provider [name: 'idx_provider_sample_deliveries_id_provider']
     id_received_by_purchasing [name: 'idx_provider_sample_deliveries_id_received_by_purchasing']
-    id_accepted_by_rd [name: 'idx_provider_sample_deliveries_id_accepted_by_rd']
     expiration_date [name: 'idx_provider_sample_deliveries_expiration_date']
     (id_provider, status, received_at) [name: 'idx_provider_sample_deliveries_provider_status_received']
     (id_accepted_by_rd, status) [name: 'idx_provider_sample_deliveries_rd_status']
@@ -1166,7 +1156,7 @@ indexes {
     id_complaint [name: 'idx_quality_complaint_action_plans_id_complaint']
     id_responsible_user [name: 'idx_quality_complaint_action_plans_id_responsible_user']
     (id_responsible_user, commitment_date) [name: 'idx_quality_complaint_action_plans_responsible_commitment']
-    (id_complaint, action_index) [name: 'idx_quality_complaint_action_plans_complaint_action']
+    (id_complaint, action_index) [unique, name: 'idx_quality_complaint_action_plans_complaint_action']
   }
 }
 
@@ -1335,6 +1325,8 @@ Table quality_non_conformities {
   created_at timestamp [default: `now()`]
   updated_at timestamp
   deleted_at timestamp
+
+  // Note: 'ARCO EXCLUSIVO: Solo uno de los campos de origen (id_*_inspection, id_warehouse_reception, id_customer_complaint, id_glass_plastic_detail) puede contener un valor UUID a la vez.'
 
   indexes {
     id_created_by [name: 'idx_quality_non_conformities_id_created_by']
