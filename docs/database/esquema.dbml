@@ -294,9 +294,6 @@ Table rd_tickets {
   id_updated_by uuid
 
   indexes {
-    id_client [name: 'idx_rd_tickets_id_client']
-    id_requested_by [name: 'idx_rd_tickets_id_requested_by']
-    id_assigned_to [name: 'idx_rd_tickets_id_assigned_to']
     status [name: 'idx_rd_tickets_status']
     (id_assigned_to, status, created_at) [name: 'idx_rd_tickets_assigned_status_created']
     (id_requested_by, status, created_at) [name: 'idx_rd_tickets_requested_status_created']
@@ -326,7 +323,6 @@ Table rd_ticket_receipts {
   id_updated_by uuid                          // Vendedor que cambia el estatus
 
   indexes {
-    id_delivered_by_user [name: 'idx_rd_ticket_receipts_id_delivered_by']
     (status, issued_at) [name: 'idx_rd_ticket_receipts_status_issued']
     (id_delivered_by_user, status) [name: 'idx_rd_ticket_receipts_delivered_status']
   }
@@ -389,7 +385,6 @@ Table employees {
   id_updated_by uuid
 
   indexes {
-    id_department [name: 'idx_employees_id_department']
     id_manager [name: 'idx_employees_id_manager']
     (id_department, status) [name: 'idx_employees_department_status']
     (status, hire_date) [name: 'idx_employees_status_hiredate']
@@ -444,9 +439,6 @@ Table vacation_requests {
   updated_at timestamp
 
   indexes {
-    id_user_requested [name: 'idx_vacation_requests_id_user_requested']
-    id_manager_approver [name: 'idx_vacation_requests_id_manager_approver']
-    id_hr_approver [name: 'idx_vacation_requests_id_hr_approver']
     (id_user_requested, status) [name: 'idx_vacation_requests_user_status']
     (id_manager_approver, status) [name: 'idx_vacation_requests_manager_status']
     (id_hr_approver, status) [name: 'idx_vacation_requests_hr_status']
@@ -473,7 +465,6 @@ Table attendance_permits {
   updated_at timestamp
 
   indexes {
-    id_user_requested [name: 'idx_attendance_permits_id_user_requested']
     id_manager_approver [name: 'idx_attendance_permits_id_manager_approver']
     id_hr_approver [name: 'idx_attendance_permits_id_hr_approver']
     (id_user_requested, status) [name: 'idx_attendance_permits_user_status']
@@ -495,7 +486,6 @@ Table money_loans {
   updated_at timestamp
 
   indexes {
-    id_user_requested [name: 'idx_money_loans_id_user_requested']
     id_approver [name: 'idx_money_loans_id_approver']
     (id_user_requested, status) [name: 'idx_money_loans_user_status']
   }
@@ -536,7 +526,6 @@ Table vehicles {
   id_updated_by uuid
 
   indexes {
-    id_department [name: 'idx_vehicles_id_department']
     insurance_end_date [name: 'idx_vehicles_insurance_end_date']
     (id_department, status) [name: 'idx_vehicles_department_status']
     (status, next_maintenance_odometer) [name: 'idx_vehicles_status_next_maintenance']
@@ -560,8 +549,6 @@ Table fuel_logs {
   created_at timestamp [default: `now()`]
 
   indexes {
-    id_vehicle [name: 'idx_fuel_logs_id_vehicle']
-    id_registered_by [name: 'idx_fuel_logs_id_registered_by']
     (id_vehicle, created_at) [name: 'idx_fuel_logs_vehicle_created']
     (id_vehicle, odometer_at_loading) [name: 'idx_fuel_logs_vehicle_odometer']
     (id_registered_by, created_at) [name: 'idx_fuel_logs_registered_created']
@@ -583,7 +570,6 @@ Table vehicle_maintenances {
   updated_at timestamp
 
   indexes {
-    id_vehicle [name: 'idx_vehicle_maintenances_id_vehicle']
     id_registered_by [name: 'idx_vehicle_maintenances_id_registered_by']
     (id_vehicle, created_at) [name: 'idx_vehicle_maintenances_vehicle_created']
     (id_vehicle, maintenance_type) [name: 'idx_vehicle_maintenances_vehicle_type']
@@ -621,10 +607,7 @@ Table gate_logs {
   created_at timestamp [default: `now()`]
   
   indexes {
-    id_vehicle [name: 'idx_gate_logs_id_vehicle']
-    id_driver [name: 'idx_gate_logs_id_driver']
     id_department [name: 'idx_gate_logs_id_department']
-    id_hauler [name: 'idx_gate_logs_id_hauler']
     id_guard_entry [name: 'idx_gate_logs_id_guard_entry']
     id_guard_exit [name: 'idx_gate_logs_id_guard_exit']
     (registration_type, created_at) [name: 'idx_gate_logs_registration_created']
@@ -666,7 +649,6 @@ Table gate_personnel_access_logs {
   created_at timestamp [default: `now()`]
 
   indexes {
-    id_user [name: 'idx_gate_personnel_access_logs_id_user']
     id_guard_entry [name: 'idx_gate_personnel_access_logs_id_guard_entry']
     id_guard_exit [name: 'idx_gate_personnel_access_logs_id_guard_exit']
     (status, entry_timestamp) [name: 'idx_gate_personnel_access_logs_status_entry']
@@ -711,7 +693,6 @@ Table warehouse_equipment {
   id_updated_by uuid
 
   indexes {
-    id_department [name: 'idx_warehouse_equipment_id_department']
     id_assigned_employee [name: 'idx_warehouse_equipment_id_assigned_employee']
     (id_department, status) [name: 'idx_warehouse_equipment_department_status']
     (status, next_maintenance_date) [name: 'idx_warehouse_equipment_status_next_date']
@@ -735,7 +716,6 @@ Table equipment_maintenances {
   updated_at timestamp
 
   indexes {
-    id_equipment [name: 'idx_equipment_maintenances_id_equipment']
     id_registered_by [name: 'idx_equipment_maintenances_id_registered_by']
     (id_equipment, created_at) [name: 'idx_equipment_maintenances_equipment_created']
     (id_equipment, maintenance_type) [name: 'idx_equipment_maintenances_equipment_maintenance']
@@ -801,8 +781,6 @@ Table vehicle_daily_inspections {
   created_at timestamp [default: `now()`]
 
   indexes {
-    id_vehicle [name: 'idx_vehicle_daily_inspections_id_vehicle']
-    id_inspector_user [name: 'idx_vehicle_daily_inspections_id_inspector_user']
     id_driver_user [name: 'idx_vehicle_daily_inspections_id_driver_user']
     (id_vehicle, created_at) [name: 'idx_vehicle_daily_inspections_vehicle_created']
     (id_inspector_user, created_at) [name: 'idx_vehicle_daily_inspections_inspector_created']
@@ -844,10 +822,9 @@ Table vehicle_wash_inspections {
   created_at timestamp [default: `now()`]
 
   indexes {
-    id_vehicle [name: 'idx_vehicle_wash_inspections_id_vehicle']
-    id_inspector_user [name: 'idx_vehicle_wash_inspections_id_inspector_user']
     id_driver_user [name: 'idx_vehicle_wash_inspections_id_driver_user']
     (id_vehicle, created_at) [name: 'idx_vehicle_wash_inspections_vehicle_created']
+    (id_inspector_user, created_at) [name: 'idx_vehicle_wash_inspections_inspector_created']
     (status, created_at) [name: 'idx_vehicle_wash_inspections_status_created']
   }
 }
@@ -937,8 +914,6 @@ Table vehicle_reception_inspections {
 
 indexes {
     id_inspector_user [name: 'idx_vehicle_reception_inspections_id_inspector_user']
-    id_vehicle [name: 'idx_vehicle_reception_inspections_id_vehicle']
-    id_hauler [name: 'idx_vehicle_reception_inspections_id_hauler']
     (inspection_date, inspection_time) [name: 'idx_vehicle_reception_inspections_datetime']
     (status, inspection_date) [name: 'idx_vehicle_reception_inspections_status_date']
     (id_vehicle, inspection_date) [name: 'idx_vehicle_reception_inspections_vehicle_date']
@@ -994,7 +969,6 @@ Table quality_glass_plastic_verifications {
   created_at timestamp [default: `now()`]
 
   indexes {
-    id_inspector_user [name: 'idx_quality_glass_plastic_verifications_id_inspector_user']
     (inspection_date, inspection_time) [name: 'idx_quality_glass_plastic_inspections_datetime']
     (status, inspection_date) [name: 'idx_quality_glass_plastic_verifications_status_date']
     (id_inspector_user, inspection_date) [name: 'idx_quality_glass_plastic_verifications_inspector_date']
@@ -1013,8 +987,6 @@ Table quality_glass_plastic_details {
   corrective_action varchar                        // ACCIÓN CORRECTIVA: Solo admite 'REVISION' o 'CAMBIO'
 
   indexes {
-    id_verification [name: 'idx_quality_glass_plastic_details_id_verification']
-    id_glass_brittle_plastic [name: 'idx_quality_glass_plastic_details_id_glass_brittle_plastic']
     (id_verification, structure_status) [name: 'idx_quality_glass_plastic_details_verification_structure']
     (id_glass_brittle_plastic, structure_status) [name: 'idx_quality_glass_plastic_details_resource_structure']
   }
@@ -1081,9 +1053,7 @@ Table quality_customer_complaints {
   updated_at timestamp
 
   indexes {
-    id_client [name: 'idx_quality_customer_complaints_id_client']
     id_reported_by [name: 'idx_quality_customer_complaints_id_reported_by']
-    id_sales_executive [name: 'idx_quality_customer_complaints_id_sales_executive']
     id_quality_reviewer [name: 'idx_quality_customer_complaints_id_quality_reviewer']
     id_admin_authorizer [name: 'idx_quality_customer_complaints_id_admin_authorizer']
     invoice_reference [name: 'idx_quality_customer_complaints_invoice_reference']
@@ -1134,8 +1104,6 @@ Table quality_complaint_items {
   other_action_details text
 
   indexes {
-    id_complaint [name: 'idx_quality_complaint_items_id_complaint']
-    id_product [name: 'idx_quality_complaint_items_id_product']
     expiration_date [name: 'idx_quality_complaint_items_expiration']
     (id_complaint, id_product) [name: 'idx_quality_complaint_items_complaint_product']
     (id_product, lot_number) [name: 'idx_quality_complaint_items_product_lot']
@@ -1153,8 +1121,6 @@ Table quality_complaint_action_plans {
   created_at timestamp [default: `now()`]
 
 indexes {
-    id_complaint [name: 'idx_quality_complaint_action_plans_id_complaint']
-    id_responsible_user [name: 'idx_quality_complaint_action_plans_id_responsible_user']
     (id_responsible_user, commitment_date) [name: 'idx_quality_complaint_action_plans_responsible_commitment']
     (id_complaint, action_index) [unique, name: 'idx_quality_complaint_action_plans_complaint_action']
   }
@@ -1183,8 +1149,6 @@ Table quality_recollection_authorizations {
   id_updated_by uuid
 
   indexes {
-    id_driver_user [name: 'idx_quality_recollection_authorizations_id_driver']
-    id_vehicle [name: 'idx_quality_recollection_authorizations_id_vehicle']
     id_assigned_by [name: 'idx_quality_recollection_authorizations_id_assigned_by']
     (scheduled_date, status) [name: 'idx_quality_recollection_authorizations_schedule_status']
     (id_driver_user, scheduled_date) [name: 'idx_quality_recollection_authorizations_driver_schedule']
@@ -1268,8 +1232,6 @@ Table quality_warehouse_receptions {
 
   indexes {
     id_inspector_user [name: 'idx_quality_warehouse_receptions_id_inspector_user']
-    id_client [name: 'idx_quality_warehouse_receptions_id_client']
-    id_sales_executive [name: 'idx_quality_warehouse_receptions_id_sales_executive']
     id_recollection_authorization [name: 'idx_quality_warehouse_receptions_id_recollection_authorization']
     id_complaint [name: 'idx_quality_warehouse_receptions_id_complaint']
     (reception_date, reception_time) [name: 'idx_quality_warehouse_receptions_datetime']
@@ -1292,8 +1254,6 @@ Table quality_warehouse_reception_details {
   unit_package varchar [not null]                 // Empaque unitario (SCO, BOL, BID)
 
   indexes {
-    id_reception [name: 'idx_quality_warehouse_reception_details_id_reception']
-    id_product [name: 'idx_quality_warehouse_reception_details_id_product']
     expiration_date_received [name: 'idx_quality_warehouse_reception_details_expiration']
     (id_reception, id_product) [name: 'idx_quality_warehouse_reception_details_reception_product']
     (id_product, lot_number_received) [name: 'idx_quality_warehouse_reception_details_product_lot']
@@ -1329,7 +1289,6 @@ Table quality_non_conformities {
   // Note: 'ARCO EXCLUSIVO: Solo uno de los campos de origen (id_*_inspection, id_warehouse_reception, id_customer_complaint, id_glass_plastic_detail) puede contener un valor UUID a la vez.'
 
   indexes {
-    id_created_by [name: 'idx_quality_non_conformities_id_created_by']
     id_updated_by [name: 'idx_quality_non_conformities_id_updated_by']
     id_daily_inspection [name: 'idx_quality_non_conformities_id_daily_inspection']
     id_wash_inspection [name: 'idx_quality_non_conformities_id_wash_inspection']
@@ -1368,7 +1327,6 @@ Table system_notifications {
   created_at timestamp [default: `now()`]
 
   indexes {
-    id_user [name: 'idx_system_notifications_id_user']
     (id_user, is_read) [name: 'idx_system_notifications_user_read']
     (id_user, created_at) [name: 'idx_system_notifications_user_created']
     (id_user, priority, is_read) [name: 'idx_system_notifications_user_priority_read']
