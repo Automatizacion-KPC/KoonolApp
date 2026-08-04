@@ -11,7 +11,7 @@ Table users {
   username varchar [unique, not null]
   password varchar [not null]
   profile_picture text
-  headline text
+  headline text    //maximo 140 caracteres
   status boolean
   created_at timestamp [default: `now()`]
   updated_at timestamp
