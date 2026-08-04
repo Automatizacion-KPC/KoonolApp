@@ -267,6 +267,7 @@ La documentación detallada de cada vertical operativa se encuentra segmentada e
 - 📢 [Módulo: Social](./modules/social.md) - _Comunicación comunal intra e inter departamental.._
 - ✏️ [Módulo: Productividad](./modules/productivity.md) - _Gestión de tareas intra e inter departamental._
 - 📫 [Módulo: Recepcion de Muestras](./modules/sample_reception.md) - _Recepcion de muestras de Proveedores._
+- 🎫 [Módulo: Solicitudes a I+D](./modules/rd_tickets.md) - _Solicitudes de Muestras, Desarrollos y Visitas a I+D._
 
 ---
 
