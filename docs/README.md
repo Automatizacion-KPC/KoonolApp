@@ -266,6 +266,7 @@ La documentación detallada de cada vertical operativa se encuentra segmentada e
 - 🔑 [Módulo: Core (Usuarios/Accesos)](./modules/core.md) - _Accesos, Roles y Departamentos._
 - 📢 [Módulo: Social](./modules/social.md) - _Comunicación comunal intra e inter departamental.._
 - ✏️ [Módulo: Productividad](./modules/productivity.md) - _Gestión de tareas intra e inter departamental._
+- 📫 [Módulo: Recepcion de Muestras](./modules/sample_reception.md) - _Recepcion de muestras de Proveedores._
 
 ---
 

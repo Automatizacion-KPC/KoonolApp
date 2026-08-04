@@ -47,9 +47,9 @@ El módulo Social y Muro Institucional provee un espacio centralizado de comunic
   - Al eliminar una publicación, se actualizará `status = 'ELIMINADO'` y se asentará la fecha en `deleted_at`.
   - Al eliminar un comentario, se registrará únicamente `deleted_at = NOW()`. Las consultas del muro omitirán registros con `deleted_at IS NOT NULL`.
 
-  ***
+---
 
-  ***
+---
 
 ## 👥 Historias de Usuario (User Stories)
 

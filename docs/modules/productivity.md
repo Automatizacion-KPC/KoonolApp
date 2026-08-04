@@ -2,6 +2,10 @@
 
 El módulo de Productividad gestiona las herramientas operativas personales y colaborativas de KoonolApp. Abarca la gestión privada de notas personales con recordatorios programados y el flujo de asignación, delegación, seguimiento y ejecución de tareas tanto a nivel intra-departamental como inter-departamental.
 
+---
+
+---
+
 ## 💼 Reglas de Negocio (Business Rules)
 
 ### BR-PRD-01: Privacidad y Aislamiento Absoluto de Notas Personales
@@ -41,6 +45,8 @@ El módulo de Productividad gestiona las herramientas operativas personales y co
 
 - **Descripción:** Se prohíbe la eliminación física (hard delete) en las tablas `personal_notes` y `tasks`.
 - **Comportamiento Global:** Únicamente el usuario creador (`id_created_by` / `id_user`) tiene la facultad de eliminar lógicamente un registro asentando la fecha en `deleted_at`. Al eliminar una tarea, el backend registrará el UUID del ejecutor en `id_updated_by`.
+
+---
 
 ---
 
