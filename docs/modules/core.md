@@ -1,4 +1,4 @@
-# 👥 Módulo: Usuarios, Accesos y Jerarquías (USR)
+# 🔑 Módulo: Usuarios, Accesos y Jerarquías (USR)
 
 El módulo Core de Usuarios gestiona el control de acceso, la autenticación, la asignación de perfiles operativos, la estructura departamental y la jerarquía de roles dentro de KoonolApp. Garantiza que el acceso a la plataforma responda a la matriz de seguridad por departamentos y niveles organizacionales, sirviendo como la entidad transversal principal para la trazabilidad y auditoría de todas las operaciones del sistema.
 

@@ -151,7 +151,7 @@ Table tasks {
   body text
   receiver_comments text
   priority varchar [default: 'MEDIA']        // BAJA, MEDIA, ALTA
-  status varchar [default: 'PENDIENTE']      // PENDIENTE, EN_PROCESO, COMPLETADA
+  status varchar [default: 'PENDIENTE']      // PENDIENTE, EN_PROCESO, COMPLETADA, VENCIDA, RECHAZADA
   deadline timestamp
   created_at timestamp [default: `now()`]
   updated_at timestamp

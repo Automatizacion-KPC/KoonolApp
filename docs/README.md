@@ -184,13 +184,13 @@ Para asegurar la trazabilidad del código y el orden de las pruebas, cada regla 
 
 #### A) Reglas de Negocio (Business Rules)
 
-- **Formato:** `BR-[SIGLAS_MÓDULO (TRES LETRAS)]-[NÚMERO_DOS_DÍGITOS]`
+- **Formato:** `BR-[ENG-SIGLAS_MÓDULO (TRES LETRAS)]-[NÚMERO_DOS_DÍGITOS]`
 - **Uso:** Restricciones técnicas e interceptaciones lógicas obligatorias en el backend.
 - **Ejemplo:** `BR-SOC-01` (Donde `SOC` corresponde al módulo Social/Muro).
 
 #### B) Historias de Usuario (User Stories)
 
-- **Formato:** `US-[SIGLAS_MÓDULO (TRES LETRAS)]-[NÚMERO_DOS_DÍGITOS]`
+- **Formato:** `US-[ENG-SIGLAS_MÓDULO (TRES LETRAS)]-[NÚMERO_DOS_DÍGITOS]`
 - **Uso:** Funcionalidades entregables descritas desde la perspectiva del colaborador.
 - **Ejemplo:** `US-SOC-02`(Donde `SOC` corresponde al módulo Social/Muro).
 
@@ -263,9 +263,9 @@ graph TD
 
 La documentación detallada de cada vertical operativa se encuentra segmentada en los siguientes documentos técnicos, los cuales unifican reglas de negocio, historias de usuario y diagramas de flujo en formato `Mermaid.js`:
 
-- 📦 [Módulo: Core (Usuarios/Accesos)](./modules/core.md) - _Accesos, Roles y Departamentos._
-- 🛒 [Módulo: Social](./modules/social.md) - _Comunicación comunal intra e inter departamental.._
-- 🧪 [Módulo: Productividad](./modules/productividad.md) - _Gestión de tareas intra e inter departamental._
+- 🔑 [Módulo: Core (Usuarios/Accesos)](./modules/core.md) - _Accesos, Roles y Departamentos._
+- 📢 [Módulo: Social](./modules/social.md) - _Comunicación comunal intra e inter departamental.._
+- ✏️ [Módulo: Productividad](./modules/productivity.md) - _Gestión de tareas intra e inter departamental._
 
 ---
 
