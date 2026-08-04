@@ -2,6 +2,10 @@
 
 El módulo Core de Usuarios gestiona el control de acceso, la autenticación, la asignación de perfiles operativos, la estructura departamental y la jerarquía de roles dentro de KoonolApp. Garantiza que el acceso a la plataforma responda a la matriz de seguridad por departamentos y niveles organizacionales, sirviendo como la entidad transversal principal para la trazabilidad y auditoría de todas las operaciones del sistema.
 
+---
+
+---
+
 ## 💼 Reglas de Negocio (Business Rules)
 
 ### BR-USR-01: Unicidad y Restricción de Vinculación Empleado-Usuario
@@ -36,11 +40,13 @@ El módulo Core de Usuarios gestiona el control de acceso, la autenticación, la
 
 ---
 
+---
+
 ## 👥 Historias de Usuario (User Stories)
 
 ### 📌 Apartado 1: Autoservicio y Perfil Colaborador (Todos los Roles)
 
-#### US-01: Gestión de Perfil de Usuario
+#### US-USR-01: Gestión de Perfil de Usuario
 
 - **Como:** Colaborador del sistema (Cualquier Rol),
 - **Quiero:** Personalizar mi fotografía de perfil y mi encabezado descriptivo (`headline`),
@@ -51,7 +57,7 @@ El módulo Core de Usuarios gestiona el control de acceso, la autenticación, la
   - **C.A. 1.3:** El usuario no puede modificar su rol (`id_rol`) ni su departamento (`id_department`).
   - **C.A. 1.4:** Toda modificación actualiza automáticamente los campos `updated_at` y `id_updated_by` con el ID del propio usuario.
 
-#### US-02: Restablecimiento de Contraseña por Autoservicio
+#### US-USR-02: Restablecimiento de Contraseña por Autoservicio
 
 - **Como:** Colaborador autenticado o usuario con credencial olvidada,
 - **Quiero:** Solicitar el restablecimiento de mi contraseña mediante mi correo electrónico asociado,
@@ -61,7 +67,7 @@ El módulo Core de Usuarios gestiona el control de acceso, la autenticación, la
   - **C.A. 2.2:** Si el usuario ingresa con contraseña temporal (creación nueva o reseteo), el frontend debe redirigirlo obligatoriamente a la vista de "Cambiar Contraseña" impidiendo la navegación a otros módulos.
   - **C.A. 2.3:** Al cambiar la clave, la nueva contraseña debe cumplir con los requerimientos de complejidad (mínimo 12 caracteres, mayúscula, minúscula, número y caracter especial) y actualizar `updated_at`.
 
-#### US-03: Visualización de Estado de Sesión e Información Personal
+#### US-USR-03: Visualización de Estado de Sesión e Información Personal
 
 - **Como:** Colaborador autenticado,
 - **Quiero:** Consultar la información básica de mi cuenta y la fecha de mi última conexión,
@@ -72,7 +78,7 @@ El módulo Core de Usuarios gestiona el control de acceso, la autenticación, la
 
 ### 📌 Apartado 2: Administración de Usuarios y Jerarquías (Exclusivo GOD y ADMIN)
 
-#### US-04: Alta Manual de Usuarios
+#### US-USR-04: Alta Manual de Usuarios
 
 - **Como:** Administrador del Sistema (`ADMIN` / `GOD`),
 - **Quiero:** Registrar manualmente cuentas de usuario para personal especial, cuentas de servicio o administradores sin registro previo en RH,
@@ -83,7 +89,7 @@ El módulo Core de Usuarios gestiona el control de acceso, la autenticación, la
   - **C.A. 4.3:** Se genera automáticamente un id (UUID v4), `status = true`, `created_at = NOW()` y `id_created_by` con el UUID del administrador ejecutor.
   - **C.A. 4.4:** Se emite una clave temporal aleatoria enviada al email del nuevo usuario.
 
-#### US-05: Modificación de Rol y Departamento
+#### US-USR-05: Modificación de Rol y Departamento
 
 - **Como:** Administrador del Sistema (`ADMIN` / `GOD`),
 - **Quiero:** Reasignar el rol o el departamento de un usuario existente,
@@ -93,7 +99,7 @@ El módulo Core de Usuarios gestiona el control de acceso, la autenticación, la
   - **C.A. 5.2:** El backend asienta la fecha de cambio en `updated_at` y la clave del autor en `id_updated_by`.
   - **C.A. 5.3:** La reasignación de departamento aplica de manera inmediata restringiendo o expandiendo los módulos accesibles por el usuario en su siguiente petición HTTP.
 
-#### US-06: Inactivación y Blanqueo Manual de Cuenta (Soft Delete)
+#### US-USR-06: Inactivación y Blanqueo Manual de Cuenta (Soft Delete)
 
 - **Como:** Administrador del Sistema (`ADMIN` / `GOD`),
 - **Quiero:** Suspender el acceso de un usuario o forzar el reseteo de su contraseña,
@@ -103,7 +109,7 @@ El módulo Core de Usuarios gestiona el control de acceso, la autenticación, la
   - **C.A. 6.2:** Al ejecutar "Resetear Contraseña", el administrador genera una nueva clave temporal para el usuario seleccionado, enviando una notificación por correo.
   - **C.A. 6.3:** Las cuentas inactivadas permanecen visibles en la vista de administración filtrando por "Inactivos", con opción de reactivación (`status = true`, `deleted_at = NULL`).
 
-#### US-07: Gestión de Catálogos de Roles y Departamentos
+#### US-USR-07: Gestión de Catálogos de Roles y Departamentos
 
 - **Como:** Administrador del Sistema (`ADMIN` / `GOD`),
 - **Quiero:** Crear o actualizar los nombres y descripciones del catálogo de departamentos y roles,
@@ -112,6 +118,8 @@ El módulo Core de Usuarios gestiona el control de acceso, la autenticación, la
   - **C.A. 7.1:** Permite crear nuevos registros en la tabla `departments` especificando `name` y `description`.
   - **C.A. 7.2:** Permite editar los campos `name` y `description` en `roles` y `departments`.
   - **C.A. 7.3:** Todo cambio en los catálogos guarda trazabilidad con `id_created_by` / `id_updated_by` y timestamps asociados.
+
+---
 
 ---
 
@@ -137,6 +145,19 @@ graph TD
     L --> M["Acceso concedido según Rol y Departamento"]
 ```
 
+#### Referencias:
+
+- Reglas de Negocio (BR):
+  - **[BR-USR-04]**: Inactivación Lógica y Control de Estado (Soft Delete)
+  - **[BR-USR-05]**: Políticas de Contraseñas y Autenticación Segura
+- Historias de Usuario (US):
+  - **[US-USR-02]**: Restablecimiento de Contraseña por Autoservicio
+  - **[US-USR-03]**: Visualización de Estado de Sesión e Información Personal
+- Criterios de Aceptación (C.A):
+  - **[C.A-2.2]**: Redirección obligatoria a la vista de cambio de contraseña al ingresar con clave temporal
+  - **[C.A-2.3]**: Requisitos de complejidad de la nueva contraseña y actualización del campo updated_at
+  - **[C.A-3.2]**: Actualización exclusiva del campo last_connection tras una autenticación exitosa
+
 ### 2. Flujo Operativo: Administración de Usuarios y Soft Delete
 
 ```mermaid
@@ -157,6 +178,27 @@ graph TD
     K --> L["Revocar tokens de sesión activos"]
 ```
 
+#### Referencias:
+
+- Reglas de Negocio (BR):
+  - **[BR-USR-01]**: Unicidad y Restricción de Vinculación Empleado-Usuario
+  - **[BR-USR-02]**: Creación Automática por Eventos de Recursos Humanos
+  - **[BR-USR-03]**: Restricción de Control de Acceso y Gestión de Usuarios
+  - **[BR-USR-04]**: Inactivación Lógica y Control de Estado (Soft Delete)
+  - **[BR-USR-05]**: Políticas de Contraseñas y Autenticación Segura
+- Historias de Usuario (US):
+  - **[US-USR-04]**: Alta Manual de Usuarios
+  - **[US-USR-05]**: Modificación de Rol y Departamento
+  - **[US-USR-06]**: Inactivación y Blanqueo Manual de Cuenta (Soft Delete)
+- Criterios de Aceptación (C.A):
+  - **[C.A-4.1]**: Requerimiento de campos obligatorios y opcionalidad de id_employee en el alta
+  - **[C.A-4.2]**: Validación de unicidad para username y email antes de registrar
+  - **[C.A-4.3]**: Generación automática de id (UUID v4), status = true, created_at e id_created_by
+  - **[C.A-4.4]**: Emisión y envío de clave temporal aleatoria al email registrado
+  - **[C.A-5.1]**: Permitir reasignación de rol y departamento por parte de administradores
+  - **[C.A-5.2]**: Asentamiento de auditoría en updated_at e id_updated_by tras actualización
+  - **[C.A-6.1]**: Borrado lógico actualizando status = false, deleted_at e id_updated_by
+
 ### 3. Diagrama de Transición de Estados de la Cuenta de Usuario
 
 ```mermaid
@@ -175,3 +217,26 @@ graph TD
     ST_ACTIVO -->|Baja laboral / Soft Delete| ST_INACTIVO["<b>ESTADO: INACTIVO_SOFT_DELETE</b><br/>status = false | deleted_at = NOW()"]
     ST_INACTIVO -->|Reactivación manual por Admin| ST_ACTIVO
 ```
+
+#### Referencias:
+
+- Reglas de Negocio (BR):
+  - **[BR-USR-02]**: Creación Automática por Eventos de Recursos Humanos
+  - **[BR-USR-04]**: Inactivación Lógica y Control de Estado (Soft Delete)
+  - **[BR-USR-05]**: Políticas de Contraseñas y Autenticación Segura
+- Historias de Usuario (US):
+  - **[US-USR-02]**: Restablecimiento de Contraseña por Autoservicio
+  - **[US-USR-04]**: Alta Manual de Usuarios
+  - **[US-USR-06]**: Inactivación y Blanqueo Manual de Cuenta (Soft Delete)
+- Criterios de Aceptación (C.A):
+  - **[C.A-2.2]**: Flujo de primera vez con redirección obligatoria a cambio de contraseña
+  - **[C.A-6.1]**: Transición a estado inactivo mediante borrado lógico (status = false, deleted_at)
+  - **[C.A-6.2]**: Blanqueo/reseteo manual de contraseña para desbloqueo
+  - **[C.A-6.3]**: Mantenimiento de cuentas inactivas con posibilidad de reactivación manual (status = true, deleted_at = NULL)
+
+---
+
+---
+
+- ⬆️ [Volver arriba](#)
+- 📖 [Ir al Índice](../README.md#-5-índice-de-módulos-funcionales)

@@ -184,21 +184,21 @@ Para asegurar la trazabilidad del código y el orden de las pruebas, cada regla 
 
 #### A) Reglas de Negocio (Business Rules)
 
-- **Formato:** `BR-[SIGLAS_MÓDULO]-[NÚMERO_DOS_DÍGITOS]`
+- **Formato:** `BR-[SIGLAS_MÓDULO (TRES LETRAS)]-[NÚMERO_DOS_DÍGITOS]`
 - **Uso:** Restricciones técnicas e interceptaciones lógicas obligatorias en el backend.
-- **Ejemplo:** `BR-SC-01` (Donde `SC` corresponde al módulo Social/Muro).
+- **Ejemplo:** `BR-SOC-01` (Donde `SOC` corresponde al módulo Social/Muro).
 
 #### B) Historias de Usuario (User Stories)
 
-- **Formato:** `US-[NÚMERO_DOS_DÍGITOS]`
+- **Formato:** `US-[SIGLAS_MÓDULO (TRES LETRAS)]-[NÚMERO_DOS_DÍGITOS]`
 - **Uso:** Funcionalidades entregables descritas desde la perspectiva del colaborador.
-- **Ejemplo:** `US-02`.
+- **Ejemplo:** `US-SOC-02`(Donde `SOC` corresponde al módulo Social/Muro).
 
 #### C) Criterios de Aceptación (C.A.)
 
 - **Formato:** `C.A. [NÚMERO_US].[NÚMERO_CRITERIO]`
 - **Uso:** Validaciones específicas de interfaz, base de datos o lógica JSONB que determinan el éxito de la historia.
-- **Ejemplo:** `C.A. 2.1` (Primer criterio vinculado a la `US-02`).
+- **Ejemplo:** `C.A. 2.1` (Primer criterio vinculado a la `US-SOC-02`).
 
 ---
 
@@ -241,6 +241,18 @@ Cada nuevo archivo Markdown generado en la ruta `docs/modules/nombre-modulo.md` 
 graph TD
 // Código estructurado de Mermaid.js
 \```
+
+#### Referencias
+
+- Reglas de Negocio (BR):
+  - **[BR-AAA-01]**: [Descripción breve de la Regla de Negocio]
+  - **[BR-AAA-02]**: [Descripción breve de la Regla de Negocio]
+- Historias de Usuario (US):
+  - **[US-AAA-01]**: [Descripción breve de la Historia de Usuario]
+  - **[US-AAA-02]**: [Descripción breve de la Historia de Usuario]
+- Criterios de Aceptación (C.A):
+  - **[C.A-01.1]**: [Descripción del criterio de aceptación específico]
+  - **[C.A-02.3]**: [Descripción del criterio de aceptación específico]
 ````
 
 ---
@@ -251,7 +263,7 @@ graph TD
 
 La documentación detallada de cada vertical operativa se encuentra segmentada en los siguientes documentos técnicos, los cuales unifican reglas de negocio, historias de usuario y diagramas de flujo en formato `Mermaid.js`:
 
-- 📦 [Módulo: Core/Acceso](./modules/core.md) - _Accesos, Roles y Departamentos._
+- 📦 [Módulo: Core (Usuarios/Accesos)](./modules/core.md) - _Accesos, Roles y Departamentos._
 - 🛒 [Módulo: Social](./modules/social.md) - _Comunicación comunal intra e inter departamental.._
 - 🧪 [Módulo: Productividad](./modules/productividad.md) - _Gestión de tareas intra e inter departamental._
 
@@ -262,3 +274,7 @@ La documentación detallada de cada vertical operativa se encuentra segmentada e
 Para consultar la definición de términos específicos del negocio o tecnicismos del sistema, refiérase al 📖 [Glosario de Términos](./glosario.md).
 
 ---
+
+---
+
+- ⬆️ [Volver arriba](#)
