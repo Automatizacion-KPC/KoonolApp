@@ -269,6 +269,7 @@ La documentación detallada de cada vertical operativa se encuentra segmentada e
 - 📫 [Módulo: Recepcion de Muestras](./modules/sample_reception.md) - _Recepcion de muestras de Proveedores._
 - 🎫 [Módulo: Solicitudes a I+D](./modules/rd_tickets.md) - _Solicitudes de Muestras, Desarrollos y Visitas a I+D._
 - 👥 [Módulo: HR](./modules/hr.md) - _RH, Gestion de Vacaciones, Autoservicio y Prestamos._
+- 🚗 [Módulo: Vehículos](./modules/vehicles.md) - _Gestion de Vehículos, Mantenimientos y Seguros Vehiculares y Cargas de Combustible._
 
 ---
 
