@@ -475,7 +475,7 @@ Table money_loans {
   id uuid [primary key, not null]
   id_user_requested uuid [not null]
   amount_requested numeric [not null]             // Monto solicitado
-  installments_terms integer [not null]           // Número de quincenas/meses para pagar
+  installments_terms integer                      // Número de semanas/quincenas/meses para pagar
   reason text                                     // Motivo del préstamo
 
   status varchar [default: 'PENDIENTE']           // 'PENDIENTE', 'APROBADO', 'RECHAZADO', 'LIQUIDADO'

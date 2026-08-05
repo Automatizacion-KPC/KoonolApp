@@ -264,10 +264,11 @@ graph TD
 La documentación detallada de cada vertical operativa se encuentra segmentada en los siguientes documentos técnicos, los cuales unifican reglas de negocio, historias de usuario y diagramas de flujo en formato `Mermaid.js`:
 
 - 🔑 [Módulo: Core (Usuarios/Accesos)](./modules/core.md) - _Accesos, Roles y Departamentos._
-- 📢 [Módulo: Social](./modules/social.md) - _Comunicación comunal intra e inter departamental.._
+- 📢 [Módulo: Social](./modules/social.md) - _Comunicación comunal intra e inter departamental._
 - ✏️ [Módulo: Productividad](./modules/productivity.md) - _Gestión de tareas intra e inter departamental._
 - 📫 [Módulo: Recepcion de Muestras](./modules/sample_reception.md) - _Recepcion de muestras de Proveedores._
 - 🎫 [Módulo: Solicitudes a I+D](./modules/rd_tickets.md) - _Solicitudes de Muestras, Desarrollos y Visitas a I+D._
+- 👥 [Módulo: HR](./modules/hr.md) - _RH, Gestion de Vacaciones, Autoservicio y Prestamos._
 
 ---
 
