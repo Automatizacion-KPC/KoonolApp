@@ -1,8 +1,8 @@
-# 👥 Módulo: Gestión de Personal y Recursos Humanos (HRM)
+# 👥 Módulo: Gestión de Personal y Recursos Humanos (Human Resource Management - HRM)
 
-El módulo de **Gestión de Personal y Recursos Humanos (HRM)** centraliza la operación diaria y los servicios al colaborador, complementando a **SAP Business One** como la fuente de verdad. Mientras que los datos generales e identitarios del personal se sincronizan y replican desde SAP, la base de datos propia administra de forma exclusiva campos de gestión local, notas internas de RH y módulos especializados como el **control de brigadas internas de protección civil** (asignación de miembros, responsables y seguimiento de capacitaciones).
+El módulo de **Gestión de Personal y Recursos Humanos** centraliza la operación diaria y los servicios al colaborador, complementando a **SAP Business One** como la fuente de verdad. Mientras que los datos generales e identitarios del personal se sincronizan y replican desde SAP, la base de datos propia administra de forma exclusiva campos de gestión local, notas internas de RH y módulos especializados como el control de brigadas internas de protección civil (asignación de miembros, responsables y seguimiento de capacitaciones).
 
-Asimismo, el sistema potencia la experiencia mediante un portal de autoservicio para los empleados y flujos de aprobación (mayoritariamente bietápicos entre líderes directos y Recursos Humanos) para gestionar **solicitudes de vacaciones, préstamos económicos personales e incidencias de asistencia** (faltas, llegadas tardías, salidas anticipadas y permisos durante la jornada laboral).
+Asimismo, el sistema potencia la experiencia mediante un portal de autoservicio para los empleados y flujos de aprobación (mayoritariamente bietápicos entre líderes directos y Recursos Humanos) para gestionar solicitudes de vacaciones, préstamos económicos personales e incidencias de asistencia (faltas, llegadas tardías, salidas anticipadas y permisos durante la jornada laboral).
 
 ---
 

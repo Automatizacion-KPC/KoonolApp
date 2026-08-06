@@ -1,6 +1,6 @@
-# 📫 Módulo: Recepción de Muestras de Proveedores (SRM)
+# 📫 Módulo: Recepción de Muestras de Proveedores (Sample Receipt Management - SRM)
 
-El módulo de Recepción de Muestras de Proveedores (Sample Receipt Management) digitaliza y controla el flujo operativo, la cadena de custodia y la evaluación técnica de las muestras enviadas por proveedores externos. Facilita la trazabilidad entre el departamento de Compras (responsable del registro inicial y enlace comercial) y el departamento de I+D (responsable de la custodia física, pruebas de laboratorio y retroalimentación técnica).
+El módulo de **Recepción de Muestras de Proveedores** digitaliza y controla el flujo operativo, la cadena de custodia y la evaluación técnica de las muestras enviadas por proveedores externos. Facilita la trazabilidad entre el departamento de Compras (responsable del registro inicial y enlace comercial) y el departamento de I+D (responsable de la custodia física, pruebas de laboratorio y retroalimentación técnica).
 
 ---
 

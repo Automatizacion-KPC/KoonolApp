@@ -1,6 +1,6 @@
-# 📢 Módulo: Social y Muro Institucional (SOC)
+# 📢 Módulo: Social y Muro Institucional (Social - SOC)
 
-El módulo Social y Muro Institucional provee un espacio centralizado de comunicación colaborativa, difusión de avisos institucionales y retroalimentación entre los colaboradores de la organización. Permite la publicación de contenidos globales o segmentados por departamento, la integración de documentos adjuntos, hilos de comentarios y un sistema de reacciones de interacción rápida, salvaguardando la moderación operativa mediante los roles de liderazgo del sistema.
+El módulo **Social y Muro Institucional** provee un espacio centralizado de comunicación colaborativa, difusión de avisos institucionales y retroalimentación entre los colaboradores de la organización. Permite la publicación de contenidos globales o segmentados por departamento, la integración de documentos adjuntos, hilos de comentarios y un sistema de reacciones de interacción rápida, salvaguardando la moderación operativa mediante los roles de liderazgo del sistema.
 
 ---
 

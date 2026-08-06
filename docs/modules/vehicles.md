@@ -1,6 +1,8 @@
-# 🚗 Módulo: Gestión de Flotilla y Control Vehicular (VEH)
+# 🚗 Módulo: Gestión de Flotilla y Control Vehicular (Vehicles - VEH)
 
-El módulo de **Gestión de Flotilla y Control Vehicular (VEH)** digitaliza la administración integral de las unidades automotrices de la empresa. Centraliza el alta del activo y el control de pólizas de seguro (Compras), la asignación de choferes responsables por departamento, el registro inmutable de recargas de combustible mediante evidencias fotográficas (Choferes), y el control del ciclo de mantenimiento preventivo y correctivo con actualización de odómetro (Mantenimiento).
+El módulo de **Gestión de Flotilla y Control Vehicular** digitaliza la administración integral de las unidades automotrices de la empresa. Centraliza el alta del activo y el control de pólizas de seguro (Compras), la asignación de choferes responsables por departamento, el registro inmutable de recargas de combustible mediante evidencias fotográficas (Choferes), y el control del ciclo de mantenimiento preventivo y correctivo con actualización de odómetro (Mantenimiento).
+
+---
 
 ---
 
@@ -35,6 +37,8 @@ El módulo de **Gestión de Flotilla y Control Vehicular (VEH)** digitaliza la a
 
 - **Descripción:** El mantenimiento preventivo se programa en función del kilometraje acumulado en la columna `next_maintenance_odometer`.
 - **Comportamiento Global:** Cuando el `current_odometer` alcanza o supera el 95% del valor fijado en `next_maintenance_odometer`, el sistema generará alertas de advertencia visuales para el área de Mantenimiento y la jefatura del departamento del vehículo.
+
+---
 
 ---
 

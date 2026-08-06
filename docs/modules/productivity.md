@@ -1,6 +1,6 @@
-# ✏️ Módulo: Productividad (PRD)
+# ✏️ Módulo: Productividad (Productivity - PRD)
 
-El módulo de Productividad gestiona las herramientas operativas personales y colaborativas de KoonolApp. Abarca la gestión privada de notas personales con recordatorios programados y el flujo de asignación, delegación, seguimiento y ejecución de tareas tanto a nivel intra-departamental como inter-departamental.
+El módulo de **Productividad** gestiona las herramientas operativas personales y colaborativas de KoonolApp. Abarca la gestión privada de notas personales con recordatorios programados y el flujo de asignación, delegación, seguimiento y ejecución de tareas tanto a nivel intra-departamental como inter-departamental.
 
 ---
 
