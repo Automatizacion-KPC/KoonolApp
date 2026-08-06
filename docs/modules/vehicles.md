@@ -160,7 +160,7 @@ graph TD
   - **[C.A. 1.4]**: Transición a SIN_SEGURO por fecha de fin de seguro.
   - **[C.A. 4.1, 4.4]**: Cambio a EN_TALLER y retorno a DISPONIBLE.
 
-### 2.Flujo Operativo: Registro de Recarga de Combustible
+### 2. Flujo Operativo: Registro de Recarga de Combustible
 
 ```mermaid
 graph TD
@@ -194,7 +194,7 @@ graph TD
   - **[C.A. 3.3]**: Evidencias fotográficas obligatorias.
   - **[C.A. 3.4]**: Inserción inmutable y actualización de odómetro vehicular.
 
-### 3.Flujo Operativo: Gestión de Mantenimiento Vehicular
+### 3. Flujo Operativo: Gestión de Mantenimiento Vehicular
 
 ```mermaid
 graph TD

@@ -146,7 +146,7 @@ El módulo de **Solicitud de Muestras y Desarrollos a I+D** gestiona la relació
 
 ## 🔄 Diagramas de Flujo
 
-### 1.Diagrama de Transición de Estados del Ticket I+D
+### 1. Diagrama de Transición de Estados del Ticket I+D
 
 ```mermaid
 graph TD
@@ -193,7 +193,7 @@ graph TD
   - **[C.A. 4.1, 5.1]**: Transición a COMPLETADO tras la preparación y emisión del acuse por I+D.
   - **[C.A. 6.3]**: Cierre automático a ACEPTADO_CLIENTE o RECHAZADO_CLIENTE según la evaluación registrada por Ventas.
 
-### 2.Diagrama de Flujo Operativo: Ciclo de Solicitud, Formulación, Acuse I+D y Feedback Comercial
+### 2. Diagrama de Flujo Operativo: Ciclo de Solicitud, Formulación, Acuse I+D y Feedback Comercial
 
 ```mermaid
 graph TD

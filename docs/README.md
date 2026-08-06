@@ -271,6 +271,8 @@ La documentación detallada de cada vertical operativa se encuentra segmentada e
 - 👥 [Módulo: HR](./modules/hr.md) - _RH, Gestion de Vacaciones, Autoservicio y Prestamos._
 - 🚗 [Módulo: Vehículos](./modules/vehicles.md) - _Gestion de Vehículos, Mantenimientos y Seguros Vehiculares y Cargas de Combustible._
 - 👮 [Módulo: Caseta](./modules/gate_logs.md) - _Control de acceso de vehículos y personal._
+- 🔧 [Módulo: Mantenimiento Equipo de Alamcen](./modules/warehouse_equipment.md) - _Control de acceso de vehículos y personal._
+
 
 ---
 

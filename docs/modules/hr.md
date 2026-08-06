@@ -191,7 +191,7 @@ graph TD
   - **[C.A. 6.2, 6.3]**: Transiciones de la primera fase a APROBADO_JEFE o RECHAZADO_JEFE.
   - **[C.A. 7.2, 7.3]**: Dictamen final de RH (APROBADO_RH / RECHAZADO_RH) y descuento automático de días.
 
-### 2.Diagrama de Flujo Operativo: Ciclo de Solicitud y Aprobación Bietápica de Vacaciones
+### 2. Diagrama de Flujo Operativo: Ciclo de Solicitud y Aprobación Bietápica de Vacaciones
 
 ```mermaid
 graph TD
@@ -239,7 +239,7 @@ graph TD
   - **[C.A. 6.1, 6.2]**: Evaluación y firmas del jefe inmediato.
   - **[C.A. 7.2]**: Cierre de aprobación por RH y recálculo atómico de saldos en base de datos.
 
-### 3.Diagrama de Flujo Operativo: Tramitación de Préstamos Económicos
+### 3. Diagrama de Flujo Operativo: Tramitación de Préstamos Económicos
 
 ```mermaid
 graph TD

@@ -683,7 +683,7 @@ Table warehouse_equipment {
   next_maintenance_horometer numeric              // Horas objetivo para el próximo servicio
   next_maintenance_date date                      // Para los patines, el servicio se agenda por fecha
 
-  status varchar [default: 'DISPONIBLE']          // DISPONIBLE, EN_USO, EN_TALLER, INACTIVO
+  status varchar [default: 'DISPONIBLE']          // DISPONIBLE, EN_TALLER, INACTIVO
   notes text
 
   created_at timestamp [default: `now()`]

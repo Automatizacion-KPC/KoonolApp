@@ -118,7 +118,7 @@ El módulo de **Recepción de Muestras de Proveedores** digitaliza y controla el
 
 ## 🔄 Diagramas de Flujo
 
-### 1.Diagrama de Transición de Estados de Muestras
+### 1. Diagrama de Transición de Estados de Muestras
 
 ```mermaid
 graph TD
