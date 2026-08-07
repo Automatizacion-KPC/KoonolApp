@@ -263,16 +263,16 @@ graph TD
 
 La documentación detallada de cada vertical operativa se encuentra segmentada en los siguientes documentos técnicos, los cuales unifican reglas de negocio, historias de usuario y diagramas de flujo en formato `Mermaid.js`:
 
-- 🔑 [Módulo: Core (Usuarios/Accesos)](./modules/core.md) - _Accesos, Roles y Departamentos._
-- 📢 [Módulo: Social](./modules/social.md) - _Comunicación comunal intra e inter departamental._
-- ✏️ [Módulo: Productividad](./modules/productivity.md) - _Gestión de tareas intra e inter departamental._
-- 📫 [Módulo: Recepcion de Muestras](./modules/sample_reception.md) - _Recepcion de muestras de Proveedores._
-- 🎫 [Módulo: Solicitudes a I+D](./modules/rd_tickets.md) - _Solicitudes de Muestras, Desarrollos y Visitas a I+D._
-- 👥 [Módulo: HR](./modules/hr.md) - _RH, Gestion de Vacaciones, Autoservicio y Prestamos._
-- 🚗 [Módulo: Vehículos](./modules/vehicles.md) - _Gestion de Vehículos, Mantenimientos y Seguros Vehiculares y Cargas de Combustible._
-- 👮 [Módulo: Caseta](./modules/gate_logs.md) - _Control de acceso de vehículos y personal._
-- 🔧 [Módulo: Mantenimiento Equipo de Alamcen](./modules/warehouse_equipment.md) - _Control de acceso de vehículos y personal._
-
+- 🔑 [Módulo: Core (Usuarios/Accesos) - USR](./modules/core.md) - _Accesos, Roles y Departamentos._
+- 📢 [Módulo: Social - SOC](./modules/social.md) - _Comunicación comunal intra e inter departamental._
+- ✏️ [Módulo: Productividad - PRD](./modules/productivity.md) - _Gestión de tareas intra e inter departamental._
+- 📫 [Módulo: Recepcion de Muestras - SRM](./modules/sample_reception.md) - _Recepcion de muestras de Proveedores._
+- 🎫 [Módulo: Solicitudes a I+D - RDR](./modules/rd_tickets.md) - _Solicitudes de Muestras, Desarrollos y Visitas a I+D._
+- 👥 [Módulo: HR - HRM](./modules/hr.md) - _RH, Gestion de Vacaciones, Autoservicio y Prestamos._
+- 🚗 [Módulo: Vehículos - VEH](./modules/vehicles.md) - _Gestion de Vehículos, Mantenimientos y Seguros Vehiculares y Cargas de Combustible._
+- 👮 [Módulo: Caseta - GTC](./modules/gate_logs.md) - _Control de acceso de vehículos y personal._
+- 🔧 [Módulo: Mantenimiento Equipo de Alamcen - WEM](./modules/warehouse_equipment.md) - _Control de Mantenimientos de Montacargas y Patines._
+- 🔍 [Módulo: Calidad, Inspección de Vehículos - VHI](./modules/vehicle_inspection.md) - _Control de inspecciones vehiculares, Precarga, Postlavado y Recepcion._
 
 ---
 

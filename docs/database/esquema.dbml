@@ -516,7 +516,7 @@ Table vehicles {
   // Datos Operativos Internos
   current_odometer integer [default: 0]       // Kilometraje actual
   next_maintenance_odometer integer           // Kilometraje objetivo para el próximo servicio
-  status varchar [default: 'DISPONIBLE']      // DISPONIBLE, EN_RUTA, EN_TALLER, INACTIVO, SIN_SEGURO, 
+  status varchar [default: 'DISPONIBLE']      // DISPONIBLE, EN_RUTA, EN_TALLER, INACTIVO, SIN_SEGURO, RETENIDO
   notes text                                  // Campo de observaciones o notas generales
 
   created_at timestamp [default: `now()`]
@@ -730,7 +730,7 @@ Table equipment_maintenances {
 // Inspección Diaria (Pre-Carga)
 Table vehicle_daily_inspections {
   id uuid [primary key, not null]
-  folio varchar [unique, not null]                 // 'IVI-AA-####'
+  folio varchar [unique, not null]                 // 'IVI-AA-#####'
   id_vehicle uuid [not null]
   id_inspector_user uuid [not null]
   id_driver_user uuid                              // Chofer asignado a la ruta del día
@@ -776,7 +776,7 @@ Table vehicle_daily_inspections {
   fumigation_service_date date
   pest_control_company_name varchar
 
-  status varchar [default: 'APROBADO']             // APROBADO, RECHAZADO
+  status varchar [default: 'APROBADO']             // APROBADO, RECHAZADO, APROBADO_CON_NC
   notes text
   created_at timestamp [default: `now()`]
 
@@ -791,7 +791,7 @@ Table vehicle_daily_inspections {
 // Inspección Post-Lavado Semanal
 Table vehicle_wash_inspections {
   id uuid [primary key, not null]
-  folio varchar [unique, not null]                 // 'VLV-AA-####'
+  folio varchar [unique, not null]                 // 'VLV-AA-#####'
   id_vehicle uuid [not null]
   id_inspector_user uuid [not null]
   id_driver_user uuid                              // Chofer asignado a la ruta del día
@@ -817,7 +817,7 @@ Table vehicle_wash_inspections {
   cabin_has_trash boolean [not null]
   cabin_has_food_crumbs boolean [not null]
 
-  status varchar [default: 'APROBADO']             // APROBADO, RECHAZADO
+  status varchar [default: 'APROBADO']             // APROBADO, RECHAZADO, APROBADO_CON_NC
   notes text
   created_at timestamp [default: `now()`]
 
@@ -832,7 +832,7 @@ Table vehicle_wash_inspections {
 // Inspección de Recepción de Mercancía
 Table vehicle_reception_inspections {
   id uuid [primary key, not null]
-  folio varchar [unique, not null]                 // 'IVE-AA-####'
+  folio varchar [unique, not null]                 // 'IVE-AA-#####'
   id_inspector_user uuid [not null]
 
   inspection_date date [not null]                  // FECHA DE REVISIÓN
@@ -907,7 +907,7 @@ Table vehicle_reception_inspections {
   has_live_or_dead_roaches boolean [not null]
   has_live_or_dead_flies boolean [not null]
 
-  status varchar [default: 'APROBADO']             // APROBADO, RECHAZADO, CUARENTENA
+  status varchar [default: 'APROBADO']             // APROBADO, RECHAZADO, APROBADO_CON_NC
   rejection_reason text
   
   created_at timestamp [default: `now()`]
