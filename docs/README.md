@@ -273,6 +273,7 @@ La documentación detallada de cada vertical operativa se encuentra segmentada e
 - 👮 [Módulo: Caseta - GTC](./modules/gate_logs.md) - _Control de acceso de vehículos y personal._
 - 🔧 [Módulo: Mantenimiento Equipo de Alamcen - WEM](./modules/warehouse_equipment.md) - _Control de Mantenimientos de Montacargas y Patines._
 - 🔍 [Módulo: Calidad, Inspección de Vehículos - VHI](./modules/vehicle_inspection.md) - _Control de inspecciones vehiculares, Precarga, Postlavado y Recepcion._
+- 🔍 [Módulo: Calidad, Inspección de Vidrio y Plástico - GBP](./modules/glass_plastic.md) - _Control de inspecciones de vidrio y plastico quebradizo._
 
 ---
 

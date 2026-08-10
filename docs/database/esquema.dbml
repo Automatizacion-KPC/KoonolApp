@@ -960,7 +960,7 @@ Table glass_brittle_plastics {
 
 Table quality_glass_plastic_verifications {
   id uuid [primary key, not null]
-  folio varchar [unique, not null]                 // 'CAL-VVP-AA-####'
+  folio varchar [unique, not null]                 // 'CAL-VVP-AA-#####'
   id_inspector_user uuid [not null]
   inspection_date date [not null] 
   inspection_time time [not null]
