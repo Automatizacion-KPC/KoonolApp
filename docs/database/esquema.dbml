@@ -1020,7 +1020,7 @@ indexes {
 Table quality_customer_complaints {
   id uuid [primary key, not null]
   form_type varchar [not null]                    // 'CAL-FOR-01' (Con Posesión) o 'CAL-FOR-02' (Sin Posesión)
-  folio varchar [unique, not null]                // 'NCC-CP-AA-###' o 'NCC-SP-AA-###'
+  folio varchar [unique, not null]                // 'NCC-CP-AA-#####' o 'NCC-SP-AA-#####'
   status varchar [default: 'ABIERTO']             // 'ABIERTO', 'AUTORIZADO', 'RECOLECTADO', 'RECIBIDO_ALMACEN', 'DICTAMINADO', 'CERRADO'
 
   // Datos Generales del Documentos
@@ -1135,7 +1135,7 @@ indexes {
 Table quality_recollection_authorizations {
   id uuid [primary key, not null]
   id_complaint uuid [not null, unique]        // Enlace 1:1 con la queja origen
-  folio varchar [unique, not null]            // 'CAL-FOR-16-AA-###'
+  folio varchar [unique, not null]            // 'CAL-FOR-16-AA-#####'
 
   id_driver_user uuid [not null]              // Chofer asignado
   id_vehicle uuid [not null]                  // Unidad interna de la empresa
@@ -1184,7 +1184,7 @@ Table quality_recollection_authorization_details {
 // ALM-FOR-01: Recepción de Producto en Almacén
 Table quality_warehouse_receptions {
   id uuid [primary key, not null]
-  folio varchar [unique, not null]             // Folio 'ALM-AA-###'
+  folio varchar [unique, not null]             // Folio 'ALM-AA-#####'
   id_inspector_user uuid [not null]            // Personal de Calidad/Almacén que recibe
   reception_date date [not null]
   reception_time time [not null]
@@ -1266,7 +1266,7 @@ Table quality_warehouse_reception_details {
 
 Table quality_non_conformities {
   id uuid [primary key, not null]
-  folio varchar [unique, not null]                 // Ej. 'NC-AA-###'
+  folio varchar [unique, not null]                 // Ej. 'NC-AA-#####'
   status varchar [default: 'ABIERTA']              // 'ABIERTA', 'EN_PROCESO', 'VERIFICADA', 'CERRADA'
 
   source_type varchar [not null]                   // 'PRE_CARGA', 'POST_LAVADO', 'RECEPCION_MERCANCIA', 'VIDRIO_PLASTICO', 'RECLAMO_CLIENTE', 'RAMPA_ALMACEN', 'MANUAL'

@@ -274,6 +274,7 @@ La documentación detallada de cada vertical operativa se encuentra segmentada e
 - 🔧 [Módulo: Mantenimiento Equipo de Alamcen - WEM](./modules/warehouse_equipment.md) - _Control de Mantenimientos de Montacargas y Patines._
 - 🔍 [Módulo: Calidad, Inspección de Vehículos - VHI](./modules/vehicle_inspection.md) - _Control de inspecciones vehiculares, Precarga, Postlavado y Recepcion._
 - 🔍 [Módulo: Calidad, Inspección de Vidrio y Plástico - GBP](./modules/glass_plastic.md) - _Control de inspecciones de vidrio y plastico quebradizo._
+- 🔍 [Módulo: Calidad, Devoluciones de Producto - CPR](./modules/product_rejection.md) - _Control de registros de Devoluciones._
 
 ---
 
