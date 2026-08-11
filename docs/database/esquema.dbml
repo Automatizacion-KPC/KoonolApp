@@ -1021,7 +1021,7 @@ Table quality_customer_complaints {
   id uuid [primary key, not null]
   form_type varchar [not null]                    // 'CAL-FOR-01' (Con Posesión) o 'CAL-FOR-02' (Sin Posesión)
   folio varchar [unique, not null]                // 'NCC-CP-AA-#####' o 'NCC-SP-AA-#####'
-  status varchar [default: 'ABIERTO']             // 'ABIERTO', 'AUTORIZADO', 'RECOLECTADO', 'RECIBIDO_ALMACEN', 'DICTAMINADO', 'CERRADO'
+  status varchar [default: 'ABIERTO']             // 'ABIERTO', 'DICTAMINADO', 'AUTORIZADO', 'RECHAZADO', 'RECOLECTADO', 'RECIBIDO_ALMACEN', 'CERRADO'
 
   // Datos Generales del Documentos
   id_reported_by uuid [not null]                  // Usuario de ventas o Calidad que reporta
@@ -1043,6 +1043,9 @@ Table quality_customer_complaints {
   root_cause_analysis text                              // Análisis de Causa Raíz
   final_solution text                                   // Dictamen / Resolución final del folio
 
+  requires_recollection boolean [default: false]
+  id_quality_warehouse_reception uuid
+
   // Firmas y Fechas de Control
   id_quality_reviewer uuid                        // Coordinador de Calidad y Desarrollo
   quality_signature_at timestamp
@@ -1060,6 +1063,7 @@ Table quality_customer_complaints {
     (status, reported_date) [name: 'idx_quality_customer_complaints_status_reported_date']
     (id_client, status) [name: 'idx_quality_customer_complaints_client_status']
     (id_sales_executive, status) [name: 'idx_quality_customer_complaints_sales_status']
+    (status, requires_recollection) [name: 'idx_quality_customer_complaints_status_recollection']
   }
 }
 
@@ -1142,7 +1146,7 @@ Table quality_recollection_authorizations {
   scheduled_date date [not null]              // Fecha programada de recolección
   observations text 
 
-  status boolean [default: false]             // Para saber si ya fue recolectado
+  status varchar [default: 'PROGRAMADO']       // 'PROGRAMADO', 'REPROGRAMADO', 'RECOLECTADO', 'ENTREGADO_ALMACEN'
   created_at timestamp [default: `now()`]
   updated_at timestamp
   id_assigned_by uuid                         //Mando que programa la recolección
@@ -1276,7 +1280,6 @@ Table quality_non_conformities {
   id_daily_inspection uuid                         // Viene de vehicles_daily_inspections (Pre-Carga)
   id_wash_inspection uuid                          // Viene de vehicle_wash_inspections (Post-Lavado)
   id_reception_inspection uuid                     // Viene de vehicle_reception_inspections (Recepción Mercancía)
-  id_warehouse_reception uuid                      // Viene de quality_warehouse_receptions (ALM-FOR-01 Rampa)
   id_customer_complaint uuid                       // Viene de quality_customer_complaints (CAL-FOR-01/02)
   id_glass_plastic_detail uuid                     // Viene de vidrio y plástico quebradizo
 
@@ -1286,14 +1289,13 @@ Table quality_non_conformities {
   updated_at timestamp
   deleted_at timestamp
 
-  // Note: 'ARCO EXCLUSIVO: Solo uno de los campos de origen (id_*_inspection, id_warehouse_reception, id_customer_complaint, id_glass_plastic_detail) puede contener un valor UUID a la vez.'
+  // Note: 'ARCO EXCLUSIVO: Solo uno de los campos de origen (id_*_inspection, id_customer_complaint, id_glass_plastic_detail) puede contener un valor UUID a la vez.'
 
   indexes {
     id_updated_by [name: 'idx_quality_non_conformities_id_updated_by']
     id_daily_inspection [name: 'idx_quality_non_conformities_id_daily_inspection']
     id_wash_inspection [name: 'idx_quality_non_conformities_id_wash_inspection']
     id_reception_inspection [name: 'idx_quality_non_conformities_id_reception_inspection']
-    id_warehouse_reception [name: 'idx_quality_non_conformities_id_warehouse_reception']
     id_customer_complaint [name: 'idx_quality_non_conformities_id_customer_complaint']
     id_glass_plastic_detail [name: 'idx_quality_non_conformities_id_glass_plastic_detail']
     (status, created_at) [name: 'idx_quality_non_conformities_status_created']
@@ -1497,6 +1499,7 @@ Ref: quality_recollection_authorizations.id_complaint - quality_customer_complai
 Ref: quality_recollection_authorizations.id_vehicle > vehicles.id
 Ref: quality_recollection_authorizations.id_assigned_by > users.id
 Ref: quality_recollection_authorizations.id_updated_by > users.id
+Ref: quality_customer_complaints.id_quality_warehouse_reception - quality_warehouse_receptions.id
 
 // Relaciones del Detalle de Autorización de Recolección
 Ref: quality_recollection_authorization_details.id_recollection_authorization > quality_recollection_authorizations.id
@@ -1526,7 +1529,6 @@ Ref: quality_customer_complaints.id_client > clients.id
 Ref: quality_non_conformities.id_daily_inspection > vehicle_daily_inspections.id
 Ref: quality_non_conformities.id_wash_inspection > vehicle_wash_inspections.id
 Ref: quality_non_conformities.id_reception_inspection > vehicle_reception_inspections.id
-Ref: quality_non_conformities.id_warehouse_reception > quality_warehouse_receptions.id
 Ref: quality_non_conformities.id_customer_complaint > quality_customer_complaints.id
 Ref: quality_non_conformities.id_glass_plastic_detail > quality_glass_plastic_details.id
 Ref: quality_non_conformities.id_created_by > users.id
