@@ -189,19 +189,19 @@ graph TD
 #### Referencias:
 
 - Reglas de Negocio (BR):
-  - **[BR-PRD-04]**: Transiciones de Estado y Control de Vencimiento de Tareas.
+  - **[BR-PRD-04]:** Transiciones de Estado y Control de Vencimiento de Tareas.
 - Historias de Usuario (US):
-  - **[US-PRD-03]**: Creación y Auto-asignación de Tareas Personales.
-  - **[US-PRD-04]**: Gestión de Estado y Comentarios de Ejecución.
-  - **[US-PRD-05]**: Rechazo de Tareas Asignadas.
-  - **[US-PRD-06]**: Asignación Directa de Tareas a Subordinados.
-  - **[US-PRD-08]**: Emisión de Tareas Interdepartamentales.
-  - **[US-PRD-09]**: Reclamación o Rechazo de Tareas del Buzón Departamental.
+  - **[US-PRD-03]:** Creación y Auto-asignación de Tareas Personales.
+  - **[US-PRD-04]:** Gestión de Estado y Comentarios de Ejecución.
+  - **[US-PRD-05]:** Rechazo de Tareas Asignadas.
+  - **[US-PRD-06]:** Asignación Directa de Tareas a Subordinados.
+  - **[US-PRD-08]:** Emisión de Tareas Interdepartamentales.
+  - **[US-PRD-09]:** Reclamación o Rechazo de Tareas del Buzón Departamental.
 - Criterios de Aceptación (C.A):
-  - **[C.A. 4.1]**: Transición de estado a EN_PROCESO o COMPLETADA por el ejecutor asignado.
-  - **[C.A. 4.4]**: Transición automática del estado a VENCIDA si transcurre la fecha límite.
-  - **[C.A. 5.1]**: Cambio de estado a RECHAZADA por el ejecutor asignado.
-  - **[C.A. 9.3]**: Cambio de estado a RECHAZADA por roles de mando en el Buzón Departamental.
+  - **[C.A. 4.1]:** Transición de estado a EN_PROCESO o COMPLETADA por el ejecutor asignado.
+  - **[C.A. 4.4]:** Transición automática del estado a VENCIDA si transcurre la fecha límite.
+  - **[C.A. 5.1]:** Cambio de estado a RECHAZADA por el ejecutor asignado.
+  - **[C.A. 9.3]:** Cambio de estado a RECHAZADA por roles de mando en el Buzón Departamental.
 
 ### 2. Diagrama de Flujo Operativo: Asignación Directa vs. Buzón Interdepartamental
 
@@ -245,20 +245,20 @@ flowchart TD
 #### Referencias:
 
 - Reglas de Negocio (BR):
-  - **[BR-PRD-02]**: Restricciones de Delegación por Nivel de Jerarquía.
-  - **[BR-PRD-03]**: Gestión de Tareas Interdepartamentales y Buzón Departamental.
-  - **[BR-PRD-04]**: Transiciones de Estado y Control de Vencimiento de Tareas.
+  - **[BR-PRD-02]:** Restricciones de Delegación por Nivel de Jerarquía.
+  - **[BR-PRD-03]:** Gestión de Tareas Interdepartamentales y Buzón Departamental.
+  - **[BR-PRD-04]:** Transiciones de Estado y Control de Vencimiento de Tareas.
 - Historias de Usuario (US):
-  - **[US-PRD-03]**: Creación y Auto-asignación de Tareas Personales.
-  - **[US-PRD-06]**: Asignación Directa de Tareas a Subordinados.
-  - **[US-PRD-08]**: Emisión de Tareas Interdepartamentales.
-  - **[US-PRD-09]**: Reclamación o Rechazo de Tareas del Buzón Departamental.
+  - **[US-PRD-03]:** Creación y Auto-asignación de Tareas Personales.
+  - **[US-PRD-06]:** Asignación Directa de Tareas a Subordinados.
+  - **[US-PRD-08]:** Emisión de Tareas Interdepartamentales.
+  - **[US-PRD-09]:** Reclamación o Rechazo de Tareas del Buzón Departamental.
 - Criterios de Aceptación (C.A):
-  - **[C.A. 3.2]**: Auto-asignación e inserción de datos por defecto.
-  - **[C.A. 6.2]**: Validación de privilegios de mando (Nivel >= 1) para delegación.
-  - **[C.A. 8.2]**: Creación de tarea en buzón departamental con id_assigned_to NULL.
-  - **[C.A. 9.1]**: Reclamación de tarea del buzón por cualquier colaborador receptor.
-  - **[C.A. 9.3]**: Rechazo de solicitud por un rol de mando del departamento receptor.
+  - **[C.A. 3.2]:** Auto-asignación e inserción de datos por defecto.
+  - **[C.A. 6.2]:** Validación de privilegios de mando (Nivel >= 1) para delegación.
+  - **[C.A. 8.2]:** Creación de tarea en buzón departamental con id_assigned_to NULL.
+  - **[C.A. 9.1]:** Reclamación de tarea del buzón por cualquier colaborador receptor.
+  - **[C.A. 9.3]:** Rechazo de solicitud por un rol de mando del departamento receptor.
 
 ---
 

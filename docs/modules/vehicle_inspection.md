@@ -134,22 +134,22 @@ graph TD
 #### Referencias
 
 - Reglas de Negocio (BR):
-  - **[BR-VHI-01]**: Determinación manual del estatus final (APROBADO, RECHAZADO, APROBADO_CON_NC) por personal de Calidad.
-  - **[BR-VHI-02]**: Inmutabilidad de rechazos y re-inspección mediante captura de un nuevo formato con folio independiente.
-  - **[BR-VHI-03]**: Bloqueo operativo de salida en caseta y asignación de rutas (el vehículo pasa a estatus RETENIDO).
-  - **[BR-VHI-04]**: Prerrequisito de inspección post-lavado semanal (VLV) aprobada para generar IVI.
-  - **[BR-VHI-05]**: Validación de vigencia de fumigación (15 días) y generación de no conformidad.
-  - **[BR-VHI-06]**: Estructura estándar de folios autogenerados de 5 dígitos (IVI-YY-#####, VLV-YY-#####).
-  - **[BR-VHI-07]**: Restricción de estados lógicos soportados (APROBADO, RECHAZADO, APROBADO_CON_NC).
+  - **[BR-VHI-01]:** Determinación manual del estatus final (APROBADO, RECHAZADO, APROBADO_CON_NC) por personal de Calidad.
+  - **[BR-VHI-02]:** Inmutabilidad de rechazos y re-inspección mediante captura de un nuevo formato con folio independiente.
+  - **[BR-VHI-03]:** Bloqueo operativo de salida en caseta y asignación de rutas (el vehículo pasa a estatus RETENIDO).
+  - **[BR-VHI-04]:** Prerrequisito de inspección post-lavado semanal (VLV) aprobada para generar IVI.
+  - **[BR-VHI-05]:** Validación de vigencia de fumigación (15 días) y generación de no conformidad.
+  - **[BR-VHI-06]:** Estructura estándar de folios autogenerados de 5 dígitos (IVI-YY-#####, VLV-YY-#####).
+  - **[BR-VHI-07]:** Restricción de estados lógicos soportados (APROBADO, RECHAZADO, APROBADO_CON_NC).
 - Historias de Usuario (US):
-  - **[US-VHI-01]**: Captura de Inspección Diaria Pre-Carga (IVI).
-  - **[US-VHI-02]**: Captura de Inspección Post-Lavado Semanal (VLV).
+  - **[US-VHI-01]:** Captura de Inspección Diaria Pre-Carga (IVI).
+  - **[US-VHI-02]:** Captura de Inspección Post-Lavado Semanal (VLV).
 - Criterios de Aceptación (C.A):
-  - **[C.A. 1.1]**: Validación de prerrequisito de VLV semanal.
-  - **[C.A. 1.3]**: Alerta visual y registro de vigencia de fumigación.
-  - **[C.A. 1.4]**: Selección manual del estado final (APROBADO, RECHAZADO, APROBADO_CON_NC).
-  - **[C.A. 1.5]**: Bloqueo en caseta y asignación de rutas ante estatus rechazado.
-  - **[C.A. 2.3]**: Habilitación de unidad tras VLV aprobado o aprobado con NC.
+  - **[C.A. 1.1]:** Validación de prerrequisito de VLV semanal.
+  - **[C.A. 1.3]:** Alerta visual y registro de vigencia de fumigación.
+  - **[C.A. 1.4]:** Selección manual del estado final (APROBADO, RECHAZADO, APROBADO_CON_NC).
+  - **[C.A. 1.5]:** Bloqueo en caseta y asignación de rutas ante estatus rechazado.
+  - **[C.A. 2.3]:** Habilitación de unidad tras VLV aprobado o aprobado con NC.
 
 ### 2. Flujo Operativo de Recepción de Mercancía (IVE)
 
@@ -181,18 +181,18 @@ graph TD
 #### Referencias
 
 - Reglas de Negocio (BR):
-  - **[BR-VHI-01]**: Determinación manual del estatus final (APROBADO, RECHAZADO, APROBADO_CON_NC) por personal de Calidad.
-  - **[BR-VHI-02]**: Inmutabilidad de registros y generación de nuevo folio para re-evaluaciones.
-  - **[BR-VHI-05]**: Validación de vigencia de fumigación, alerta visual y detonación de no conformidad.
-  - **[BR-VHI-06]**: Estructura estándar de folios autogenerados de 5 dígitos (IVE-YY-#####).
-  - **[BR-VHI-07]**: Restricción de estados lógicos soportados (APROBADO, RECHAZADO, APROBADO_CON_NC).
+  - **[BR-VHI-01]:** Determinación manual del estatus final (APROBADO, RECHAZADO, APROBADO_CON_NC) por personal de Calidad.
+  - **[BR-VHI-02]:** Inmutabilidad de registros y generación de nuevo folio para re-evaluaciones.
+  - **[BR-VHI-05]:** Validación de vigencia de fumigación, alerta visual y detonación de no conformidad.
+  - **[BR-VHI-06]:** Estructura estándar de folios autogenerados de 5 dígitos (IVE-YY-#####).
+  - **[BR-VHI-07]:** Restricción de estados lógicos soportados (APROBADO, RECHAZADO, APROBADO_CON_NC).
 - Historias de Usuario (US):
-  - **[US-VHI-03]**: Captura de Inspección de Recepción de Mercancía (IVE).
+  - **[US-VHI-03]:** Captura de Inspección de Recepción de Mercancía (IVE).
 - Criterios de Aceptación (C.A):
-  - **[C.A. 3.1]**: Diferenciación entre transporte interno y externo.
-  - **[C.A. 3.2]**: Captura de facturas invoices_included en JSONB y verificación de sellos.
-  - **[C.A. 3.3]**: Registro informativo de alérgenos y logística compartida sin bloqueo de formulario.
-  - **[C.A. 3.4]**: Generación de folio IVE de 5 dígitos y restricción a estados válidos.
+  - **[C.A. 3.1]:** Diferenciación entre transporte interno y externo.
+  - **[C.A. 3.2]:** Captura de facturas invoices_included en JSONB y verificación de sellos.
+  - **[C.A. 3.3]:** Registro informativo de alérgenos y logística compartida sin bloqueo de formulario.
+  - **[C.A. 3.4]:** Generación de folio IVE de 5 dígitos y restricción a estados válidos.
 
 ---
 

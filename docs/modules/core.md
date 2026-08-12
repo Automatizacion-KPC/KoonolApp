@@ -148,15 +148,15 @@ graph TD
 #### Referencias:
 
 - Reglas de Negocio (BR):
-  - **[BR-USR-04]**: Inactivación Lógica y Control de Estado (Soft Delete)
-  - **[BR-USR-05]**: Políticas de Contraseñas y Autenticación Segura
+  - **[BR-USR-04]:** Inactivación Lógica y Control de Estado (Soft Delete)
+  - **[BR-USR-05]:** Políticas de Contraseñas y Autenticación Segura
 - Historias de Usuario (US):
-  - **[US-USR-02]**: Restablecimiento de Contraseña por Autoservicio
-  - **[US-USR-03]**: Visualización de Estado de Sesión e Información Personal
+  - **[US-USR-02]:** Restablecimiento de Contraseña por Autoservicio
+  - **[US-USR-03]:** Visualización de Estado de Sesión e Información Personal
 - Criterios de Aceptación (C.A):
-  - **[C.A-2.2]**: Redirección obligatoria a la vista de cambio de contraseña al ingresar con clave temporal
-  - **[C.A-2.3]**: Requisitos de complejidad de la nueva contraseña y actualización del campo updated_at
-  - **[C.A-3.2]**: Actualización exclusiva del campo last_connection tras una autenticación exitosa
+  - **[C.A-2.2]:** Redirección obligatoria a la vista de cambio de contraseña al ingresar con clave temporal
+  - **[C.A-2.3]:** Requisitos de complejidad de la nueva contraseña y actualización del campo updated_at
+  - **[C.A-3.2]:** Actualización exclusiva del campo last_connection tras una autenticación exitosa
 
 ### 2. Flujo Operativo: Administración de Usuarios y Soft Delete
 
@@ -181,23 +181,23 @@ graph TD
 #### Referencias:
 
 - Reglas de Negocio (BR):
-  - **[BR-USR-01]**: Unicidad y Restricción de Vinculación Empleado-Usuario
-  - **[BR-USR-02]**: Creación Automática por Eventos de Recursos Humanos
-  - **[BR-USR-03]**: Restricción de Control de Acceso y Gestión de Usuarios
-  - **[BR-USR-04]**: Inactivación Lógica y Control de Estado (Soft Delete)
-  - **[BR-USR-05]**: Políticas de Contraseñas y Autenticación Segura
+  - **[BR-USR-01]:** Unicidad y Restricción de Vinculación Empleado-Usuario
+  - **[BR-USR-02]:** Creación Automática por Eventos de Recursos Humanos
+  - **[BR-USR-03]:** Restricción de Control de Acceso y Gestión de Usuarios
+  - **[BR-USR-04]:** Inactivación Lógica y Control de Estado (Soft Delete)
+  - **[BR-USR-05]:** Políticas de Contraseñas y Autenticación Segura
 - Historias de Usuario (US):
-  - **[US-USR-04]**: Alta Manual de Usuarios
-  - **[US-USR-05]**: Modificación de Rol y Departamento
-  - **[US-USR-06]**: Inactivación y Blanqueo Manual de Cuenta (Soft Delete)
+  - **[US-USR-04]:** Alta Manual de Usuarios
+  - **[US-USR-05]:** Modificación de Rol y Departamento
+  - **[US-USR-06]:** Inactivación y Blanqueo Manual de Cuenta (Soft Delete)
 - Criterios de Aceptación (C.A):
-  - **[C.A-4.1]**: Requerimiento de campos obligatorios y opcionalidad de id_employee en el alta
-  - **[C.A-4.2]**: Validación de unicidad para username y email antes de registrar
-  - **[C.A-4.3]**: Generación automática de id (UUID v4), status = true, created_at e id_created_by
-  - **[C.A-4.4]**: Emisión y envío de clave temporal aleatoria al email registrado
-  - **[C.A-5.1]**: Permitir reasignación de rol y departamento por parte de administradores
-  - **[C.A-5.2]**: Asentamiento de auditoría en updated_at e id_updated_by tras actualización
-  - **[C.A-6.1]**: Borrado lógico actualizando status = false, deleted_at e id_updated_by
+  - **[C.A-4.1]:** Requerimiento de campos obligatorios y opcionalidad de id_employee en el alta
+  - **[C.A-4.2]:** Validación de unicidad para username y email antes de registrar
+  - **[C.A-4.3]:** Generación automática de id (UUID v4), status = true, created_at e id_created_by
+  - **[C.A-4.4]:** Emisión y envío de clave temporal aleatoria al email registrado
+  - **[C.A-5.1]:** Permitir reasignación de rol y departamento por parte de administradores
+  - **[C.A-5.2]:** Asentamiento de auditoría en updated_at e id_updated_by tras actualización
+  - **[C.A-6.1]:** Borrado lógico actualizando status = false, deleted_at e id_updated_by
 
 ### 3. Diagrama de Transición de Estados de la Cuenta de Usuario
 
@@ -221,18 +221,18 @@ graph TD
 #### Referencias:
 
 - Reglas de Negocio (BR):
-  - **[BR-USR-02]**: Creación Automática por Eventos de Recursos Humanos
-  - **[BR-USR-04]**: Inactivación Lógica y Control de Estado (Soft Delete)
-  - **[BR-USR-05]**: Políticas de Contraseñas y Autenticación Segura
+  - **[BR-USR-02]:** Creación Automática por Eventos de Recursos Humanos
+  - **[BR-USR-04]:** Inactivación Lógica y Control de Estado (Soft Delete)
+  - **[BR-USR-05]:** Políticas de Contraseñas y Autenticación Segura
 - Historias de Usuario (US):
-  - **[US-USR-02]**: Restablecimiento de Contraseña por Autoservicio
-  - **[US-USR-04]**: Alta Manual de Usuarios
-  - **[US-USR-06]**: Inactivación y Blanqueo Manual de Cuenta (Soft Delete)
+  - **[US-USR-02]:** Restablecimiento de Contraseña por Autoservicio
+  - **[US-USR-04]:** Alta Manual de Usuarios
+  - **[US-USR-06]:** Inactivación y Blanqueo Manual de Cuenta (Soft Delete)
 - Criterios de Aceptación (C.A):
-  - **[C.A-2.2]**: Flujo de primera vez con redirección obligatoria a cambio de contraseña
-  - **[C.A-6.1]**: Transición a estado inactivo mediante borrado lógico (status = false, deleted_at)
-  - **[C.A-6.2]**: Blanqueo/reseteo manual de contraseña para desbloqueo
-  - **[C.A-6.3]**: Mantenimiento de cuentas inactivas con posibilidad de reactivación manual (status = true, deleted_at = NULL)
+  - **[C.A-2.2]:** Flujo de primera vez con redirección obligatoria a cambio de contraseña
+  - **[C.A-6.1]:** Transición a estado inactivo mediante borrado lógico (status = false, deleted_at)
+  - **[C.A-6.2]:** Blanqueo/reseteo manual de contraseña para desbloqueo
+  - **[C.A-6.3]:** Mantenimiento de cuentas inactivas con posibilidad de reactivación manual (status = true, deleted_at = NULL)
 
 ---
 

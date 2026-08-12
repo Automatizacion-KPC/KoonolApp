@@ -163,17 +163,17 @@ graph TD
 #### Referencias
 
 - Reglas de Negocio (BR):
-  - **[BR-HRM-03]**: Asignación Manual de Bolsa Anual y Cálculo Automático de Vacaciones.
-  - **[BR-HRM-04]**: Flujo de Aprobación Bietápico para Vacaciones y Permisos.
+  - **[BR-HRM-03]:** Asignación Manual de Bolsa Anual y Cálculo Automático de Vacaciones.
+  - **[BR-HRM-04]:** Flujo de Aprobación Bietápico para Vacaciones y Permisos.
 - Historias de Usuario (US):
-  - **[US-HRM-04]**: Solicitud de Vacaciones (Autoservicio Colaborador).
-  - **[US-HRM-05]**: Solicitud de Permiso de Asistencia e Incidencias.
-  - **[US-HRM-06]**: Aprobación / Rechazo por Mando Directo.
-  - **[US-HRM-07]**: Dictamen Final e Impacto por Recursos Humanos.
+  - **[US-HRM-04]:** Solicitud de Vacaciones (Autoservicio Colaborador).
+  - **[US-HRM-05]:** Solicitud de Permiso de Asistencia e Incidencias.
+  - **[US-HRM-06]:** Aprobación / Rechazo por Mando Directo.
+  - **[US-HRM-07]:** Dictamen Final e Impacto por Recursos Humanos.
 - Criterios de Aceptación (C.A):
-  - **[C.A. 4.3, 5.3]**: Creación de registros en estado inicial PENDIENTE_JEFE.
-  - **[C.A. 6.2, 6.3]**: Transiciones de la primera fase a APROBADO_JEFE o RECHAZADO_JEFE.
-  - **[C.A. 7.2, 7.3]**: Dictamen final de RH (APROBADO_RH / RECHAZADO_RH) y descuento automático de días.
+  - **[C.A. 4.3, 5.3]:** Creación de registros en estado inicial PENDIENTE_JEFE.
+  - **[C.A. 6.2, 6.3]:** Transiciones de la primera fase a APROBADO_JEFE o RECHAZADO_JEFE.
+  - **[C.A. 7.2, 7.3]:** Dictamen final de RH (APROBADO_RH / RECHAZADO_RH) y descuento automático de días.
 
 ### 2. Diagrama de Flujo Operativo: Ciclo de Solicitud y Aprobación Bietápica de Vacaciones
 
@@ -211,17 +211,17 @@ graph TD
 #### Referencias
 
 - Reglas de Negocio (BR):
-  - **[BR-HRM-03]**: Asignación Manual de Bolsa Anual y Cálculo Automático de Vacaciones.
-  - **[BR-HRM-04]**: Flujo de Aprobación Bietápico para Vacaciones y Permisos.
+  - **[BR-HRM-03]:** Asignación Manual de Bolsa Anual y Cálculo Automático de Vacaciones.
+  - **[BR-HRM-04]:** Flujo de Aprobación Bietápico para Vacaciones y Permisos.
 - Historias de Usuario (US):
-  - **[US-HRM-03]**: Carga de Bolsa Anual de Vacaciones.
-  - **[US-HRM-04]**: Solicitud de Vacaciones (Autoservicio Colaborador).
-  - **[US-HRM-06]**: Aprobación / Rechazo por Mando Directo.
-  - **[US-HRM-07]**: Dictamen Final e Impacto por Recursos Humanos.
+  - **[US-HRM-03]:** Carga de Bolsa Anual de Vacaciones.
+  - **[US-HRM-04]:** Solicitud de Vacaciones (Autoservicio Colaborador).
+  - **[US-HRM-06]:** Aprobación / Rechazo por Mando Directo.
+  - **[US-HRM-07]:** Dictamen Final e Impacto por Recursos Humanos.
 - Criterios de Aceptación (C.A):
-  - **[C.A. 4.1, 4.2]**: Validación de saldo disponible e ingreso de fechas.
-  - **[C.A. 6.1, 6.2]**: Evaluación y firmas del jefe inmediato.
-  - **[C.A. 7.2]**: Cierre de aprobación por RH y recálculo atómico de saldos en base de datos.
+  - **[C.A. 4.1, 4.2]:** Validación de saldo disponible e ingreso de fechas.
+  - **[C.A. 6.1, 6.2]:** Evaluación y firmas del jefe inmediato.
+  - **[C.A. 7.2]:** Cierre de aprobación por RH y recálculo atómico de saldos en base de datos.
 
 ### 3. Diagrama de Flujo Operativo: Tramitación de Préstamos Económicos
 
@@ -249,12 +249,12 @@ graph TD
 #### Referencias
 
 - Reglas de Negocio (BR):
-  - **[BR-HRM-06]**: Gestión y Ciclo Financiero de Préstamos Económicos.
+  - **[BR-HRM-06]:** Gestión y Ciclo Financiero de Préstamos Económicos.
 - Historias de Usuario (US):
-  - **[US-HRM-08]**: Tramitación de Préstamos Económicos.
+  - **[US-HRM-08]:** Tramitación de Préstamos Económicos.
 - Criterios de Aceptación (C.A):
-  - **[C.A. 8.1, 8.2]**: Captura inicial de monto y motivo en estado PENDIENTE.
-  - **[C.A. 8.3]**: Definición del plazo installments_terms, firmas de aprobación y cambio manual a LIQUIDADO.
+  - **[C.A. 8.1, 8.2]:** Captura inicial de monto y motivo en estado PENDIENTE.
+  - **[C.A. 8.3]:** Definición del plazo installments_terms, firmas de aprobación y cambio manual a LIQUIDADO.
 
 ---
 

@@ -2,9 +2,7 @@
 
 El módulo de **Recepción de Muestras de Proveedores** digitaliza y controla el flujo operativo, la cadena de custodia y la evaluación técnica de las muestras enviadas por proveedores externos. Facilita la trazabilidad entre el departamento de Compras (responsable del registro inicial y enlace comercial) y el departamento de I+D (responsable de la custodia física, pruebas de laboratorio y retroalimentación técnica).
 
----
-
----
+## -:--
 
 ## 💼 Reglas de Negocio (Business Rules)
 
@@ -127,17 +125,17 @@ graph TD
 #### Referencias:
 
 - Reglas de Negocio (BR):
-  - **[BR-SRM-02]**: Recepción Irrestricta en Compras y Campos Obligatorios.
-  - **[BR-SRM-03]**: Cadena de Custodia y Confirmación de Recepción por I+D.
-  - **[BR-SRM-05]**: Compromiso y Registro de Retroalimentación Técnica (rd_feedback).
+  - **[BR-SRM-02]:** Recepción Irrestricta en Compras y Campos Obligatorios.
+  - **[BR-SRM-03]:** Cadena de Custodia y Confirmación de Recepción por I+D.
+  - **[BR-SRM-05]:** Compromiso y Registro de Retroalimentación Técnica (rd_feedback).
 - Historias de Usuario (US):
-  - **[US-SRM-01]**: Registro de Recepción de Muestras de Proveedores.
-  - **[US-SRM-03]**: Confirmación de Recepción y Custodia de Muestra.
-  - **[US-SRM-04]**: Emisión de Retroalimentación Técnica (rd_feedback).
+  - **[US-SRM-01]:** Registro de Recepción de Muestras de Proveedores.
+  - **[US-SRM-03]:** Confirmación de Recepción y Custodia de Muestra.
+  - **[US-SRM-04]:** Emisión de Retroalimentación Técnica (rd_feedback).
 - Criterios de Aceptación (C.A):
-  - **[C.A. 1.4]**: Asignación de estado inicial RECIBIDO_COMPRAS y sellado de tiempo.
-  - **[C.A. 3.2]**: Cambio de estado a ENTREGADO_A_ID al aceptar la custodia física.
-  - **[C.A. 4.2]**: Asentamiento de fecha de retroalimentación rd_feedback_date y autoría.
+  - **[C.A. 1.4]:** Asignación de estado inicial RECIBIDO_COMPRAS y sellado de tiempo.
+  - **[C.A. 3.2]:** Cambio de estado a ENTREGADO_A_ID al aceptar la custodia física.
+  - **[C.A. 4.2]:** Asentamiento de fecha de retroalimentación rd_feedback_date y autoría.
 
 ### 2. Diagrama de Flujo Operativo: Ciclo de Recepción, Custodia y Retroalimentación
 
@@ -166,20 +164,20 @@ graph TD
 #### Referencias:
 
 - Reglas de Negocio (BR):
-  - **[BR-SRM-01]**: Generación Autónoma y Estructura de Folio Único.
-  - **[BR-SRM-03]**: Cadena de Custodia y Confirmación de Recepción por I+D.
-  - **[BR-SRM-04]**: Encapsulamiento y Mapeo de Facultades por Departamento.
-  - **[BR-SRM-05]**: Compromiso y Registro de Retroalimentación Técnica (rd_feedback).
+  - **[BR-SRM-01]:** Generación Autónoma y Estructura de Folio Único.
+  - **[BR-SRM-03]:** Cadena de Custodia y Confirmación de Recepción por I+D.
+  - **[BR-SRM-04]:** Encapsulamiento y Mapeo de Facultades por Departamento.
+  - **[BR-SRM-05]:** Compromiso y Registro de Retroalimentación Técnica (rd_feedback).
 - Historias de Usuario (US):
-  - **[US-SRM-01]**: Registro de Recepción de Muestras de Proveedores.
-  - **[US-SRM-03]**: Confirmación de Recepción y Custodia de Muestra.
-  - **[US-SRM-04]**: Emisión de Retroalimentación Técnica (rd_feedback).
-  - **[US-SRM-05]**: Consulta de Histórico de Muestras y Dictámenes.
+  - **[US-SRM-01]:** Registro de Recepción de Muestras de Proveedores.
+  - **[US-SRM-03]:** Confirmación de Recepción y Custodia de Muestra.
+  - **[US-SRM-04]:** Emisión de Retroalimentación Técnica (rd_feedback).
+  - **[US-SRM-05]:** Consulta de Histórico de Muestras y Dictámenes.
 - Criterios de Aceptación (C.A):
-  - **[C.A. 1.1, 1.4]**: Captura de datos requeridos y asignación de folio único.
-  - **[C.A. 3.2]**: Registro explícito de custodia (id_accepted_by_rd, accepted_at_rd).
-  - **[C.A. 4.1, 4.3]**: Registro del dictamen técnico y envío de notificación a Compras.-
-  - **[C.A. 5.3]**: Transmisión de la retroalimentación técnica al proveedor.
+  - **[C.A. 1.1, 1.4]:** Captura de datos requeridos y asignación de folio único.
+  - **[C.A. 3.2]:** Registro explícito de custodia (id_accepted_by_rd, accepted_at_rd).
+  - **[C.A. 4.1, 4.3]:** Registro del dictamen técnico y envío de notificación a Compras.-
+  - **[C.A. 5.3]:** Transmisión de la retroalimentación técnica al proveedor.
 
 ---
 

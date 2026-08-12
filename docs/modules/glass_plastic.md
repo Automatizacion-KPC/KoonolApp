@@ -115,14 +115,14 @@ graph TD
 #### Referencias
 
 - Reglas de Negocio (BR):
-  - **[BR-GBP-05]**: Control restringido del catálogo a roles MANAGER, ADMIN y GOD.
-  - **[BR-GBP-07]**: Inmutabilidad histórica y preservación mediante baja lógica (is_active = false).
+  - **[BR-GBP-05]:** Control restringido del catálogo a roles MANAGER, ADMIN y GOD.
+  - **[BR-GBP-07]:** Inmutabilidad histórica y preservación mediante baja lógica (is_active = false).
 - Historias de Usuario (US):
-  - **[US-GBP-01]**: Gestión del Catálogo Maestro de Vidrio y Plástico Quebradizo.
+  - **[US-GBP-01]:** Gestión del Catálogo Maestro de Vidrio y Plástico Quebradizo.
 - Criterios de Aceptación (C.A):
-  - **[C.A. 1.1]**: Validación de roles autorizados para modificación.
-  - **[C.A. 1.2]**: Validaciones de unicidad y campos requeridos.
-  - **[C.A. 1.3]**: Desactivación lógica preservando historial.
+  - **[C.A. 1.1]:** Validación de roles autorizados para modificación.
+  - **[C.A. 1.2]:** Validaciones de unicidad y campos requeridos.
+  - **[C.A. 1.3]:** Desactivación lógica preservando historial.
 
 ### 2. Flujo Operativo de la Verificación Mensual
 
@@ -155,20 +155,20 @@ graph TD
 #### Referencias
 
 - Reglas de Negocio (BR):
-  - **[BR-GBP-01]**: Scope operativo y carga masiva obligatoria de elementos activos.
-  - **[BR-GBP-02]**: Determinación manual del estatus final por el inspector.
-  - **[BR-GBP-03]**: Obligatoriedad de observaciones y acciones correctivas ante No Conformidades.
-  - **[BR-GBP-04]**: Detonación automática de registros en quality_non_conformities.
-  - **[BR-GBP-06]**: Estructura estándar de folios autogenerados (GBP-YY-#####).
+  - **[BR-GBP-01]:** Scope operativo y carga masiva obligatoria de elementos activos.
+  - **[BR-GBP-02]:** Determinación manual del estatus final por el inspector.
+  - **[BR-GBP-03]:** Obligatoriedad de observaciones y acciones correctivas ante No Conformidades.
+  - **[BR-GBP-04]:** Detonación automática de registros en quality_non_conformities.
+  - **[BR-GBP-06]:** Estructura estándar de folios autogenerados (GBP-YY-#####).
 - Historias de Usuario (US):
-  - **[US-GBP-02]**: Ejecución y Registro de la Verificación Mensual.
-  - **[US-GBP-03]**: Generación de No Conformidades por Elementos Defectuosos.
+  - **[US-GBP-02]:** Ejecución y Registro de la Verificación Mensual.
+  - **[US-GBP-03]:** Generación de No Conformidades por Elementos Defectuosos.
 - Criterios de Aceptación (C.A):
-  - **[C.A. 2.1]**: Selección de alcance y carga masiva de plantilla.
-  - **[C.A. 2.2]**: Autogeneración de folio de inspección.
-  - **[C.A. 2.4]**: Validaciones condicionales para campos de observaciones y acciones correctivas.
-  - **[C.A. 2.5]**: Asignación manual del dictamen del encabezado.
-  - **[C.A. 3.1]**: Creación automática de no conformidades para partidas con 'NC'.
+  - **[C.A. 2.1]:** Selección de alcance y carga masiva de plantilla.
+  - **[C.A. 2.2]:** Autogeneración de folio de inspección.
+  - **[C.A. 2.4]:** Validaciones condicionales para campos de observaciones y acciones correctivas.
+  - **[C.A. 2.5]:** Asignación manual del dictamen del encabezado.
+  - **[C.A. 3.1]:** Creación automática de no conformidades para partidas con 'NC'.
 
 ---
 

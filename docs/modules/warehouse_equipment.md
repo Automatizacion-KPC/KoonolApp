@@ -155,25 +155,25 @@ flowchart TD
 #### Referencias
 
 - Reglas de Negocio (BR):
-  - **[BR-WEM-01]**: Monotonicidad y Registro Diario de Horómetro (REVISION_DIARIA)
-  - **[BR-WEM-02]**: Generación Automatizada de Alertas y Notificaciones de Servicio
-  - **[BR-WEM-03]**: Exclusividad en la Transición a EN_TALLER o INACTIVO
-  - **[BR-WEM-04]**: Bloqueo Operativo por Estatus No Disponible
-  - **[BR-WEM-05]**: Exclusividad de Reincorporación Operativa (LEADER o Superior)
-  - **[BR-WEM-06]**: Facultades de Administración del Catálogo de Equipos
-  - **[BR-WEM-07]**: Flexibilidad en el Registro de Mantenimientos e Insumos
+  - **[BR-WEM-01]:** Monotonicidad y Registro Diario de Horómetro (REVISION_DIARIA)
+  - **[BR-WEM-02]:** Generación Automatizada de Alertas y Notificaciones de Servicio
+  - **[BR-WEM-03]:** Exclusividad en la Transición a EN_TALLER o INACTIVO
+  - **[BR-WEM-04]:** Bloqueo Operativo por Estatus No Disponible
+  - **[BR-WEM-05]:** Exclusividad de Reincorporación Operativa (LEADER o Superior)
+  - **[BR-WEM-06]:** Facultades de Administración del Catálogo de Equipos
+  - **[BR-WEM-07]:** Flexibilidad en el Registro de Mantenimientos e Insumos
 - Historias de Usuario (US):
-  - **[US-WEM-01]**: Captura Diaria de Horómetro y Revisión de Unidad
-  - **[US-WEM-02]**: Ingrese de Equipo a Taller y Programación de Servicio
-  - **[US-WEM-03]**: Cierre Técnico y Liberación de Equipo
-  - **[US-WEM-04]**: Gestión de Catálogo de Equipos y Maquinaria
-  - **[US-WEM-05]**: Monitoreo de Alertas Preventivas de Maquinaria
+  - **[US-WEM-01]:** Captura Diaria de Horómetro y Revisión de Unidad
+  - **[US-WEM-02]:** Ingrese de Equipo a Taller y Programación de Servicio
+  - **[US-WEM-03]:** Cierre Técnico y Liberación de Equipo
+  - **[US-WEM-04]:** Gestión de Catálogo de Equipos y Maquinaria
+  - **[US-WEM-05]:** Monitoreo de Alertas Preventivas de Maquinaria
 - Criterios de Aceptación (C.A):
-  - **[C.A. 1.1 - 1.4]**: Proceso de validación e inserción de revisión diaria de horómetro
-  - **[C.A. 2.1 - 2.2]**: Control de acceso para cambio de estatus y bloqueo de asignación
-  - **[C.A. 3.1 - 3.4]**: Registro de intervenciones, costeo, verificación de nivel Leader+ y reincorporación
-  - **[C.A. 4.1 - 4.3]**: Permisos para altas, cambios y baja lógica del inventario de maquinaria
-  - **[C.A. 5.1 - 5.2]**: Despliegue de insignias de alerta y distribución de notificaciones a las 4 áreas
+  - **[C.A. 1.1 - 1.4]:** Proceso de validación e inserción de revisión diaria de horómetro
+  - **[C.A. 2.1 - 2.2]:** Control de acceso para cambio de estatus y bloqueo de asignación
+  - **[C.A. 3.1 - 3.4]:** Registro de intervenciones, costeo, verificación de nivel Leader+ y reincorporación
+  - **[C.A. 4.1 - 4.3]:** Permisos para altas, cambios y baja lógica del inventario de maquinaria
+  - **[C.A. 5.1 - 5.2]:** Despliegue de insignias de alerta y distribución de notificaciones a las 4 áreas
 
 ---
 

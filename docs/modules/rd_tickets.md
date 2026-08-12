@@ -2,9 +2,7 @@
 
 El módulo de **Solicitud de Muestras y Desarrollos a I+D** gestiona la relación operativa e interdepartamental entre el equipo de Ventas y el laboratorio de I+D (Investigación y Desarrollo). Permite canalizar requerimientos técnicos del mercado (solicitudes de muestras, desarrollos desde cero o visitas técnicas), controlar la preparación y asignación de prototipos en el laboratorio, formalizar la entrega física al cliente mediante acuses de recibo y registrar la retroalimentación técnica/comercial posterior para el cierre del ciclo de innovación.
 
----
-
----
+## -:--
 
 ## 💼 Reglas de Negocio (Business Rules)
 
@@ -162,21 +160,21 @@ graph TD
 #### Referencias
 
 - Reglas de Negocio (BR):
-  - **[BR-RDR-02]**: Definición de Cliente (Prospecto Lead vs. Cliente SAP).
-  - **[BR-RDR-04]**: Transiciones de Estado y Asignación de Responsables en I+D.
-  - **[BR-RDR-06]**: Vínculo de Retroalimentación y Cierre de Dictamen Comercial.
+  - **[BR-RDR-02]:** Definición de Cliente (Prospecto Lead vs. Cliente SAP).
+  - **[BR-RDR-04]:** Transiciones de Estado y Asignación de Responsables en I+D.
+  - **[BR-RDR-06]:** Vínculo de Retroalimentación y Cierre de Dictamen Comercial.
 - Historias de Usuario (US):
-  - **[US-RDR-01]**: Registro de Solicitud de Muestra, Desarrollo o Visita Técnica.
-  - **[US-RDR-02]**: Seguimiento y Cancelación de Solicitudes por Ventas.
-  - **[US-RDR-03]**: Asignación y Gestión de Solicitudes en Laboratorio.
-  - **[US-RDR-04]**: Finalización de Preparación de Muestra en I+D.
-  - **[US-RDR-05]**: Emisión de Acuse de Entrega de Muestras al Cliente por I+D.
-  - **[US-RDR-06]**: Registro de Retroalimentación del Cliente y Cierre de Proyecto.
+  - **[US-RDR-01]:** Registro de Solicitud de Muestra, Desarrollo o Visita Técnica.
+  - **[US-RDR-02]:** Seguimiento y Cancelación de Solicitudes por Ventas.
+  - **[US-RDR-03]:** Asignación y Gestión de Solicitudes en Laboratorio.
+  - **[US-RDR-04]:** Finalización de Preparación de Muestra en I+D.
+  - **[US-RDR-05]:** Emisión de Acuse de Entrega de Muestras al Cliente por I+D.
+  - **[US-RDR-06]:** Registro de Retroalimentación del Cliente y Cierre de Proyecto.
 - Criterios de Aceptación (C.A):
-  - **[C.A. 1.4]**: Estado inicial PENDIENTE y asignación de folio.
-  - **[C.A. 3.1, 3.2]**: Lectura por I+D y actualización manual a EN_PROCESO por el ejecutor asignado.
-  - **[C.A. 4.1, 5.1]**: Transición a COMPLETADO tras la preparación y emisión del acuse por I+D.
-  - **[C.A. 6.3]**: Cierre automático a ACEPTADO_CLIENTE o RECHAZADO_CLIENTE según la evaluación registrada por Ventas.
+  - **[C.A. 1.4]:** Estado inicial PENDIENTE y asignación de folio.
+  - **[C.A. 3.1, 3.2]:** Lectura por I+D y actualización manual a EN_PROCESO por el ejecutor asignado.
+  - **[C.A. 4.1, 5.1]:** Transición a COMPLETADO tras la preparación y emisión del acuse por I+D.
+  - **[C.A. 6.3]:** Cierre automático a ACEPTADO_CLIENTE o RECHAZADO_CLIENTE según la evaluación registrada por Ventas.
 
 ### 2. Diagrama de Flujo Operativo: Ciclo de Solicitud, Formulación, Acuse I+D y Feedback Comercial
 
@@ -217,23 +215,23 @@ graph TD
 #### Referencias
 
 - Reglas de Negocio (BR):
-  - **[BR-RDR-01]**: Generación Autónoma y Estructura de Folios Únicos.
-  - **[BR-RDR-02]**: Definición de Cliente (Prospecto Lead vs. Cliente SAP).
-  - **[BR-RDR-03]**: Contenedor Dinámico de Especificaciones Técnicas (technical_specifications).
-  - **[BR-RDR-04]**: Transiciones de Estado y Asignación de Responsables en I+D.
-  - **[BR-RDR-05]**: Exención de Auditoría en Tablas de Detalle (3NF) y Registro de Acuse.
-  - **[BR-RDR-06]**: Vínculo de Retroalimentación y Cierre de Dictamen Comercial.
+  - **[BR-RDR-01]:** Generación Autónoma y Estructura de Folios Únicos.
+  - **[BR-RDR-02]:** Definición de Cliente (Prospecto Lead vs. Cliente SAP).
+  - **[BR-RDR-03]:** Contenedor Dinámico de Especificaciones Técnicas (technical_specifications).
+  - **[BR-RDR-04]:** Transiciones de Estado y Asignación de Responsables en I+D.
+  - **[BR-RDR-05]:** Exención de Auditoría en Tablas de Detalle (3NF) y Registro de Acuse.
+  - **[BR-RDR-06]:** Vínculo de Retroalimentación y Cierre de Dictamen Comercial.
 - Historias de Usuario (US):
-  - **[US-RDR-01]**: Registro de Solicitud de Muestra, Desarrollo o Visita Técnica.
-  - **[US-RDR-03]**: Asignación y Gestión de Solicitudes en Laboratorio.
-  - **[US-RDR-04]**: Finalización de Preparación de Muestra en I+D.
-  - **[US-RDR-05]**: Emisión de Acuse de Entrega de Muestras al Cliente por I+D.
-  - **[US-RDR-06]**: Registro de Retroalimentación del Cliente y Cierre de Proyecto.
+  - **[US-RDR-01]:** Registro de Solicitud de Muestra, Desarrollo o Visita Técnica.
+  - **[US-RDR-03]:** Asignación y Gestión de Solicitudes en Laboratorio.
+  - **[US-RDR-04]:** Finalización de Preparación de Muestra en I+D.
+  - **[US-RDR-05]:** Emisión de Acuse de Entrega de Muestras al Cliente por I+D.
+  - **[US-RDR-06]:** Registro de Retroalimentación del Cliente y Cierre de Proyecto.
 - Criterios de Aceptación (C.A):
-  - **[C.A. 1.1, 1.3]**: Selección de tipo de cliente y registro de especificaciones JSONB.
-  - **[C.A. 3.2]**: Asignación de responsable y actualización manual a EN_PROCESO.
-  - **[C.A. 5.1, 5.2, 5.3]**: Generación de acuse por I+D con folios REC-YYYY-NNN y asignación explícita de id_delivered_by_user para la transferencia de custodia.
-  - **[C.A. 6.1, 6.3]**: Asentamiento de feedback por Ventas y actualización atómica del estado final del ticket.
+  - **[C.A. 1.1, 1.3]:** Selección de tipo de cliente y registro de especificaciones JSONB.
+  - **[C.A. 3.2]:** Asignación de responsable y actualización manual a EN_PROCESO.
+  - **[C.A. 5.1, 5.2, 5.3]:** Generación de acuse por I+D con folios REC-YYYY-NNN y asignación explícita de id_delivered_by_user para la transferencia de custodia.
+  - **[C.A. 6.1, 6.3]:** Asentamiento de feedback por Ventas y actualización atómica del estado final del ticket.
 
 ---
 

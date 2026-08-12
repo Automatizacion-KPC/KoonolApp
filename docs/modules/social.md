@@ -150,16 +150,16 @@ sequenceDiagram
 #### Referencias:
 
 - Reglas de Negocio (BR):
-  - **[BR-SOC-01]**: Encapsulamiento y Alcance de Visibilidad (post_type)
-  - **[BR-SOC-05]**: Validación de Archivos Adjuntos (docs JSONB)
+  - **[BR-SOC-01]:** Encapsulamiento y Alcance de Visibilidad (post_type)
+  - **[BR-SOC-05]:** Validación de Archivos Adjuntos (docs JSONB)
 - Historias de Usuario (US):
-  - **[US-SOC-01]**: Creación de Publicación
-  - **[US-SOC-03]**: Carga de Documentos Adjuntos
+  - **[US-SOC-01]:** Creación de Publicación
+  - **[US-SOC-03]:** Carga de Documentos Adjuntos
 - Criterios de Aceptación (C.A):
-  - **[C.A-1.1]**: Requerimiento obligatorio de post_type y al menos title o body
-  - **[C.A-1.2]**: Asignación automática del departamento del usuario activo en publicaciones departamentales
-  - **[C.A-1.3]**: Creación con status = 'ACTIVO', published_at = NOW(), pinned = false y trazabilidad con id_user
-  - **[C.A-3.2]**: Almacenamiento estructurado de archivos adjuntos en el campo JSONB docs
+  - **[C.A-1.1]:** Requerimiento obligatorio de post_type y al menos title o body
+  - **[C.A-1.2]:** Asignación automática del departamento del usuario activo en publicaciones departamentales
+  - **[C.A-1.3]:** Creación con status = 'ACTIVO', published_at = NOW(), pinned = false y trazabilidad con id_user
+  - **[C.A-3.2]:** Almacenamiento estructurado de archivos adjuntos en el campo JSONB docs
 
 ### 2. Flujo de Control de Visibilidad y Filtros del Muro
 
@@ -185,16 +185,16 @@ flowchart TD
 #### Referencias:
 
 - Reglas de Negocio (BR):
-  - **[BR-SOC-01]**: Encapsulamiento y Alcance de Visibilidad (post_type)
-  - **[BR-SOC-03]**: Facultad de Moderación y Estado de Archivo
-  - **[BR-SOC-07]**: Inactivación Lógica (Soft Delete)
+  - **[BR-SOC-01]:** Encapsulamiento y Alcance de Visibilidad (post_type)
+  - **[BR-SOC-03]:** Facultad de Moderación y Estado de Archivo
+  - **[BR-SOC-07]:** Inactivación Lógica (Soft Delete)
 - Historias de Usuario (US):
-  - **[US-SOC-01]**: Creación de Publicación
-  - **[US-SOC-04]**: Edición y Borrado de Contenidos Propios
-  - **[US-SOC-06]**: Moderación y Archivo de Publicaciones Ajenas
+  - **[US-SOC-01]:** Creación de Publicación
+  - **[US-SOC-04]:** Edición y Borrado de Contenidos Propios
+  - **[US-SOC-06]:** Moderación y Archivo de Publicaciones Ajenas
 - Criterios de Aceptación (C.A):
-  - **[C.A-4.3]**: Ocultamiento de publicaciones con status = 'ELIMINADO' y deleted_at IS NOT NULL
-  - **[C.A-6.3]**: Exclusión inmediata de publicaciones con status = 'ARCHIVADO' en las vistas del muro
+  - **[C.A-4.3]:** Ocultamiento de publicaciones con status = 'ELIMINADO' y deleted_at IS NOT NULL
+  - **[C.A-6.3]:** Exclusión inmediata de publicaciones con status = 'ARCHIVADO' en las vistas del muro
 
 ### 3. Diagrama de Casos de Uso y Matriz de Permisos por Rol
 
@@ -230,27 +230,27 @@ graph LR
 #### Referencias:
 
 - Reglas de Negocio (BR):
-  - **[BR-SOC-01]**: Encapsulamiento y Alcance de Visibilidad (post_type)
-  - **[BR-SOC-02]**: Restricción de Fijación de Avisos (Pinning)
-  - **[BR-SOC-03]**: Facultad de Moderación y Estado de Archivo
-  - **[BR-SOC-04]**: Unicidad y Concurrencia de Reacciones
-  - **[BR-SOC-05]**: Validación de Archivos Adjuntos (docs JSONB)
-  - **[BR-SOC-06]**: Estructura Anidada de Comentarios (Hilos de Respuesta)
-  - **[BR-SOC-07]**: Inactivación Lógica (Soft Delete)
+  - **[BR-SOC-01]:** Encapsulamiento y Alcance de Visibilidad (post_type)
+  - **[BR-SOC-02]:** Restricción de Fijación de Avisos (Pinning)
+  - **[BR-SOC-03]:** Facultad de Moderación y Estado de Archivo
+  - **[BR-SOC-04]:** Unicidad y Concurrencia de Reacciones
+  - **[BR-SOC-05]:** Validación de Archivos Adjuntos (docs JSONB)
+  - **[BR-SOC-06]:** Estructura Anidada de Comentarios (Hilos de Respuesta)
+  - **[BR-SOC-07]:** Inactivación Lógica (Soft Delete)
 - Historias de Usuario (US):
-  - **[US-SOC-01]**: Creación de Publicación
-  - **[US-SOC-02]**: Interacción mediante Reacciones y Comentarios
-  - **[US-SOC-03]**: Carga de Documentos Adjuntos
-  - **[US-SOC-04]**: Edición y Borrado de Contenidos Propios
-  - **[US-SOC-05]**: Fijación de Avisos Prioritarios (Pinning)
-  - **[US-SOC-06]**: Moderación y Archivo de Publicaciones Ajenas
+  - **[US-SOC-01]:** Creación de Publicación
+  - **[US-SOC-02]:** Interacción mediante Reacciones y Comentarios
+  - **[US-SOC-03]:** Carga de Documentos Adjuntos
+  - **[US-SOC-04]:** Edición y Borrado de Contenidos Propios
+  - **[US-SOC-05]:** Fijación de Avisos Prioritarios (Pinning)
+  - **[US-SOC-06]:** Moderación y Archivo de Publicaciones Ajenas
 - Criterios de Aceptación (C.A):
-  - **[C.A-1.1]**: Definición obligatoria de tipo y contenido en publicaciones
-  - **[C.A-2.1]**: Registro de tipo de reacción en posts y comentarios
-  - **[C.A-2.3]**: Soporte para hilos mediante id_parent_comment
-  - **[C.A-4.1]**: Restricción de edición/eliminación únicamente para contenido propio
-  - **[C.A-5.1]**: Restricción de pinning exclusiva para roles con Nivel >= 1 (LEADER)
-  - **[C.A-6.1]**: Habilitación de moderación/archivo sobre contenidos ajenos para roles de mando
+  - **[C.A-1.1]:** Definición obligatoria de tipo y contenido en publicaciones
+  - **[C.A-2.1]:** Registro de tipo de reacción en posts y comentarios
+  - **[C.A-2.3]:** Soporte para hilos mediante id_parent_comment
+  - **[C.A-4.1]:** Restricción de edición/eliminación únicamente para contenido propio
+  - **[C.A-5.1]:** Restricción de pinning exclusiva para roles con Nivel >= 1 (LEADER)
+  - **[C.A-6.1]:** Habilitación de moderación/archivo sobre contenidos ajenos para roles de mando
 
 ---
 

@@ -134,31 +134,31 @@ flowchart TD
 #### Referencias
 
 - Reglas de Negocio (BR):
-  - **[BR-GTC-01]**: Bloqueo Operativo Vehicular por Estatus Restringido
-  - **[BR-GTC-02]**: Transición Automática de Estatus y Odómetro Vehicular
-  - **[BR-GTC-03]**: Obligatoriedad de Evidencia Fotográfica Digital
-  - **[BR-GTC-04]**: Monotonicidad y Consistencia del Odómetro
-  - **[BR-GTC-05]**: Integridad Condicional por Tipo de Registro Vehicular
-  - **[BR-GTC-06]**: Control de Unicidad y Permanencia Peatonal
+  - **[BR-GTC-01]:** Bloqueo Operativo Vehicular por Estatus Restringido
+  - **[BR-GTC-02]:** Transición Automática de Estatus y Odómetro Vehicular
+  - **[BR-GTC-03]:** Obligatoriedad de Evidencia Fotográfica Digital
+  - **[BR-GTC-04]:** Monotonicidad y Consistencia del Odómetro
+  - **[BR-GTC-05]:** Integridad Condicional por Tipo de Registro Vehicular
+  - **[BR-GTC-06]:** Control de Unicidad y Permanencia Peatonal
 - Historias de Usuario (US):
-  - **[US-GTC-01]**: Registro de Entrada y Salida de Flotilla Propia y Directiva
-  - **[US-GTC-02]**: Autorización de Excepción de Salida por Administrador
-  - **[US-GTC-03]**: Control de Acceso para Vehículos Externos y Fletes
-  - **[US-GTC-04]**: Control de Registro Peatonal de Personal y Visitantes
+  - **[US-GTC-01]:** Registro de Entrada y Salida de Flotilla Propia y Directiva
+  - **[US-GTC-02]:** Autorización de Excepción de Salida por Administrador
+  - **[US-GTC-03]:** Control de Acceso para Vehículos Externos y Fletes
+  - **[US-GTC-04]:** Control de Registro Peatonal de Personal y Visitantes
 - Criterios de Aceptación (C.A):
-  - **[C.A. 1.1]**: Despliegue dinámico de campos para flota interna/directiva
-  - **[C.A. 1.2]**: Validación de estatus e incremento de odómetro en salida
-  - **[C.A. 1.3]**: Persistencia de fotografías y actualización a estado EN_RUTA
-  - **[C.A. 1.4]**: Retorno de flota, actualización a DISPONIBLE y sincronización de odómetro
-  - **[C.A. 2.1]**: Despliegue de diálogo de bloqueo por vehículo restringido
-  - **[C.A. 2.2]**: Solicitud de re-autenticación de rol ADMIN
-  - **[C.A. 2.3]**: Confirmación de autorización e inserción en bitácora
-  - **[C.A. 3.1]**: Habilitación de campos externos y catálogo de haulers
-  - **[C.A. 3.2]**: Captura obligatoria de placas, chofer externo y evidencia fotográfica
-  - **[C.A. 3.3]**: Registro inmutable de movimiento vehicular externo
-  - **[C.A. 4.1]**: Captura de datos de identificación para ingreso peatonal
-  - **[C.A. 4.2]**: Validación de permanencia única y registro de ingreso
-  - **[C.A. 4.3]**: Marcado de egreso peatonal y cierre de estancia activa
+  - **[C.A. 1.1]:** Despliegue dinámico de campos para flota interna/directiva
+  - **[C.A. 1.2]:** Validación de estatus e incremento de odómetro en salida
+  - **[C.A. 1.3]:** Persistencia de fotografías y actualización a estado EN_RUTA
+  - **[C.A. 1.4]:** Retorno de flota, actualización a DISPONIBLE y sincronización de odómetro
+  - **[C.A. 2.1]:** Despliegue de diálogo de bloqueo por vehículo restringido
+  - **[C.A. 2.2]:** Solicitud de re-autenticación de rol ADMIN
+  - **[C.A. 2.3]:** Confirmación de autorización e inserción en bitácora
+  - **[C.A. 3.1]:** Habilitación de campos externos y catálogo de haulers
+  - **[C.A. 3.2]:** Captura obligatoria de placas, chofer externo y evidencia fotográfica
+  - **[C.A. 3.3]:** Registro inmutable de movimiento vehicular externo
+  - **[C.A. 4.1]:** Captura de datos de identificación para ingreso peatonal
+  - **[C.A. 4.2]:** Validación de permanencia única y registro de ingreso
+  - **[C.A. 4.3]:** Marcado de egreso peatonal y cierre de estancia activa
 
 ---
 

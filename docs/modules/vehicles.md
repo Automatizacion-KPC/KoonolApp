@@ -138,16 +138,16 @@ graph TD
 #### Referencias
 
 - Reglas de Negocio (BR):
-  - **[BR-VEH-01]**: Alta y Control del Catálogo Vehicular.
-  - **[BR-VEH-03]**: Control de Vigencia de Seguro y Estado Automático SIN_SEGURO.
-  - **[BR-VEH-05]**: Control de Mantenimiento y Transición de Estado EN_TALLER.
+  - **[BR-VEH-01]:** Alta y Control del Catálogo Vehicular.
+  - **[BR-VEH-03]:** Control de Vigencia de Seguro y Estado Automático SIN_SEGURO.
+  - **[BR-VEH-05]:** Control de Mantenimiento y Transición de Estado EN_TALLER.
 - Historias de Usuario (US):
-  - **[US-VEH-01]**: Registro y Alta del Activo Vehicular.
-  - **[US-VEH-04]**: Bitácora de Mantenimiento Vehicular.
-  - **[US-VEH-05]**: Panel de Monitoreo y Alertas de Flotilla.
+  - **[US-VEH-01]:** Registro y Alta del Activo Vehicular.
+  - **[US-VEH-04]:** Bitácora de Mantenimiento Vehicular.
+  - **[US-VEH-05]:** Panel de Monitoreo y Alertas de Flotilla.
 - Criterios de Aceptación (C.A):
-  - **[C.A. 1.4]**: Transición a SIN_SEGURO por fecha de fin de seguro.
-  - **[C.A. 4.1, 4.4]**: Cambio a EN_TALLER y retorno a DISPONIBLE.
+  - **[C.A. 1.4]:** Transición a SIN_SEGURO por fecha de fin de seguro.
+  - **[C.A. 4.1, 4.4]:** Cambio a EN_TALLER y retorno a DISPONIBLE.
 
 ### 2. Flujo Operativo: Registro de Recarga de Combustible
 
@@ -174,14 +174,14 @@ graph TD
 #### Referencias
 
 - Reglas de Negocio (BR):
-  - **[BR-VEH-04]**: Registro Inmutable de Carga de Combustible e Incremento de Odómetro.
-  - **[BR-VEH-06]**: Programación y Alertas de Mantenimiento Preventivo.
+  - **[BR-VEH-04]:** Registro Inmutable de Carga de Combustible e Incremento de Odómetro.
+  - **[BR-VEH-06]:** Programación y Alertas de Mantenimiento Preventivo.
 - Historias de Usuario (US):
-  - **[US-VEH-03]**: Registro de Carga de Combustible.
+  - **[US-VEH-03]:** Registro de Carga de Combustible.
 - Criterios de Aceptación (C.A):
-  - **[C.A. 3.2]**: Validación de kilometraje mínimo.
-  - **[C.A. 3.3]**: Evidencias fotográficas obligatorias.
-  - **[C.A. 3.4]**: Inserción inmutable y actualización de odómetro vehicular.
+  - **[C.A. 3.2]:** Validación de kilometraje mínimo.
+  - **[C.A. 3.3]:** Evidencias fotográficas obligatorias.
+  - **[C.A. 3.4]:** Inserción inmutable y actualización de odómetro vehicular.
 
 ### 3. Flujo Operativo: Gestión de Mantenimiento Vehicular
 
@@ -206,14 +206,14 @@ graph TD
 #### Referencias
 
 - Reglas de Negocio (BR):
-  - **[BR-VEH-05]**: Control de Mantenimiento y Transición de Estado EN_TALLER.
-  - **[BR-VEH-06]**: Programación y Cálculo del Próximo Servicio Preventivo.
+  - **[BR-VEH-05]:** Control de Mantenimiento y Transición de Estado EN_TALLER.
+  - **[BR-VEH-06]:** Programación y Cálculo del Próximo Servicio Preventivo.
 - Historias de Usuario (US):
-  - **[US-VEH-04]**: Bitácora de Mantenimiento Vehicular.
+  - **[US-VEH-04]:** Bitácora de Mantenimiento Vehicular.
 - Criterios de Aceptación (C.A):
-  - **[C.A. 4.1]**: Cambio a EN_TALLER.
-  - **[C.A. 4.2]**: Captura de detalle de mantenimiento y facturas en formato JSONB.
-  - **[C.A. 4.3, 4.4]**: Recálculo del próximo mantenimiento y retorno a DISPONIBLE.
+  - **[C.A. 4.1]:** Cambio a EN_TALLER.
+  - **[C.A. 4.2]:** Captura de detalle de mantenimiento y facturas en formato JSONB.
+  - **[C.A. 4.3, 4.4]:** Recálculo del próximo mantenimiento y retorno a DISPONIBLE.
 
 ---
 
