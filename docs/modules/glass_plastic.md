@@ -56,12 +56,10 @@ El módulo de **Verificación de Vidrio y Plástico Quebradizo** digitaliza el c
 - **Como:** Gerente de Calidad (`MANAGER`), `ADMIN` o `GOD`.
 - **Quiero:** Dar de alta, actualizar y desactivar elementos de vidrio y plástico quebradizo en el catálogo centralizado.
 - **Para:** Mantener actualizada la matriz de auditoría de planta y equipos móviles sin comprometer la trazabilidad de inspecciones previas.
-
-#### Criterios de Aceptación:
-
-1. **C.A. 1.1:** Solo los roles `MANAGER` (Calidad), `ADMIN` y `GOD` pueden acceder a la interfaz de creación y edición del catálogo (**BR-GBP-05**).
-2. **C.A. 1.2:** Al registrar un elemento, se debe validar la unicidad del `concept_code` y requerir de forma obligatoria `resource_scope`, `resource_type`, `category` y `location_or_model`.
-3. **C.A. 1.3:** La desactivación de un elemento (`is_active = false`) lo excluye de futuras inspecciones mensuales sin afectar las verificaciones históricas registradas previamente (**BR-GBP-07**).
+- **Criterios de Aceptación:**
+  - **C.A. 1.1:** Solo los roles `MANAGER` (Calidad), `ADMIN` y `GOD` pueden acceder a la interfaz de creación y edición del catálogo (**BR-GBP-05**).
+  - **C.A. 1.2:** Al registrar un elemento, se debe validar la unicidad del `concept_code` y requerir de forma obligatoria `resource_scope`, `resource_type`, `category` y `location_or_model`.
+  - **C.A. 1.3:** La desactivación de un elemento (`is_active = false`) lo excluye de futuras inspecciones mensuales sin afectar las verificaciones históricas registradas previamente (**BR-GBP-07**).
 
 ---
 
@@ -70,14 +68,12 @@ El módulo de **Verificación de Vidrio y Plástico Quebradizo** digitaliza el c
 - **Como:** Colaborador del departamento de Calidad (`USER`, `LEADER`, `SUPERVISOR`, `MANAGER`).
 - **Quiero:** Seleccionar el alcance operativo y evaluar el estado físico, funcional y de acceso de todos los elementos activos de vidrio y plástico quebradizo.
 - **Para:** Cumplir con la auditoría mensual de inocuidad y detectar de forma oportuna grietas, roturas o astillamientos.
-
-#### Criterios de Aceptación:
-
-1. **C.A. 2.1:** El usuario debe seleccionar inicialmente el `resource_scope` (`INFRAESTRUCTURA_PLANTA` o `EQUIPO_MOVIL`). El sistema cargará automáticamente todos los elementos del catálogo con `is_active = true` asociados a los tipos autorizados (**BR-GBP-01**).
-2. **C.A. 2.2:** Se autogenera el folio único con la estructura `CAL-VVP-YY-#####` (**BR-GBP-06**).
-3. **C.A. 2.3:** Para cada elemento, el usuario debe marcar `structure_status`, `operation_status` y `access_status` como `'C'` o `'NC'`.
-4. **C.A. 2.4:** Si algún atributo es marcado como `'NC'`, la UI debe exigir la captura de `observations` y la selección de `corrective_action` (`REVISION` o `CAMBIO`). Si todos son `'C'`, `corrective_action` se guarda como `NULL` (**BR-GBP-03**).
-5. **C.A. 2.5:** El usuario debe seleccionar manualmente el estatus general del encabezado (`COMPLETADO` o `CON_OBSERVACIONES`) (**BR-GBP-02**).
+- **Criterios de Aceptación:**
+  - **C.A. 2.1:** El usuario debe seleccionar inicialmente el `resource_scope` (`INFRAESTRUCTURA_PLANTA` o `EQUIPO_MOVIL`). El sistema cargará automáticamente todos los elementos del catálogo con `is_active = true` asociados a los tipos autorizados (**BR-GBP-01**).
+  - **C.A. 2.2:** Se autogenera el folio único con la estructura `CAL-VVP-YY-#####` (**BR-GBP-06**).
+  - **C.A. 2.3:** Para cada elemento, el usuario debe marcar `structure_status`, `operation_status` y `access_status` como `'C'` o `'NC'`.
+  - **C.A. 2.4:** Si algún atributo es marcado como `'NC'`, la UI debe exigir la captura de `observations` y la selección de `corrective_action` (`REVISION` o `CAMBIO`). Si todos son `'C'`, `corrective_action` se guarda como `NULL` (**BR-GBP-03**).
+  - **C.A. 2.5:** El usuario debe seleccionar manualmente el estatus general del encabezado (`COMPLETADO` o `CON_OBSERVACIONES`) (**BR-GBP-02**).
 
 ---
 
@@ -86,11 +82,9 @@ El módulo de **Verificación de Vidrio y Plástico Quebradizo** digitaliza el c
 - **Como:** Colaborador del departamento de Calidad (`USER`, `LEADER`, `SUPERVISOR`, `MANAGER`).
 - **Quiero:** Que el sistema canalice automáticamente los hallazgos de elementos con No Conformidad (`'NC'`).
 - **Para:** Garantizar que el personal operativo gestione la reparación o reemplazo inmediato del insumo afectado.
-
-#### Criterios de Aceptación:
-
-1. **C.A. 3.1:** Al procesar el guardado de la verificación, el backend identifica todas las partidas de detalle con al menos un atributo en `'NC'` y crea un registro correspondiente en `quality_non_conformities` (**BR-GBP-04**).
-2. **C.A. 3.2:** El registro de No Conformidad debe vincular el `concept_code` del elemento, la ubicación/modelo, el detalle de las observaciones y la acción correctiva seleccionada.
+- **Criterios de Aceptación:**
+  - **C.A. 3.1:** Al procesar el guardado de la verificación, el backend identifica todas las partidas de detalle con al menos un atributo en `'NC'` y crea un registro correspondiente en `quality_non_conformities` (**BR-GBP-04**).
+  - **C.A. 3.2:** El registro de No Conformidad debe vincular el `concept_code` del elemento, la ubicación/modelo, el detalle de las observaciones y la acción correctiva seleccionada.
 
 ---
 

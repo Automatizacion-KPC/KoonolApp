@@ -1273,7 +1273,7 @@ Table quality_non_conformities {
   folio varchar [unique, not null]                 // Ej. 'NC-AA-#####'
   status varchar [default: 'ABIERTA']              // 'ABIERTA', 'EN_PROCESO', 'VERIFICADA', 'CERRADA'
 
-  source_type varchar [not null]                   // 'PRE_CARGA', 'POST_LAVADO', 'RECEPCION_MERCANCIA', 'VIDRIO_PLASTICO', 'RECLAMO_CLIENTE', 'RAMPA_ALMACEN', 'MANUAL'
+  source_type varchar [not null]                   // 'PRE_CARGA', 'POST_LAVADO', 'RECEPCION_MERCANCIA', 'VIDRIO_PLASTICO', 'RECLAMO_CLIENTE', 'MANUAL'
   description text [not null]                      // Detalles del hallazgo
 
   // APUNTADORES DE ORIGEN GLOBAL (Nullables)

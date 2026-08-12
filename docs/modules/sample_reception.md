@@ -48,25 +48,21 @@ El módulo de **Recepción de Muestras de Proveedores** digitaliza y controla el
 - **Como:** Colaborador del departamento de Compras,
 - **Quiero:** Registrar las muestras físicas de productos entregadas por los proveedores y adjuntar sus documentos técnicos,
 - **Para:** Dar ingreso formal a la muestra en el sistema y permitir su posterior transferencia a I+D.
-
-**Criterios de Aceptación:**
-
-- **C.A. 1.1:** El formulario requiere la selección del proveedor (`id_provider` proveniente del catálogo maestro `providers`), nombre del producto (`product_name`), cantidad recibida (`quantity_received`) y unidad de medida (`unit_of_measure`).
-- **C.A. 1.2:** Los campos `brand_manufacturer`, `lot_number`, `expiration_date`, `production_date` y `purchasing_notes` son opcionales.
-- **C.A. 1.3:** El sistema permite adjuntar archivos digitales (Hojas de Seguridad, Certificados de Análisis CoA, Fichas Técnicas) almacenando su estructura y metadatos en el campo de tipo JSONB `documents`.
-- **C.A. 1.4:** Al guardar, el backend asigna el UUID del usuario autenticado en `id_received_by_purchasing`, establece `status = 'RECIBIDO_COMPRAS'`, guarda `received_at = NOW()` y genera el código de folio bajo la estructura `SMP-YYYY-NNN`.
+- **Criterios de Aceptación:**
+  - **C.A. 1.1:** El formulario requiere la selección del proveedor (`id_provider` proveniente del catálogo maestro `providers`), nombre del producto (`product_name`), cantidad recibida (`quantity_received`) y unidad de medida (`unit_of_measure`).
+  - **C.A. 1.2:** Los campos `brand_manufacturer`, `lot_number`, `expiration_date`, `production_date` y `purchasing_notes` son opcionales.
+  - **C.A. 1.3:** El sistema permite adjuntar archivos digitales (Hojas de Seguridad, Certificados de Análisis CoA, Fichas Técnicas) almacenando su estructura y metadatos en el campo de tipo JSONB `documents`.
+  - **C.A. 1.4:** Al guardar, el backend asigna el UUID del usuario autenticado en `id_received_by_purchasing`, establece `status = 'RECIBIDO_COMPRAS'`, guarda `received_at = NOW()` y genera el código de folio bajo la estructura `SMP-YYYY-NNN`.
 
 #### US-SRM-02: Seguimiento y Entrega Físico-Operativa a I+D
 
 - **Como:** Colaborador del departamento de Compras,
 - **Quiero:** Consultar el listado de muestras en estado de recepción para coordinar su entrega a I+D,
 - **Para:** Mantener un control del inventario temporal de muestras pendientes de traspaso.
-
-**Criterios de Aceptación:**
-
-- **C.A. 2.1:** La interfaz muestra una vista filtrada con las entregas de muestras cuyo `status` es igual a `RECIBIDO_COMPRAS`.
-- **C.A. 2.2:** Mientras el registro se mantenga en `RECIBIDO_COMPRAS`, el usuario de Compras puede editar o complementar los datos capturados y la documentación adjunta.
-- **C.A. 2.3:** Cada actualización en esta fase asienta la fecha/hora en `updated_at` y el identificador del usuario ejecutor en `id_updated_by`.
+- **Criterios de Aceptación:**
+  - **C.A. 2.1:** La interfaz muestra una vista filtrada con las entregas de muestras cuyo `status` es igual a `RECIBIDO_COMPRAS`.
+  - **C.A. 2.2:** Mientras el registro se mantenga en `RECIBIDO_COMPRAS`, el usuario de Compras puede editar o complementar los datos capturados y la documentación adjunta.
+  - **C.A. 2.3:** Cada actualización en esta fase asienta la fecha/hora en `updated_at` y el identificador del usuario ejecutor en `id_updated_by`.
 
 ---
 
@@ -77,24 +73,20 @@ El módulo de **Recepción de Muestras de Proveedores** digitaliza y controla el
 - **Como:** Colaborador/Ingeniero del departamento de I+D,
 - **Quiero:** Aceptar la recepción física de una muestra transferida por Compras,
 - **Para:** Formalizar el traspaso de responsabilidad y establecer la fecha compromiso para su evaluación.
-
-**Criterios de Aceptación:**
-
-- **C.A. 3.1:** El usuario de I+D visualiza las muestras pendientes de traspaso y ejecuta la acción "Aceptar Custodia".
-- **C.A. 3.2:** El backend asigna `id_accepted_by_rd` con el UUID del usuario de I+D en sesión, establece `accepted_at_rd = NOW()` y actualiza `status = 'ENTREGADO_A_ID'`.
-- **C.A. 3.3:** La interfaz habilita la captura de notas internas de laboratorio en `rd_notes` y la fecha tentativa de dictamen en `rd_estimated_feedback_date`.
+- **Criterios de Aceptación:**
+  - **C.A. 3.1:** El usuario de I+D visualiza las muestras pendientes de traspaso y ejecuta la acción "Aceptar Custodia".
+  - **C.A. 3.2:** El backend asigna `id_accepted_by_rd` con el UUID del usuario de I+D en sesión, establece `accepted_at_rd = NOW()` y actualiza `status = 'ENTREGADO_A_ID'`.
+  - **C.A. 3.3:** La interfaz habilita la captura de notas internas de laboratorio en `rd_notes` y la fecha tentativa de dictamen en `rd_estimated_feedback_date`.
 
 #### US-SRM-04: Emisión de Retroalimentación Técnica (rd_feedback)
 
 - **Como:** Colaborador/Ingeniero del departamento de I+D,
 - **Quiero:** Capturar el dictamen técnico y las conclusiones de las pruebas realizadas a la muestra,
 - **Para:** Proporcionar al departamento de Compras el feedback necesario para negociar o informar al proveedor.
-
-**Criterios de Aceptación:**
-
-- **C.A. 4.1:** El usuario de I+D puede capturar el resultado técnico en el campo de texto `rd_feedback`.
-- **C.A. 4.2:** Al guardar el dictamen, el sistema estampa automáticamente la fecha y hora de emisión en `rd_feedback_date` y registra `id_updated_by` con el UUID del autor.
-- **C.A. 4.3:** El sistema genera una notificación interna al usuario de Compras que registró la muestra (`id_received_by_purchasing`), informando que la retroalimentación técnica ha sido publicada.
+- **Criterios de Aceptación:**
+  - **C.A. 4.1:** El usuario de I+D puede capturar el resultado técnico en el campo de texto `rd_feedback`.
+  - **C.A. 4.2:** Al guardar el dictamen, el sistema estampa automáticamente la fecha y hora de emisión en `rd_feedback_date` y registra `id_updated_by` con el UUID del autor.
+  - **C.A. 4.3:** El sistema genera una notificación interna al usuario de Compras que registró la muestra (`id_received_by_purchasing`), informando que la retroalimentación técnica ha sido publicada.
 
 ---
 
@@ -105,12 +97,10 @@ El módulo de **Recepción de Muestras de Proveedores** digitaliza y controla el
 - **Como:** Colaborador de Compras o I+D,
 - **Quiero:** Consultar el expediente completo de las muestras de proveedores registradas,
 - **Para:** Verificar los dictámenes técnicos emitidos y transmitir los comentarios de I+D a los proveedores correspondientes.
-
-**Criterios de Aceptación:**
-
-- **C.A. 5.1:** La tabla de consulta permite aplicar filtros por proveedor (`id_provider`), nombre de producto, status (`RECIBIDO_COMPRAS`, `ENTREGADO_A_ID`) y rangos de fechas de recepción o caducidad.
-- **C.A. 5.2:** Si la fecha actual sobrepasa la `rd_estimated_feedback_date` y el campo `rd_feedback` se encuentra vacío, la interfaz destaca visualmente el registro con un indicador de retraso.
-- **C.A. 5.3:** Compras puede visualizar y descargar la documentación en `documents` (fichas/CoA) así como copiar el dictamen en `rd_feedback` para su envío directo al contacto del proveedor (`contact_email`).
+- **Criterios de Aceptación:**
+  - **C.A. 5.1:** La tabla de consulta permite aplicar filtros por proveedor (`id_provider`), nombre de producto, status (`RECIBIDO_COMPRAS`, `ENTREGADO_A_ID`) y rangos de fechas de recepción o caducidad.
+  - **C.A. 5.2:** Si la fecha actual sobrepasa la `rd_estimated_feedback_date` y el campo `rd_feedback` se encuentra vacío, la interfaz destaca visualmente el registro con un indicador de retraso.
+  - **C.A. 5.3:** Compras puede visualizar y descargar la documentación en `documents` (fichas/CoA) así como copiar el dictamen en `rd_feedback` para su envío directo al contacto del proveedor (`contact_email`).
 
 ---
 

@@ -60,13 +60,11 @@ Este módulo vincula la responsabilidad operativa de Almacén, la ejecución té
 - **Como:** Montacarguista / Operador de Almacén (`USER` de Almacén),
 - **Quiero:** Registrar el horómetro final y las observaciones operativas al terminar la jornada laboral,
 - **Para:** Mantener actualizado el uso real del activo y notificar preventivamente el desgaste acumulado.
-
-**Criterios de Aceptación:**
-
-- **C.A. 1.1:** El usuario selecciona el equipo asignado del catálogo de activos disponibles.
-- **C.A. 1.2:** En equipos con `uses_horometer = true`, el sistema exige la captura del horómetro actual y valida la regla **BR-WEM-01** (el valor ingresado no puede ser menor a `warehouse_equipment.current_horometer`).
-- **C.A. 1.3:** Al confirmar el registro, el sistema actualiza `warehouse_equipment.current_horometer` y genera una entrada en `equipment_maintenances` con `maintenance_type = 'REVISION_DIARIA'`, registrando los campos de costos y taller como nulos.
-- **C.A. 1.4:** Si el nuevo valor supera el umbral `next_maintenance_horometer`, se activa la regla **BR-WEM-02**.
+- **Criterios de Aceptación:**
+  - **C.A. 1.1:** El usuario selecciona el equipo asignado del catálogo de activos disponibles.
+  - **C.A. 1.2:** En equipos con `uses_horometer = true`, el sistema exige la captura del horómetro actual y valida la regla **BR-WEM-01** (el valor ingresado no puede ser menor a `warehouse_equipment.current_horometer`).
+  - **C.A. 1.3:** Al confirmar el registro, el sistema actualiza `warehouse_equipment.current_horometer` y genera una entrada en `equipment_maintenances` con `maintenance_type = 'REVISION_DIARIA'`, registrando los campos de costos y taller como nulos.
+  - **C.A. 1.4:** Si el nuevo valor supera el umbral `next_maintenance_horometer`, se activa la regla **BR-WEM-02**.
 
 ### 🛠️ APARTADO 2: GESTIÓN DE MANTENIMIENTO (Taller y Liberación)
 
@@ -75,24 +73,20 @@ Este módulo vincula la responsabilidad operativa de Almacén, la ejecución té
 - **Como:** Técnico o Encargado de Mantenimiento (`USER` / `LEADER` de Mantenimiento),
 - **Quiero:** Cambiar el estado de un activo a `EN_TALLER` o `INACTIVO` al detectar o recibir reporte de una falla,
 - **Para:** Bloquear el equipo y evitar su uso operativo en el almacén mientras se realiza la reparación.
-
-**Criterios de Aceptación:**
-
-- **C.A. 2.1:** Solo personal de Mantenimiento puede cambiar el estado a `EN_TALLER` o `INACTIVO` en cumplimiento con **BR-WEM-03**.
-- **C.A. 2.2:** Al cambiar el estado, el activo aplica inmediatamente la regla **BR-WEM-04**, ocultándose de las listas de asignación operativa de Almacén.
+- **Criterios de Aceptación:**
+  - **C.A. 2.1:** Solo personal de Mantenimiento puede cambiar el estado a `EN_TALLER` o `INACTIVO` en cumplimiento con **BR-WEM-03**.
+  - **C.A. 2.2:** Al cambiar el estado, el activo aplica inmediatamente la regla **BR-WEM-04**, ocultándose de las listas de asignación operativa de Almacén.
 
 #### US-WEM-03: Cierre Técnico y Liberación de Equipo
 
 - **Como:** Líder o Supervisor de Mantenimiento (`LEADER+` de Mantenimiento),
 - **Quiero:** Registrar las actividades realizadas, refacciones utilizadas y cambiar el estado del equipo a `DISPONIBLE`,
 - **Para:** Reincorporar el activo a la operación diaria y reprogramar los umbrales del siguiente mantenimiento.
-
-**Criterios de Aceptación:**
-
-- **C.A. 3.1:** El usuario registra la intervención en `equipment_maintenances` especificando `maintenance_type` (`PREVENTIVO` o `CORRECTIVO`), `horometer_at_service`, la descripción del trabajo y las refacciones en el campo de texto libre `parts_replaced`.
-- **C.A. 3.2:** Si el mantenimiento es externo, se captura `workshop_name`, `total_cost` y el archivo en `invoice_document`. Si es interno, estos campos son opcionales según **BR-WEM-07**.
-- **C.A. 3.3:** El sistema valida que el usuario posea nivel `LEADER` o superior en Mantenimiento conforme a **BR-WEM-05**.
-- **C.A. 3.4:** Al guardar, se actualiza `warehouse_equipment.status = 'DISPONIBLE'` y se recalculan `next_maintenance_horometer` (sumando las horas de intervalo objetivo al `horometer_at_service`) o `next_maintenance_date`.
+- **Criterios de Aceptación:**
+  - **C.A. 3.1:** El usuario registra la intervención en `equipment_maintenances` especificando `maintenance_type` (`PREVENTIVO` o `CORRECTIVO`), `horometer_at_service`, la descripción del trabajo y las refacciones en el campo de texto libre `parts_replaced`.
+  - **C.A. 3.2:** Si el mantenimiento es externo, se captura `workshop_name`, `total_cost` y el archivo en `invoice_document`. Si es interno, estos campos son opcionales según **BR-WEM-07**.
+  - **C.A. 3.3:** El sistema valida que el usuario posea nivel `LEADER` o superior en Mantenimiento conforme a **BR-WEM-05**.
+  - **C.A. 3.4:** Al guardar, se actualiza `warehouse_equipment.status = 'DISPONIBLE'` y se recalculan `next_maintenance_horometer` (sumando las horas de intervalo objetivo al `horometer_at_service`) o `next_maintenance_date`.
 
 ### 🛍️ APARTADO 3: ADMINISTRACIÓN Y CONTROL DE ACTIVOS
 
@@ -101,23 +95,19 @@ Este módulo vincula la responsabilidad operativa de Almacén, la ejecución té
 - **Como:** Personal de Compras, Mantenimiento o Administrador Global (`COMPRAS`, `MANTENIMIENTO`, `ADMIN`),
 - **Quiero:** Dar de alta nuevos activos, actualizar sus características o aplicar baja lógica,
 - **Para:** Mantener el inventario de maquinaria actualizado con información precisa de serie, capacidad y fabricante.
-
-**Criterios de Aceptación:**
-
-- **C.A. 4.1:** El formulario permite capturar el código interno (`internal_code`), número de serie, marca, modelo, capacidad de carga (`load_capacity_kg`) y tipo de equipo.
-- **C.A. 4.2:** Se define la parametrización inicial de mantenimiento: `uses_horometer` (booleano), `next_maintenance_horometer` o `next_maintenance_date`.
-- **C.A. 4.3:** Al aplicar una baja, el sistema realiza un borrado lógico estableciendo la fecha actual en `deleted_at` según **BR-WEM-06**.
+- **Criterios de Aceptación:**
+  - **C.A. 4.1:** El formulario permite capturar el código interno (`internal_code`), número de serie, marca, modelo, capacidad de carga (`load_capacity_kg`) y tipo de equipo.
+  - **C.A. 4.2:** Se define la parametrización inicial de mantenimiento: `uses_horometer` (booleano), `next_maintenance_horometer` o `next_maintenance_date`.
+  - **C.A. 4.3:** Al aplicar una baja, el sistema realiza un borrado lógico estableciendo la fecha actual en `deleted_at` según **BR-WEM-06**.
 
 #### US-WEM-05: Monitoreo de Alertas Preventivas de Maquinaria
 
 - **Como:** Usuario de Almacén, Mantenimiento, Compras o Administrador,
 - **Quiero:** Visualizar los indicadores de alerta en los equipos próximos o vencidos para mantenimiento,
 - **Para:** Coordinar oportunamente las intervenciones mecánicas sin afectar la productividad del almacén.
-
-**Criterios de Aceptación:**
-
-- **C.A. 5.1:** Las tarjetas del listado de equipos despliegan una insignia visible cuando el horómetro actual alcanza el objetivo de mantenimiento o cuando la fecha de revisión programada expiró.
-- **C.A. 5.2:** El sistema envía notificaciones a los cuatro departamentos involucrados (Almacén, Mantenimiento, Compras, Admin) al detectarse un vencimiento de servicio.
+- **Criterios de Aceptación:**
+  - **C.A. 5.1:** Las tarjetas del listado de equipos despliegan una insignia visible cuando el horómetro actual alcanza el objetivo de mantenimiento o cuando la fecha de revisión programada expiró.
+  - **C.A. 5.2:** El sistema envía notificaciones a los cuatro departamentos involucrados (Almacén, Mantenimiento, Compras, Admin) al detectarse un vencimiento de servicio.
 
 ---
 

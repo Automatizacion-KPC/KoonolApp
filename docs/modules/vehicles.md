@@ -48,63 +48,52 @@ El módulo de **Gestión de Flotilla y Control Vehicular** digitaliza la adminis
 
 - **Como:** Colaborador del departamento de Compras,
 - **Quiero:** Registrar nuevas unidades vehiculares y mantener actualizadas las pólizas de seguro,
-- **Para:** Garantizar la disponibilidad legal y operativa de la flotilla de la empresa.
-
-**Criterios de Aceptación:**
-
-- **C.A. 1.1:** Interfaz de alta restringida a usuarios de Compras.
-- **C.A. 1.2:** Captura obligatoria de `plates`, `brand`, `model`, `vehicle_type` e `id_department`.
-- **C.A. 1.3:** Las placas ingresadas se validan contra la restricción de unicidad en `vehicles`.
-- **C.A. 1.4:** Permitir la captura y actualización de `insurance_start_date` e `insurance_end_date`. Si la fecha de fin es menor a la fecha actual, el sistema asigna automáticamente el `status = 'SIN_SEGURO'`.
+- **Para:** Garantizar la disponibilidad legal y operativa de la flotilla de la empresa. -**Criterios de Aceptación:**
+  - **C.A. 1.1:** Interfaz de alta restringida a usuarios de Compras.
+  - **C.A. 1.2:** Captura obligatoria de `plates`, `brand`, `model`, `vehicle_type` e `id_department`.
+  - **C.A. 1.3:** Las placas ingresadas se validan contra la restricción de unicidad en `vehicles`.
+  - **C.A. 1.4:** Permitir la captura y actualización de `insurance_start_date` e `insurance_end_date`. Si la fecha de fin es menor a la fecha actual, el sistema asigna automáticamente el `status = 'SIN_SEGURO'`.
 
 ### US-VEH-02: Asignación de Conductor Titular
 
 - **Como:** Encargado/Supervisor de un departamento operativo (Logística, Ventas, CxC),
 - **Quiero:** Asignar o cambiar el chofer titular asignado a un vehículo de mi departamento,
 - **Para:** Definir la responsabilidad formal sobre el cuidado y custodia de la unidad.
-
-**Criterios de Aceptación:**
-
-- **C.A. 2.1:** El usuario solo puede visualizar y asignar vehículos cuyo `id_department` coincida con su área.
-- **C.A. 2.2:** Al seleccionar un empleado (`id_employee`), el sistema verifica que no sea titular actual de otro vehículo activo.
-- **C.A. 2.3:** El cambio de chofer actualiza la columna `id_employee` y asienta auditoría (`updated_at`, `id_updated_by`).
+- **Criterios de Aceptación:**
+  - **C.A. 2.1:** El usuario solo puede visualizar y asignar vehículos cuyo `id_department` coincida con su área.
+  - **C.A. 2.2:** Al seleccionar un empleado (`id_employee`), el sistema verifica que no sea titular actual de otro vehículo activo.
+  - **C.A. 2.3:** El cambio de chofer actualiza la columna `id_employee` y asienta auditoría (`updated_at`, `id_updated_by`).
 
 ### US-VEH-03: Registro de Carga de Combustible
 
 - **Como:** Chofer / Conductor del vehículo,
 - **Quiero:** Registrar las recargas de combustible capturando kilometraje, litros, costo y fotografías del ticket, bomba y tanque,
 - **Para:** Justificar el gasto de combustible y mantener actualizado el kilometraje del vehículo.
-
-**Criterios de Aceptación:**
-
-- **C.A. 3.1:** Formulario accesible para el operador. Debe seleccionar el vehículo de su departamento.
-- **C.A. 3.2:** Validación de kilometraje: `odometer_at_loading` no puede ser menor al `current_odometer` registrado actualmente en el vehículo.
-- **C.A. 3.3:** Carga obligatoria de archivos/fotografías: `ticket_picture`, `fuel_level_picture` y `gas_pump_picture`.
-- **C.A. 3.4:** Al guardar exitosamente, se inserta el registro inmutable en `fuel_logs` y se actualiza `current_odometer` en la tabla `vehicles`.
+- **Criterios de Aceptación:**
+  - **C.A. 3.1:** Formulario accesible para el operador. Debe seleccionar el vehículo de su departamento.
+  - **C.A. 3.2:** Validación de kilometraje: `odometer_at_loading` no puede ser menor al `current_odometer` registrado actualmente en el vehículo.
+  - **C.A. 3.3:** Carga obligatoria de archivos/fotografías: `ticket_picture`, `fuel_level_picture` y `gas_pump_picture`.
+  - **C.A. 3.4:** Al guardar exitosamente, se inserta el registro inmutable en `fuel_logs` y se actualiza `current_odometer` en la tabla `vehicles`.
 
 ### US-VEH-04: Bitácora de Mantenimiento Vehicular
 
 - **Como:** Encargado del departamento de Mantenimiento,
 - **Quiero:** Registrar los mantenimientos preventivos y correctivos ejecutados en las unidades y cambiar su estado operativo,
 - **Para:** Llevar un histórico de gastos por unidad y controlar la disponibilidad de la flotilla.
-
-**Criterios de Aceptación:**
-
-- **C.A. 4.1:** Permitir cambiar el estado de la unidad a `EN_TALLER` al iniciar los trabajos.
-- **C.A. 4.2:** Formulario de cierre de servicio en `vehicle_maintenances`: captura de `maintenance_type` (`PREVENTIVO` / `CORRECTIVO`), `odometer_at_service`, `description`, `workshop_name`, `total_cost` y adjunto de comprobantes digitales en `invoice_document` (`JSONB`).
-- **C.A. 4.3:** Si el mantenimiento es `PREVENTIVO`, el usuario debe ingresar o confirmar el valor objetivo para el siguiente servicio (`next_maintenance_odometer`).
-- **C.A. 4.4:** Al guardar la finalización del mantenimiento, el vehículo pasa automáticamente a estado `DISPONIBLE`.
+- **Criterios de Aceptación:**
+  - **C.A. 4.1:** Permitir cambiar el estado de la unidad a `EN_TALLER` al iniciar los trabajos.
+  - **C.A. 4.2:** Formulario de cierre de servicio en `vehicle_maintenances`: captura de `maintenance_type` (`PREVENTIVO` / `CORRECTIVO`), `odometer_at_service`, `description`, `workshop_name`, `total_cost` y adjunto de comprobantes digitales en `invoice_document` (`JSONB`).
+  - **C.A. 4.3:** Si el mantenimiento es `PREVENTIVO`, el usuario debe ingresar o confirmar el valor objetivo para el siguiente servicio (`next_maintenance_odometer`).
+  - **C.A. 4.4:** Al guardar la finalización del mantenimiento, el vehículo pasa automáticamente a estado `DISPONIBLE`.
 
 ### US-VEH-05: Panel de Monitoreo y Alertas de Flotilla
 
 - **Como:** Gerente o Supervisor de Área / Administración,
 - **Quiero:** Consultar el catálogo general de vehículos con sus kilometrajes, estatus actuales y alertas de mantenimiento/seguro,
 - **Para:** Tomar decisiones oportunas sobre la operación y el reemplazo de activos.
-
-**Criterios de Aceptación:**
-
-- **C.A. 5.1:** Vista en formato tabla/tarjetas filtrable por departamento, estatus (`DISPONIBLE`, `EN_RUTA`, `EN_TALLER`, `INACTIVO`, `SIN_SEGURO`) y tipo de vehículo.
-- **C.A. 5.2:** Indicadores visuales de alerta (color amarillo/rojo) para vehículos próximos o pasados de su kilometraje de servicio (`next_maintenance_odometer`) o con pólizas de seguro próximas a vencer (30 días).
+- **Criterios de Aceptación:**
+  - **C.A. 5.1:** Vista en formato tabla/tarjetas filtrable por departamento, estatus (`DISPONIBLE`, `EN_RUTA`, `EN_TALLER`, `INACTIVO`, `SIN_SEGURO`) y tipo de vehículo.
+  - **C.A. 5.2:** Indicadores visuales de alerta (color amarillo/rojo) para vehículos próximos o pasados de su kilometraje de servicio (`next_maintenance_odometer`) o con pólizas de seguro próximas a vencer (30 días).
 
 ---
 

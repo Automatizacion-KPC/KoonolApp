@@ -73,7 +73,7 @@ El módulo de **Devoluciones y Rechazos de Producto por Cliente** gestiona el fl
   ### BR-CPR-10: Integración Automática con Orden de Recolección (Solo CAL-FOR-01)
 
 - **Descripción:** Cuando un plan de acción para un producto en posesión del cliente requiere el retorno físico del material, se automatiza el despacho logístico.
-- **Comportamiento Global:** Si la solicitud es de tipo **CAL-FOR-01**, el plan de acción fue `APROBADO` por la Gerencia de Administración y el plan estipula recolectar el producto, el backend genera automáticamente una orden de recolección para Logística en la tabla `quality_recollection_authorizations`.
+- **Comportamiento Global:** Si la solicitud es de tipo **CAL-FOR-01**, el plan de acción fue `AUTORIZADO` por la Gerencia de Administración y el plan estipula recolectar el producto, el backend genera automáticamente una orden de recolección para Logística en la tabla `quality_recollection_authorizations`.
 - **Seguimiento Logístico:**
   - El chofer realiza la recolección física y actualiza el estatus en `quality_recollection_authorizations`.
   - La mercancía llega a planta y personal de Calidad efectúa la inspección de entrada registrándola en `quality_warehouse_receptions`.
@@ -141,10 +141,10 @@ El módulo de **Devoluciones y Rechazos de Producto por Cliente** gestiona el fl
 #### Criterios de Aceptación:
 
 1. **C.A. 4.1:** El `MANAGER` de Calidad ingresa el análisis de causa raíz y partidas en `quality_complaint_action_plans` (**BR-CPR-09**).
-2. **C.A. 4.1:** El `MANAGER` de Calidad firma la resolución dictaminada (`id_quality_reviewer`).
-3. **C.A. 4.2:** El `MANAGER` de Administración aprueba o rechaza el plan de acción y aplica su firma (`id_admin_authorizer`). Al completar ambas firmas, el folio pasa al estado `'AUTORIZADO'` O `'RECHAZADO'` (**BR-CPR-09**).
-4. **C.A. 4.3:** Si el plan es para **CAL-FOR-01**, está `APROBADO` e incluye recolección, el sistema crea en automático la orden en `quality_recollection_authorizations` (**BR-CPR-10**).
-5. **C.A. 4.4:** El `MANAGER` de Calidad realiza el cierre manual del expediente (`'CERRADO'`) al concluir las actividades o recibir la respuesta de Administración (**BR-CPR-11**).
+2. **C.A. 4.2:** El `MANAGER` de Calidad firma la resolución dictaminada (`id_quality_reviewer`).
+3. **C.A. 4.3:** El `MANAGER` de Administración aprueba o rechaza el plan de acción y aplica su firma (`id_admin_authorizer`). Al completar ambas firmas, el folio pasa al estado `'AUTORIZADO'` O `'RECHAZADO'` (**BR-CPR-09**).
+4. **C.A. 4.4:** Si el plan es para **CAL-FOR-01**, está `AUTORIZADO` e incluye recolección, el sistema crea en automático la orden en `quality_recollection_authorizations` (**BR-CPR-10**).
+5. **C.A. 4.5:** El `MANAGER` de Calidad realiza el cierre manual del expediente (`'CERRADO'`) al concluir las actividades o recibir la respuesta de Administración (**BR-CPR-11**).
 
 ---
 

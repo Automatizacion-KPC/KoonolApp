@@ -64,14 +64,12 @@ Comprende tres flujos de evaluación técnica:
 - **Como:** Colaborador del departamento de Calidad (`USER`, `LEADER`, `SUPERVISOR`, `MANAGER`).
 - **Quiero:** Registrar el checklist de condiciones físicas, higiene y plagas de una unidad interna antes de su carga.
 - **Para:** Garantizar que el vehículo cumpla con los estándares de inocuidad e higiene exigidos para la distribución de producto.
-
-#### Criterios de Aceptación:
-
-1. **C.A. 1.1:** El sistema debe verificar que la unidad tenga una inspección post-lavado VLV aprobada dentro de los últimos 7 días. En caso contrario, debe denegar el registro indicando la restricción (**BR-VHI-04**).
-2. **C.A. 1.2:** Se debe autogenerar el folio con la estructura `IVI-YY-####` (**BR-VHI-06**).
-3. **C.A. 1.3:** Si la fecha del certificado de fumigación excede los 15 días respecto a la fecha actual, la UI debe mostrar una alerta visual y registrar la marca `has_fumigation_certificate = false` (**BR-VHI-05**).
-4. **C.A. 1.4:** El usuario debe seleccionar manualmente el estado final (`APROBADO`, `RECHAZADO`, `APROBADO_CON_NC`) (**BR-VHI-01**).
-5. **C.A. 1.5:** Un estado `RECHAZADO` debe bloquear de inmediato la asignación de rutas y salida del vehículo en caseta (**BR-VHI-03**).
+- **Criterios de Aceptación:**
+  - **C.A. 1.1:** El sistema debe verificar que la unidad tenga una inspección post-lavado VLV aprobada dentro de los últimos 7 días. En caso contrario, debe denegar el registro indicando la restricción (**BR-VHI-04**).
+  - **C.A. 1.2:** Se debe autogenerar el folio con la estructura `IVI-YY-####` (**BR-VHI-06**).
+  - **C.A. 1.3:** Si la fecha del certificado de fumigación excede los 15 días respecto a la fecha actual, la UI debe mostrar una alerta visual y registrar la marca `has_fumigation_certificate = false` (**BR-VHI-05**).
+  - **C.A. 1.4:** El usuario debe seleccionar manualmente el estado final (`APROBADO`, `RECHAZADO`, `APROBADO_CON_NC`) (**BR-VHI-01**).
+  - **C.A. 1.5:** Un estado `RECHAZADO` debe bloquear de inmediato la asignación de rutas y salida del vehículo en caseta (**BR-VHI-03**).
 
 ---
 
@@ -80,12 +78,10 @@ Comprende tres flujos de evaluación técnica:
 - **Como:** Colaborador del departamento de Calidad (`USER`, `LEADER`, `SUPERVISOR`, `MANAGER`).
 - **Quiero:** Documentar la inspección de higiene, secado y estado de la cabina de un vehículo tras su lavado semanal.
 - **Para:** Habilitar la unidad operativa para la realización de las inspecciones diarias de la semana.
-
-#### Criterios de Aceptación:
-
-1. **C.A. 2.1:** El sistema debe autogenerar el folio único bajo el patrón `VLV-YY-####` (**BR-VHI-06**).
-2. **C.A. 2.2:** La interfaz debe solicitar la selección del vehículo (`id_vehicle`), chofer asignado (`id_driver_user`) y almacenar el usuario autenticado como inspector (`id_inspector_user`).
-3. **C.A. 2.3:** Al guardar con estatus `APROBADO`, el vehículo queda automáticamente habilitado para pasar inspecciones diarias IVI durante los siguientes 7 días naturales (**BR-VHI-04**).
+- **Criterios de Aceptación:**
+  - **C.A. 2.1:** El sistema debe autogenerar el folio único bajo el patrón `VLV-YY-####` (**BR-VHI-06**).
+  - **C.A. 2.2:** La interfaz debe solicitar la selección del vehículo (`id_vehicle`), chofer asignado (`id_driver_user`) y almacenar el usuario autenticado como inspector (`id_inspector_user`).
+  - **C.A. 2.3:** Al guardar con estatus `APROBADO`, el vehículo queda automáticamente habilitado para pasar inspecciones diarias IVI durante los siguientes 7 días naturales (**BR-VHI-04**).
 
 ---
 
@@ -94,13 +90,11 @@ Comprende tres flujos de evaluación técnica:
 - **Como:** Colaborador del departamento de Calidad (`USER`, `LEADER`, `SUPERVISOR`, `MANAGER`).
 - **Quiero:** Registrar la inspección física, sellos y condiciones de transporte de las unidades que arriban con mercancía (internas o fleteras externas).
 - **Para:** Mantener la trazabilidad, inocuidad e integridad de la carga entrante al almacén.
-
-#### Criterios de Aceptación:
-
-1. **C.A. 3.1:** El usuario debe poder definir si la unidad es interna (`is_internal_vehicle = true`) o externa (`is_internal_vehicle = false`), requiriendo los datos de fletera (`id_hauler`), placas (`external_plates`) y chofer (`driver_name`) para unidades externas.
-2. **C.A. 3.2:** Debe permitir almacenar el listado de facturas asociadas en formato `JSONB` (`invoices_included`), así como la verificación de sellos de seguridad (`correct_seals`, `seal_number_received`).
-3. **C.A. 3.3:** La captura de alérgenos compartidos o carga no alimenticia se debe guardar como información estadística sin bloquear el formulario (**BR-VHI-01**).
-4. **C.A. 3.4:** El sistema autogenerará el folio `IVE-YY-#####` y admitirá únicamente el envío de estados `APROBADO`, `RECHAZADO` o `APROBADO_CON_NC` (**BR-VHI-06**, **BR-VHI-07**).
+- **Criterios de Aceptación:**
+  - **C.A. 3.1:** El usuario debe poder definir si la unidad es interna (`is_internal_vehicle = true`) o externa (`is_internal_vehicle = false`), requiriendo los datos de fletera (`id_hauler`), placas (`external_plates`) y chofer (`driver_name`) para unidades externas.
+  - **C.A. 3.2:** Debe permitir almacenar el listado de facturas asociadas en formato `JSONB` (`invoices_included`), así como la verificación de sellos de seguridad (`correct_seals`, `seal_number_received`).
+  - **C.A. 3.3:** La captura de alérgenos compartidos o carga no alimenticia se debe guardar como información estadística sin bloquear el formulario (**BR-VHI-01**).
+  - **C.A. 3.4:** El sistema autogenerará el folio `IVE-YY-#####` y admitirá únicamente el envío de estados `APROBADO`, `RECHAZADO` o `APROBADO_CON_NC` (**BR-VHI-06**, **BR-VHI-07**).
 
 ---
 

@@ -51,49 +51,41 @@ El módulo de **Control de Caseta** tiene como propósito digitalizar y centrali
 - **Como:** Guardia de Caseta (`USER`),
 - **Quiero:** Registrar la entrada o salida de los vehículos pertenecientes a la flotilla propia o directiva de la empresa,
 - **Para:** Mantener actualizado el estatus operativo del vehículo, controlar el kilometraje y garantizar el historial de asignación de choferes.
-
-**Criterios de Aceptación:**
-
-- **C.A. 1.1:** Al seleccionar `registration_type` como `'INTERNO'` o `'DIRECTIVA'`, la interfaz despliega los campos para seleccionar el vehículo (`id_vehicle`), chofer (`id_driver`), departamento (`id_department`), nivel de combustible (`fuel_level_percentage`) y odómetro (`odometer_reading`).
-- **C.A. 1.2:** Si el movimiento es de tipo `'SALIDA'`, el sistema valida que el vehículo esté en estatus `DISPONIBLE` y que el odómetro capturado sea mayor o igual a `vehicles.current_odometer`.
-- **C.A. 1.3:** La aplicación exige adjuntar al menos una fotografía (`pictures`). Al guardar, se genera el registro inmutable en `gate_logs` con `id_guard_entry = auth.user_id` y el vehículo actualiza su estatus en `vehicles` a `EN_RUTA`.
-- **C.A. 1.4:** Al registrar una `'ENTRADA'`, el sistema guarda la lectura del odómetro, cambia el estatus del vehículo en `vehicles` a `DISPONIBLE` y actualiza `vehicles.current_odometer`.
+- **Criterios de Aceptación:**
+  - **C.A. 1.1:** Al seleccionar `registration_type` como `'INTERNO'` o `'DIRECTIVA'`, la interfaz despliega los campos para seleccionar el vehículo (`id_vehicle`), chofer (`id_driver`), departamento (`id_department`), nivel de combustible (`fuel_level_percentage`) y odómetro (`odometer_reading`).
+  - **C.A. 1.2:** Si el movimiento es de tipo `'SALIDA'`, el sistema valida que el vehículo esté en estatus `DISPONIBLE` y que el odómetro capturado sea mayor o igual a `vehicles.current_odometer`.
+  - **C.A. 1.3:** La aplicación exige adjuntar al menos una fotografía (`pictures`). Al guardar, se genera el registro inmutable en `gate_logs` con `id_guard_entry = auth.user_id` y el vehículo actualiza su estatus en `vehicles` a `EN_RUTA`.
+  - **C.A. 1.4:** Al registrar una `'ENTRADA'`, el sistema guarda la lectura del odómetro, cambia el estatus del vehículo en `vehicles` a `DISPONIBLE` y actualiza `vehicles.current_odometer`.
 
 ### US-GTC-02: Autorización de Excepción de Salida por Administrador
 
 - **Como:** Administrador del Sistema (`ADMIN`),
 - **Quiero:** Autorizar mediante firma de credenciales la salida de un vehículo restringido (`EN_TALLER`, `SIN_SEGURO`, `INACTIVO`),
 - **Para:** Permitir traslados de emergencia o mantenimiento sin vulnerar la regla de bloqueo del sistema.
-
-**Criterios de Aceptación:**
-
-- **C.A. 2.1:** Cuando el guardia intenta registrar la salida de un vehículo cuyo estatus no sea `DISPONIBLE`, el sistema despliega un diálogo de bloqueo invocando la regla **BR-GTC-01**.
-- **C.A. 2.2:** La interfaz solicita la re-autenticación (correo/contraseña o PIN de seguridad) de un usuario con nivel de rol `ADMIN` (Nivel 5) para omitir la restricción.
-- **C.A. 2.3:** Si la validación de credenciales del `ADMIN` es exitosa, se permite la persistencia de la salida en `gate_logs` y se asienta el evento en la bitácora de auditoría. Si es denegada o cancelada, la transacción se revierte.
+- **Criterios de Aceptación:**
+  - **C.A. 2.1:** Cuando el guardia intenta registrar la salida de un vehículo cuyo estatus no sea `DISPONIBLE`, el sistema despliega un diálogo de bloqueo invocando la regla **BR-GTC-01**.
+  - **C.A. 2.2:** La interfaz solicita la re-autenticación (correo/contraseña o PIN de seguridad) de un usuario con nivel de rol `ADMIN` (Nivel 5) para omitir la restricción.
+  - **C.A. 2.3:** Si la validación de credenciales del `ADMIN` es exitosa, se permite la persistencia de la salida en `gate_logs` y se asienta el evento en la bitácora de auditoría. Si es denegada o cancelada, la transacción se revierte.
 
 ### US-GTC-03: Control de Acceso para Vehículos Externos y Fletes
 
 - **Como:** Guardia de Caseta (`USER`),
 - **Quiero:** Registrar el ingreso y egreso de transporte de proveedores, fletes externos y servicios públicos,
 - **Para:** Registrar la trazabilidad de placas externas, transportistas (_haulers_) y condiciones de las unidades que ingresan a la planta.
-
-**Criterios de Aceptación:**
-
-- **C.A. 3.1:** Al seleccionar `registration_type` en (`'PROVEEDOR'`, `'VISITA'`, `'SERVICIO_PUBLICO'`), el sistema habilita los campos `external_plates`, `external_driver_name`, `company_provenance` y la vinculación opcional de `id_hauler` desde el catálogo de transportistas.
-- **C.A. 3.2:** Se requiere de forma obligatoria el ingreso de las placas externas, el nombre del chofer y la captura de evidencia fotográfica en el atributo `pictures`.
-- **C.A. 3.3:** El registro queda asentado en `gate_logs` vinculando el identificador del guardia en `id_guard_entry` (al ingresar) o `id_guard_exit` (al egresar).
+- **Criterios de Aceptación:**
+  - **C.A. 3.1:** Al seleccionar `registration_type` en (`'PROVEEDOR'`, `'VISITA'`, `'SERVICIO_PUBLICO'`), el sistema habilita los campos `external_plates`, `external_driver_name`, `company_provenance` y la vinculación opcional de `id_hauler` desde el catálogo de transportistas.
+  - **C.A. 3.2:** Se requiere de forma obligatoria el ingreso de las placas externas, el nombre del chofer y la captura de evidencia fotográfica en el atributo `pictures`.
+  - **C.A. 3.3:** El registro queda asentado en `gate_logs` vinculando el identificador del guardia en `id_guard_entry` (al ingresar) o `id_guard_exit` (al egresar).
 
 ### US-GTC-04: Control de Registro Peatonal de Personal y Visitantes
 
 - **Como:** Guardia de Caseta (`USER`),
 - **Quiero:** Registrar la entrada y salida del personal interno, contratistas, proveedores y visitantes a pie,
 - **Para:** Conocer en tiempo real la nómina de personas presentes dentro de las instalaciones y garantizar la seguridad del recinto.
-
-**Criterios de Aceptación:**
-
-- **C.A. 4.1:** Al registrar una entrada peatonal (`person_type` $\in$ `['EMPLEADO', 'CONTRATISTA', 'VISITA', 'PROVEEDOR', 'CLIENTE']`), el guardia captura `external_name`, `external_company`, `external_id_number` (No. de INE/Identificación) y `visit_purpose`. Si es empleado, se vincula `id_user`.
-- **C.A. 4.2:** El sistema valida la regla **BR-GTC-06**. Si la persona no tiene una estancia activa, genera un registro en `gate_personnel_access_logs` con `status = 'DENTRO'`, `entry_timestamp = now()` e `id_guard_entry = auth.user_id`.
-- **C.A. 4.3:** Para marcar la salida de una persona, el guardia selecciona el registro activo con `status = 'DENTRO'`, actualizando la fila a `status = 'FUERA'`, marcando `exit_timestamp = now()` e insertando `id_guard_exit = auth.user_id`.
+- **Criterios de Aceptación:**
+  - **C.A. 4.1:** Al registrar una entrada peatonal (`person_type` $\in$ `['EMPLEADO', 'CONTRATISTA', 'VISITA', 'PROVEEDOR', 'CLIENTE']`), el guardia captura `external_name`, `external_company`, `external_id_number` (No. de INE/Identificación) y `visit_purpose`. Si es empleado, se vincula `id_user`.
+  - **C.A. 4.2:** El sistema valida la regla **BR-GTC-06**. Si la persona no tiene una estancia activa, genera un registro en `gate_personnel_access_logs` con `status = 'DENTRO'`, `entry_timestamp = now()` e `id_guard_entry = auth.user_id`.
+  - **C.A. 4.3:** Para marcar la salida de una persona, el guardia selecciona el registro activo con `status = 'DENTRO'`, actualizando la fila a `status = 'FUERA'`, marcando `exit_timestamp = now()` e insertando `id_guard_exit = auth.user_id`.
 
 ---
 
