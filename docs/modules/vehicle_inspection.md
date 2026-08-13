@@ -71,8 +71,6 @@ Comprende tres flujos de evaluación técnica:
   - **C.A. 1.4:** El usuario debe seleccionar manualmente el estado final (`APROBADO`, `RECHAZADO`, `APROBADO_CON_NC`) (**BR-VHI-01**).
   - **C.A. 1.5:** Un estado `RECHAZADO` debe bloquear de inmediato la asignación de rutas y salida del vehículo en caseta (**BR-VHI-03**).
 
----
-
 ### US-VHI-02: Captura de Inspección Post-Lavado Semanal (VLV)
 
 - **Como:** Colaborador del departamento de Calidad (`USER`, `LEADER`, `SUPERVISOR`, `MANAGER`).
@@ -82,8 +80,6 @@ Comprende tres flujos de evaluación técnica:
   - **C.A. 2.1:** El sistema debe autogenerar el folio único bajo el patrón `VLV-YY-####` (**BR-VHI-06**).
   - **C.A. 2.2:** La interfaz debe solicitar la selección del vehículo (`id_vehicle`), chofer asignado (`id_driver_user`) y almacenar el usuario autenticado como inspector (`id_inspector_user`).
   - **C.A. 2.3:** Al guardar con estatus `APROBADO`, el vehículo queda automáticamente habilitado para pasar inspecciones diarias IVI durante los siguientes 7 días naturales (**BR-VHI-04**).
-
----
 
 ### US-VHI-03: Captura de Inspección de Recepción de Mercancía (IVE)
 

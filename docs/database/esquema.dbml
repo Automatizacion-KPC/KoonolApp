@@ -1076,6 +1076,7 @@ Table quality_complaint_items {
   expiration_date date [not null]
   unit_package varchar [not null]               // Empaque unitario. "sales_uom" (SCO, BOL, BID)
   pieces_quantity numeric [not null]            // Número de bultos/piezas devueltas
+  weight_per_package numeric [not null]         // Peso unitario por empaque (kg)
   reported_weight_kg numeric [not null]         // Cantidad total neta KG
 
   // Checklist de Desviación
@@ -1141,15 +1142,16 @@ Table quality_recollection_authorizations {
   id_complaint uuid [not null, unique]        // Enlace 1:1 con la queja origen
   folio varchar [unique, not null]            // 'CAL-FOR-16-AA-#####'
 
-  id_driver_user uuid [not null]              // Chofer asignado
-  id_vehicle uuid [not null]                  // Unidad interna de la empresa
-  scheduled_date date [not null]              // Fecha programada de recolección
-  observations text 
-
-  status varchar [default: 'PROGRAMADO']       // 'PROGRAMADO', 'REPROGRAMADO', 'RECOLECTADO', 'ENTREGADO_ALMACEN'
+  id_driver_user uuid                         // Chofer asignado
+  id_vehicle uuid                             // Unidad interna de la empresa
+  scheduled_date date                         // Fecha programada de recolección
+  observations text
+  driver_observations text                    // Novedades/Inconformidades reportadas por el chofer en campo
+  
+  status varchar [default: 'PENDIENTE']       // 'PENDIENTE', 'PROGRAMADO', 'REPROGRAMADO', 'RECOLECTADO', 'ENTREGADO_ALMACEN'
   created_at timestamp [default: `now()`]
   updated_at timestamp
-  id_assigned_by uuid                         //Mando que programa la recolección
+  id_assigned_by uuid                         //Mando de logística que programa la recolección
   id_updated_by uuid
 
   indexes {
@@ -1169,6 +1171,7 @@ Table quality_recollection_authorization_details {
   // Queja original
   id_complaint_item uuid [not null]
 
+  unit_package varchar [not null]               // Empaque unitario. "sales_uom" (SCO, BOL, BID)
   pieces_to_recollect numeric [not null]    // Cuántos bultos tiene permiso de subir al camión Ej: 3.25
   weight_per_package numeric [not null]     // Ej: 1 kg
   total_weight_kg numeric [not null]        // Ej: 3.25 kg
@@ -1499,6 +1502,7 @@ Ref: quality_recollection_authorizations.id_complaint - quality_customer_complai
 Ref: quality_recollection_authorizations.id_vehicle > vehicles.id
 Ref: quality_recollection_authorizations.id_assigned_by > users.id
 Ref: quality_recollection_authorizations.id_updated_by > users.id
+Ref: quality_recollection_authorizations.id_driver_user > users.id
 Ref: quality_customer_complaints.id_quality_warehouse_reception - quality_warehouse_receptions.id
 
 // Relaciones del Detalle de Autorización de Recolección

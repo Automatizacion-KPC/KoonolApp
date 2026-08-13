@@ -61,8 +61,6 @@ El módulo de **Verificación de Vidrio y Plástico Quebradizo** digitaliza el c
   - **C.A. 1.2:** Al registrar un elemento, se debe validar la unicidad del `concept_code` y requerir de forma obligatoria `resource_scope`, `resource_type`, `category` y `location_or_model`.
   - **C.A. 1.3:** La desactivación de un elemento (`is_active = false`) lo excluye de futuras inspecciones mensuales sin afectar las verificaciones históricas registradas previamente (**BR-GBP-07**).
 
----
-
 ### US-GBP-02: Ejecución y Registro de la Verificación Mensual
 
 - **Como:** Colaborador del departamento de Calidad (`USER`, `LEADER`, `SUPERVISOR`, `MANAGER`).
@@ -74,8 +72,6 @@ El módulo de **Verificación de Vidrio y Plástico Quebradizo** digitaliza el c
   - **C.A. 2.3:** Para cada elemento, el usuario debe marcar `structure_status`, `operation_status` y `access_status` como `'C'` o `'NC'`.
   - **C.A. 2.4:** Si algún atributo es marcado como `'NC'`, la UI debe exigir la captura de `observations` y la selección de `corrective_action` (`REVISION` o `CAMBIO`). Si todos son `'C'`, `corrective_action` se guarda como `NULL` (**BR-GBP-03**).
   - **C.A. 2.5:** El usuario debe seleccionar manualmente el estatus general del encabezado (`COMPLETADO` o `CON_OBSERVACIONES`) (**BR-GBP-02**).
-
----
 
 ### US-GBP-03: Generación de No Conformidades por Elementos Defectuosos
 

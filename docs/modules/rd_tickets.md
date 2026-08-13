@@ -2,7 +2,9 @@
 
 El módulo de **Solicitud de Muestras y Desarrollos a I+D** gestiona la relación operativa e interdepartamental entre el equipo de Ventas y el laboratorio de I+D (Investigación y Desarrollo). Permite canalizar requerimientos técnicos del mercado (solicitudes de muestras, desarrollos desde cero o visitas técnicas), controlar la preparación y asignación de prototipos en el laboratorio, formalizar la entrega física al cliente mediante acuses de recibo y registrar la retroalimentación técnica/comercial posterior para el cierre del ciclo de innovación.
 
-## -:--
+---
+
+---
 
 ## 💼 Reglas de Negocio (Business Rules)
 

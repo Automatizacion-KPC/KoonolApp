@@ -1,6 +1,6 @@
 # 🔍 Módulo: Calidad - Devoluciones y Rechazos de Producto por Cliente (Customer Product Rejection - CPR)
 
-El módulo de Devoluciones y Rechazos de Producto por Cliente gestiona el flujo operativo, investigación técnica, dictamen y resolución ante no conformidades reportadas por el cliente. Abarca tanto reclamaciones posteriores a la entrega con mercancía en poder del cliente (**Con Posesión - CAL-FOR-01**) como rechazos inmediatos en ruta de reparto (**Sin Posesión - CAL-FOR-02**). Garantiza la trazabilidad de lotes/pesos, la ejecución de planes de acción correctiva y la aprobación administrativa/técnica interdepartamental; apoyándose de los subsistemas de recolección logística, recepción en almacén y registro central de no conformidades (Quality Management System - QMS).
+El módulo de **Devoluciones y Rechazos de Producto por Cliente** gestiona el flujo operativo, investigación técnica, dictamen y resolución ante no conformidades reportadas por el cliente. Abarca tanto reclamaciones posteriores a la entrega con mercancía en poder del cliente (**Con Posesión - CAL-FOR-01**) como rechazos inmediatos en ruta de reparto (**Sin Posesión - CAL-FOR-02**). Garantiza la trazabilidad de lotes/pesos, la ejecución de planes de acción correctiva y la aprobación administrativa/técnica interdepartamental; apoyándose de los subsistemas de recolección logística, recepción en almacén y registro central de no conformidades (Quality Management System - QMS).
 
 ---
 
@@ -69,7 +69,7 @@ El módulo de Devoluciones y Rechazos de Producto por Cliente gestiona el flujo 
 ### BR-CPR-09: Generación Automática de Orden de Recolección (Solo CAL-FOR-01)
 
 - **Descripción:** Cuando una queja para producto en posesión del cliente es autorizada y requiere el retorno del material, se automatiza el despacho logístico.
-- **Comportamiento Global:** Si `form_type = 'CAL-FOR-01'`, el estado es `AUTORIZADO` y `requires_recollection = true`, el backend genera automáticamente un registro en `quality_recollection_authorizations` (estado `PROGRAMADO`) y desglose en `quality_recollection_authorization_details`.
+- **Comportamiento Global:** Si `form_type = 'CAL-FOR-01'`, el estado es `AUTORIZADO` y `requires_recollection = true`, el backend genera automáticamente un registro en `quality_recollection_authorizations` (estado `PENDIENTE`) y desglose en `quality_recollection_authorization_details`.
 
 ### BR-CPR-10: Cierre Manual
 
@@ -119,10 +119,10 @@ El módulo de Devoluciones y Rechazos de Producto por Cliente gestiona el flujo 
 
 - **Como:** Gerente de Administración (`MANAGER`) y Gerente de Calidad (`MANAGER`).
 - **Quiero:** Revisar y firmar la aprobación del dictamen, detonar automáticamente la orden de recolección (si aplica) y cerrar el expediente.
-- **Para:** Validar la resolución financiera/comercial, asegurar el retorno logístico del material y registrar la No Conformidad en el SGC.
+- **Para:** Validar la resolución financiera/comercial, asegurar el retorno logístico del material.
 - **Criterios de Aceptación:**
   - **C.A. 4.1:** El `MANAGER` de Administración revisa el folio dictaminado y emite su firma (`id_admin_authorizer`, `admin_signature_at`), aprobando o rechazando el plan de acción. El estado cambia a `AUTORIZADO` o `RECHAZADO` (**BR-CPR-08**).
-  - **C.A. 4.2:** Si el folio es `CAL-FOR-01`, su estado es `AUTORIZADO` y `requires_recollection = true`, el sistema crea en automático la orden de recolección en `quality_recollection_authorizations` con estado `PROGRAMADO` (**BR-CPR-09**).
+  - **C.A. 4.2:** Si el folio es `CAL-FOR-01`, su estado es `AUTORIZADO` y `requires_recollection = true`, el sistema crea en automático la orden de recolección en `quality_recollection_authorizations` con estado `PENDIENTE` (**BR-CPR-09**).
   - **C.A. 4.3:** En solicitudes `CAL-FOR-01`, el seguimiento operativo actualiza el flujo conforme se recolecta (`RECOLECTADO`) y se recibe en planta (`RECIBIDO_ALMACEN`) (**BR-CPR-02**).
   - **C.A. 4.4:** Una vez concluidos los compromisos, el `MANAGER` de Calidad realiza el cierre manual del expediente cambiando el estado a `CERRADO` (**BR-CPR-10**).
 
@@ -266,11 +266,10 @@ graph TD
 #### Referencias
 
 - Reglas de Negocio (BR):
-  - **[BR-CPR-01]:** Integración del folio cerrado con la tabla central quality_non_conformities.
   - **[BR-CPR-02]:** Flujo Asincrónico y Secuencia de Estados por tipo de formato.
   - **[BR-CPR-08]:** Requisito de firmas conjuntas para mover a 'AUTORIZADO' o 'RECHAZADO'.
   - **[BR-CPR-09]:** Transición a 'RECOLECTADO' y 'RECIBIDO_ALMACEN' gatillada por el flujo logístico en CAL-FOR-01.
-  - **[BR-CPR-10]:** Cierre manual exclusivo por Gerencia de Calidad como detonante final del SGC.
+  - **[BR-CPR-10]:** Cierre manual exclusivo por Gerencia de Calidad.
 - Historias de Usuario (US):
   - **[US-CPR-01]:** Inicio de estados en CAL-FOR-01.
   - **[US-CPR-02]:** Precondición de recepción previa en rampa para CAL-FOR-02.
