@@ -1147,7 +1147,7 @@ Table quality_recollection_authorizations {
   scheduled_date date                         // Fecha programada de recolección
   observations text
   driver_observations text                    // Novedades/Inconformidades reportadas por el chofer en campo
-  
+
   status varchar [default: 'PENDIENTE']       // 'PENDIENTE', 'PROGRAMADO', 'REPROGRAMADO', 'RECOLECTADO', 'ENTREGADO_ALMACEN'
   created_at timestamp [default: `now()`]
   updated_at timestamp
@@ -1171,7 +1171,7 @@ Table quality_recollection_authorization_details {
   // Queja original
   id_complaint_item uuid [not null]
 
-  unit_package varchar [not null]               // Empaque unitario. "sales_uom" (SCO, BOL, BID)
+  unit_package varchar [not null]           // Empaque unitario. "sales_uom" (SCO, BOL, BID)
   pieces_to_recollect numeric [not null]    // Cuántos bultos tiene permiso de subir al camión Ej: 3.25
   weight_per_package numeric [not null]     // Ej: 1 kg
   total_weight_kg numeric [not null]        // Ej: 3.25 kg

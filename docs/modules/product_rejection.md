@@ -22,9 +22,10 @@ El módulo de **Devoluciones y Rechazos de Producto por Cliente** gestiona el fl
 - **Descripción:** El ciclo de vida de un folio se rige por la secuencia de estados de acuerdo con el tipo de formato.
 - **Comportamiento por Ruta:**
   - **Ruta `CAL-FOR-01` (Con Posesión):**
-    `ABIERTO` (Ventas) → `DICTAMINADO` (Calidad) → `AUTORIZADO` / `RECHAZADO` (Administración) → `RECOLECTADO` (Chofer) → `RECIBIDO_ALMACEN` (Almacén) → `CERRADO` (Calidad).
+    `ABIERTO (Ventas)` $\rightarrow$ `DICTAMINADO (Calidad)` $\rightarrow$ `AUTORIZADO / RECHAZADO (Administración)` $\rightarrow$ `RECOLECTADO (Evento Backend por Chofer)` $\rightarrow$ `RECIBIDO_ALMACEN (Evento Backend por Almacén)` $\rightarrow$ `CERRADO (Manual por Calidad)`
   - **Ruta `CAL-FOR-02` (Sin Posesión):**
-    Ocurre la recepción física previa en rampa (`quality_warehouse_receptions`). Posteriormente se genera la queja: `ABIERTO` (Calidad) → `DICTAMINADO` (Calidad) → `AUTORIZADO` / `RECHAZADO` (Administración) → `CERRADO` (Calidad).
+    Recepción física previa en rampa $\rightarrow$ `ABIERTO (Calidad)` $\rightarrow$ `DICTAMINADO (Calidad)` $\rightarrow$ `AUTORIZADO / RECHAZADO (Administración)` $\rightarrow$ `CERRADO (Manual por Calidad)`
+  - **Transiciones Automáticas:** Las transiciones a los estados `RECOLECTADO` y `RECIBIDO_ALMACEN` en `quality_customer_complaints` son ejecutadas automáticamente por eventos del backend al cambiar el estatus en los módulos de Recolección y Recepción respectivamente.
   - Las solicitudes `CAL-FOR-02` omiten por completo la orden de recolección y el estado `RECOLECTADO`.
 
 ### BR-CPR-03: Registro de Queja Con Posesión (CAL-FOR-01)
@@ -39,7 +40,7 @@ El módulo de **Devoluciones y Rechazos de Producto por Cliente** gestiona el fl
 - **Descripción:** Los rechazos inmediatos en ruta de reparto se originan a partir del reingreso físico de la unidad de transporte a rampa.
 - **Comportamiento Global:**
   - La mercancía es recepcionada en primera instancia por personal de rampa/almacén en la tabla `quality_warehouse_receptions`.
-  - El **MANAGER de Calidad** crea formalmente el expediente `CAL-FOR-02` en `quality_customer_complaints` asociando obligatoriamente el ID de la recepción previa (`id_quality_warehouse_reception`).
+  - El **MANAGER de Calidad** crea formalmente el expediente `CAL-FOR-02` en `quality_customer_complaints` asociando obligatoriamente el ID de la recepción física previa (`id_quality_warehouse_reception`). El sistema autocompletará en el formulario los campos id_client, id_sales_executive e invoice_reference con la información capturada por Almacén, sin embargo, mantendrá la facultad de editar manualmente estos tres campos antes de guardar.
 
 ### BR-CPR-05: Exclusividad Mutua en Desviaciones Logísticas Globales (CAL-FOR-02)
 
@@ -71,11 +72,13 @@ El módulo de **Devoluciones y Rechazos de Producto por Cliente** gestiona el fl
 - **Descripción:** Cuando una queja para producto en posesión del cliente es autorizada y requiere el retorno del material, se automatiza el despacho logístico.
 - **Comportamiento Global:** Si `form_type = 'CAL-FOR-01'`, el estado es `AUTORIZADO` y `requires_recollection = true`, el backend genera automáticamente un registro en `quality_recollection_authorizations` (estado `PENDIENTE`) y desglose en `quality_recollection_authorization_details`.
 
-### BR-CPR-10: Cierre Manual
+### BR-CPR-10: Cierre Manual del Expediente
 
-- **Descripción:** La conclusión definitiva de un folio de queja/devolución es una acción explícita ejecutada por Calidad.
+- **Descripción:** La conclusión definitiva de un folio de queja/devolución es una acción manual explícita y exclusiva ejecutada por el **MANAGER de Calidad**.
 - **Comportamiento Global:**
   - En estado `AUTORIZADO`, la transición a `CERRADO` es realizada manualmente por el **MANAGER de Calidad** tras verificar el cumplimiento de los compromisos en `quality_complaint_action_plans`.
+  - **Para CAL-FOR-01:** El sistema permitirá el cierre únicamente si la queja se encuentra en estado `RECIBIDO_ALMACEN` (o `RECHAZADO` en aprobación administrativa).
+  - **Para CAL-FOR-02:** El sistema permitirá el cierre únicamente si la queja se encuentra en estado `AUTORIZADO` (o `RECHAZADO`).
 
 ---
 
@@ -100,7 +103,7 @@ El módulo de **Devoluciones y Rechazos de Producto por Cliente** gestiona el fl
 - **Quiero:** Dar de alta un rechazo de producto retornado en ruta de reparto vinculándolo a su recepción física en rampa.
 - **Para:** Documentar la causa del rechazo inmediato y pasar el folio al proceso de dictamen y plan de acción.
 - **Criterios de Aceptación:**
-  - **C.A. 2.1:** El registro exige seleccionar una recepción existente previamente registrada en `quality_warehouse_receptions` (`id_quality_warehouse_reception`) (**BR-CPR-04**).
+  - **C.A. 2.1:** El registro exige seleccionar una recepción en rampa (`id_quality_warehouse_reception`). Al elegirla, la UI precargará automáticamente `id_client`, `id_sales_executive` e `invoice_reference`, permitiendo al **MANAGER de Calidad** la edición libre de estos campos en caso de requerir corrección (**BR-CPR-04**).
   - **C.A. 2.2:** Permite seleccionar únicamente una causa global de rechazo en ruta (`is_dev_*`) (**BR-CPR-05**) y desglosar las partidas afectadas.
   - **C.A. 2.3:** La carga de imágenes fotográficas es opcional (**BR-CPR-06**).
   - **C.A. 2.4:** Al guardar, se genera el folio `NCC-SP-YY-#####` en estado inicial `ABIERTO` (**BR-CPR-01**, **BR-CPR-02**).
@@ -123,8 +126,8 @@ El módulo de **Devoluciones y Rechazos de Producto por Cliente** gestiona el fl
 - **Criterios de Aceptación:**
   - **C.A. 4.1:** El `MANAGER` de Administración revisa el folio dictaminado y emite su firma (`id_admin_authorizer`, `admin_signature_at`), aprobando o rechazando el plan de acción. El estado cambia a `AUTORIZADO` o `RECHAZADO` (**BR-CPR-08**).
   - **C.A. 4.2:** Si el folio es `CAL-FOR-01`, su estado es `AUTORIZADO` y `requires_recollection = true`, el sistema crea en automático la orden de recolección en `quality_recollection_authorizations` con estado `PENDIENTE` (**BR-CPR-09**).
-  - **C.A. 4.3:** En solicitudes `CAL-FOR-01`, el seguimiento operativo actualiza el flujo conforme se recolecta (`RECOLECTADO`) y se recibe en planta (`RECIBIDO_ALMACEN`) (**BR-CPR-02**).
-  - **C.A. 4.4:** Una vez concluidos los compromisos, el `MANAGER` de Calidad realiza el cierre manual del expediente cambiando el estado a `CERRADO` (**BR-CPR-10**).
+  - **C.A. 4.3:** En solicitudes `CAL-FOR-01`, el estado de la queja actualizará automáticamente a `RECOLECTADO` cuando el chofer confirme en ruta, y a `RECIBIDO_ALMACEN` cuando se registre el reingreso en rampa (**BR-CPR-02**, **BR-QLR-04**, **BR-QLR-07**).
+  - **C.A. 4.4:** El botón de **"Cerrar Queja"** se habilitará para el **MANAGER de Calidad** únicamente si el folio está en `RECIBIDO_ALMACEN` (para **CAL-FOR-01**) o `AUTORIZADO` (para **CAL-FOR-02**). Al ejecutarlo, el estado pasará a `CERRADO` (**BR-CPR-10**).
 
 ---
 
