@@ -8,14 +8,14 @@ El módulo de **Devoluciones y Rechazos de Producto por Cliente** gestiona el fl
 
 ## 💼 Reglas de Negocio (Business Rules)
 
-### BR-CPR-01: Tipificación de Formatos, Folios Distintivos e Integración con el SGC
+### BR-CPR-01: Tipificación de Formatos, Folios Distintivos e Integración con el QMS
 
 - **Descripción:** Las solicitudes de devolución y rechazo deben clasificarse según la posesión física de la mercancía.
 - **Comportamiento Global:**
   - **`CAL-FOR-01` (Con Posesión):** Aplica cuando el cliente recibió formalmente el pedido y posteriormente reporta un reclamo. Genera folios con el prefijo `NCC-CP-YY-#####`.
   - **`CAL-FOR-02` (Sin Posesión):** Aplica cuando el cliente rechaza la entrega de forma inmediata en la unidad de transporte. Genera folios con el prefijo `NCC-SP-YY-#####`.
   - `YY` corresponde a los dos últimos dígitos del año en curso y `#####` a un consecutivo de 5 dígitos reiniciado anualmente.
-- **Integración SGC:** Al cambiar el estado del folio a `CERRADO`, el backend actualiza automáticamente el expediente vinculado en el sistema central de no conformidades (`quality_non_conformities`) con `source_type = 'RECLAMO_CLIENTE'`.
+- **Integración QMS:** Al cambiar el estado del folio a `CERRADO`, el backend actualiza automáticamente el expediente vinculado en el sistema central de no conformidades (`quality_non_conformities`) con `source_type = 'RECLAMO_CLIENTE'`.
 
 ### BR-CPR-02: Flujo Asincrónico y Secuencia de Estados
 
@@ -146,145 +146,153 @@ graph TD
     D --> E[Gerente de Calidad evalúa, registra causa raíz, solución y plan de acción]
     E --> F[Gerente de Calidad firma dictamen y define si requiere recolección]
     F --> G[Estado cambia a DICTAMINADO]
-    G --> H[Gerente de Administración revisa dictamen]
+    G --> H[Gerente de Administración revisa dictamen y firmante autorizador]
     H --> I{¿Aprobado por Administración?}
     I -- No --> J[Estado cambia a RECHAZADO]
     J --> K[Gerente de Calidad realiza Cierre Manual]
     I -- Sí --> L[Estado cambia a AUTORIZADO]
     L --> M{¿requires_recollection = true?}
     M -- No --> K
-    M -- Sí --> N[Sistema genera automáticamente Orden de Recolección]
-    N --> O[Logística realiza recolección en instalaciones del cliente]
-    O --> P[Estado cambia a RECOLECTADO]
-    P --> Q[Almacén y Calidad reciben mercancía en rampa]
-    Q --> R[Estado cambia a RECIBIDO_ALMACEN]
+    M -- Sí --> N[Backend genera automáticamente Orden de Recolección en PENDIENTE]
+    N --> O[Chofer confirma recolección en ruta]
+    O --> P[Backend actualiza estado a RECOLECTADO]
+    P --> Q[Almacén y Calidad registran reingreso en rampa]
+    Q --> R[Backend actualiza estado a RECIBIDO_ALMACEN]
     R --> K
     K --> S[Estado cambia a CERRADO]
-    S --> T[Fin del Proceso]
+    S --> T[Backend actualiza QMS quality_non_conformities con source_type = RECLAMO_CLIENTE]
+    T --> U[Fin del Proceso]
 ```
 
 #### Referencias
 
 - Reglas de Negocio (BR):
-  - **[BR-CPR-01]:** Tipificación de Formatos, Folios Distintivos e Integración con el SGC.
-  - **[BR-CPR-02]:** Flujo Asincrónico y Secuencia de Estados (Ruta CAL-FOR-01).
+  - **[BR-CPR-01]:** Tipificación de Formatos, Folios Distintivos (NCC-CP-YY-#####) e Integración con el QMS al Cierre.
+  - **[BR-CPR-02]:** Flujo Asincrónico, Secuencia de Estados (Ruta CAL-FOR-01) y Transiciones Automáticas del Backend.
   - **[BR-CPR-03]:** Registro de Queja Con Posesión (CAL-FOR-01) desde Ventas.
-  - **[BR-CPR-06]:** Obligatoriedad Condicional de Evidencia Fotográfica (Obligatoria en CAL-FOR-01).
-  - **[BR-CPR-07]:** Dictamen Técnico y Plan de Acción Mínimo.
+  - **[BR-CPR-06]:** Obligatoriedad Condicional de Evidencia Fotográfica (has_photo_evidence = true y URLs obligatorias).
+  - **[BR-CPR-07]:** Dictamen Técnico, Causa Raíz, Solución Final y Plan de Acción Mínimo.
   - **[BR-CPR-08]:** Matriz de Firmas y Doble Autorización (Calidad y Administración).
-  - **[BR-CPR-09]:** Generación Automática de Orden de Recolección (Solo CAL-FOR-01).
-  - **[BR-CPR-10]:** Cierre Manual.
+  - **[BR-CPR-09]:** Generación Automática de Orden de Recolección (Solo CAL-FOR-01 en AUTORIZADO y requires_recollection = true).
+  - **[BR-CPR-10]:** Cierre Manual Exclusivo por Gerente de Calidad tras verificar compromisos.
 - Historias de Usuario (US):
   - **[US-CPR-01]:** Levantamiento de Queja por Producto Con Posesión (CAL-FOR-01).
   - **[US-CPR-03]:** Dictamen Técnico, Análisis de Causa Raíz y Plan de Acción.
   - **[US-CPR-04]:** Autorización Administrativa, Disparo Logístico y Cierre del Folio.
 - Criterios de Aceptación (C.A):
-  - **[C.A-1.1]:** Captura de datos del cliente, remisión/factura y detalle de producto.
+  - **[C.A-1.1]:** Captura de datos del cliente, factura/remisión, productos, lotes, peso en KG y descripción.
   - **[C.A-1.2]:** Carga obligatoria de al menos una foto en photos_url.
-  - **[C.A-1.3]:** Generación de folio NCC-CP-YY-##### en estado 'ABIERTO'.
-  - **[C.A-3.1]:** Exigencia de causa raíz, solución final y plan de acción para dictaminar.
-  - **[C.A-3.2]:** Firma digital del Gerente de Calidad.
-  - **[C.A-4.1]:** Firma del Gerente de Administración para pasar a 'AUTORIZADO' o 'RECHAZADO'.
-  - **[C.A-4.2]:** Disparo automático de orden en quality_recollection_authorizations.
-  - **[C.A-4.3]:** Actualización a 'RECOLECTADO' y 'RECIBIDO_ALMACEN'.
-  - **[C.A-4.4]:** Cierre manual por Gerente de Calidad a 'CERRADO'.
+  - **[C.A-1.3]:** Generación de folio NCC-CP-YY-##### en estado ABIERTO.
+  - **[C.A-3.1]:** Exigencia de causa raíz, solución final, flag de recolección y plan de acción para dictaminar.
+  - **[C.A-3.2]:** Firma digital del Gerente de Calidad (id_quality_reviewer).
+  - **[C.A-4.1]:** Firma del Gerente de Administración (id_admin_authorizer) para pasar a AUTORIZADO o RECHAZADO.
+  - **[C.A-4.2]:** Disparo automático de orden en quality_recollection_authorizations (PENDIENTE).
+  - **[C.A-4.3]:** Actualización automática por eventos a RECOLECTADO y RECIBIDO_ALMACEN.
+  - **[C.A-4.4]:** Habilitación del botón "Cerrar Queja" y transición manual a CERRADO.
 
 ### 2. Flujo Operativo CAL-FOR-02: Rechazo Inmediato (Sin Posesión del Cliente)
 
 ```mermaid
 graph TD
-    A[Inicio: Unidad de reparto regresa a rampa con material rechazado] --> B[Almacén/Calidad registra ingreso en quality_warehouse_receptions]
-    B --> C[Sistema notifica a Gerencia de Calidad]
-    C --> D[Gerente de Calidad crea expediente CAL-FOR-02 asociando id_quality_warehouse_reception]
-    D --> E{¿Selecciona única causa global de rechazo?}
-    E -- No --> D
-    E -- Sí --> F[Sistema genera folio NCC-SP-YY-##### en estado ABIERTO]
-    F --> G[Gerente de Calidad captura causa raíz, solución final y plan de acción]
-    G --> H[Gerente de Calidad firma dictamen técnico]
-    H --> I[Estado cambia a DICTAMINADO]
-    I --> J[Gerente de Administración revisa dictamen]
-    J --> K{¿Aprobado por Administración?}
-    K -- No --> L[Estado cambia a RECHAZADO]
-    K -- Sí --> M[Estado cambia a AUTORIZADO]
-    L --> N[Gerente de Calidad realiza Cierre Manual]
-    M --> N
-    N --> O[Estado cambia a CERRADO]
-    O --> P[Fin del Proceso]
+    A[Inicio: Unidad de reparto regresa a rampa con material rechazado] --> B[Almacén/Rampa registra reingreso en quality_warehouse_receptions]
+    B --> C[MANAGER de Calidad crea expediente CAL-FOR-02 asociando id_quality_warehouse_reception]
+    C --> D[Sistema precarga cliente, ejecutivo y factura de la recepción]
+    D --> E[MANAGER de Calidad valida/edita datos y desglosa partidas]
+    E --> F{¿Selecciona una sola causa global de rechazo is_dev_*?}
+    F -- No --> E
+    F -- Sí --> G[Sistema genera folio NCC-SP-YY-##### en estado ABIERTO]
+    G --> H[MANAGER de Calidad captura causa raíz, solución final y plan de acción]
+    H --> I[MANAGER de Calidad firma dictamen técnico]
+    I --> J[Estado cambia a DICTAMINADO]
+    J --> K[MANAGER de Administración revisa dictamen y firmante autorizador]
+    K --> L{¿Aprobado por Administración?}
+    L -- No --> M[Estado cambia a RECHAZADO]
+    L -- Sí --> N[Estado cambia a AUTORIZADO]
+    M --> O[MANAGER de Calidad realiza Cierre Manual]
+    N --> O
+    O --> P[Estado cambia a CERRADO]
+    P --> Q[Backend actualiza QMS quality_non_conformities con source_type = RECLAMO_CLIENTE]
+    Q --> R[Fin del Proceso]
 ```
 
 #### Referencias
 
 - Reglas de Negocio (BR):
-  - **[BR-CPR-01]:** Tipificación de Formatos, Folios Distintivos e Integración con el SGC.
-  - **[BR-CPR-02]:** Flujo Asincrónico y Secuencia de Estados (Ruta CAL-FOR-02).
-  - **[BR-CPR-04]:** Registro de Rechazo Inmediato Sin Posesión (CAL-FOR-02) desde recepción en rampa.
-  - **[BR-CPR-05]:** Exclusividad Mutua en Desviaciones Logísticas Globales.
+  - **[BR-CPR-01]:** Tipificación de Formatos, Folios Distintivos (NCC-SP-YY-#####) e Integración QMS al Cierre.
+  - **[BR-CPR-02]:** Flujo Asincrónico y Secuencia de Estados (Ruta CAL-FOR-02, omite recolección).
+  - **[BR-CPR-04]:** Registro de Rechazo Inmediato Sin Posesión (CAL-FOR-02) con precargado y facultad de edición manual.
+  - **[BR-CPR-05]:** Exclusividad Mutua en Desviaciones Logísticas Globales (is*dev*\*).
   - **[BR-CPR-06]:** Evidencia fotográfica opcional en CAL-FOR-02.
   - **[BR-CPR-07]:** Dictamen Técnico y Plan de Acción Mínimo.
   - **[BR-CPR-08]:** Matriz de Firmas y Doble Autorización (Calidad y Administración).
-  - **[BR-CPR-10]:** Cierre Manual.
+  - **[BR-CPR-10]:** Cierre Manual Exclusivo por Gerente de Calidad desde AUTORIZADO o RECHAZADO.
 - Historias de Usuario (US):
   - **[US-CPR-02]:** Registro de Rechazo Inmediato Sin Posesión (CAL-FOR-02).
   - **[US-CPR-03]:** Dictamen Técnico, Análisis de Causa Raíz y Plan de Acción.
-  - **[US-CPR-04]:** Autorización Administrativa, Disparo Logístico y Cierre del Folio.
+  - **[US-CPR-04]:** Autorización Administrativa y Cierre del Folio.
 - Criterios de Aceptación (C.A):
-  - **[C.A-2.1]:** Exigencia de vincular una recepción existente en quality_warehouse_receptions.
-  - **[C.A-2.2]:** Selección exclusiva de una sola causa global de rechazo (is*dev*\*).
-  - **[C.A-2.3]:** Carga opcional de imágenes.
-  - **[C.A-2.4]:** Generación de folio NCC-SP-YY-##### en estado 'ABIERTO'.
+  - **[C.A-2.1]:** Selección obligatoria de id_quality_warehouse_reception, autocompletado y edición manual habilitada.
+  - **[C.A-2.2]:** Selección exclusiva de una sola causa global de rechazo (is*dev*\_).
+  - **[C.A-2.3]:** Carga opcional de evidencia fotográfica.
+  - **[C.A-2.4]:** Generación de folio NCC-SP-YY-##### en estado ABIERTO.
   - **[C.A-3.1]:** Captura de causa raíz, solución final y plan de acción para dictaminar.
-  - **[C.A-3.2]:** Firma digital de Calidad.
-  - **[C.A-4.1]:** Firma de Administración para pasar a 'AUTORIZADO' o 'RECHAZADO'.
-  - **[C.A-4.4]:** Transición a 'CERRADO' mediante acción explícita de Calidad.
+  - **[C.A-3.2]:** Firma digital del MANAGER de Calidad (id_quality_reviewer).
+  - **[C.A-4.1]:** Firma del MANAGER de Administración (id_admin_authorizer) para pasar a AUTORIZADO o RECHAZADO.
+  - **[C.A-4.4]:** Cierre explícito por el MANAGER de Calidad a CERRADO.
 
 ### 3. Diagrama de Transición de Estados y Disparadores del Folio
 
 ```mermaid
 graph TD
-    subgraph RUTA_CAL_FOR_01 [Ruta CAL-FOR-01: Con Posesión]
-        A1[ABIERTO] -->|Dictamen Calidad| B1[DICTAMINADO]
-        B1 -->|Firma Admin| C1{¿Dictamen?}
+    subgraph RUTA_CAL_FOR_01 [Ruta CAL-FOR-01: Con Posesión - NCC-CP-YY-#####]
+        A1[ABIERTO] -->|Firma Dictamen Calidad| B1[DICTAMINADO]
+        B1 -->|Firma Admin| C1{¿Dictamen Admin?}
         C1 -- Rechazado --> D1[RECHAZADO]
-        C1 -- Aprobado + Recol. --> E1[AUTORIZADO]
-        E1 -->|Driver Recolecta| F1[RECOLECTADO]
-        F1 -->|Ingreso Rampa| G1[RECIBIDO_ALMACEN]
-        G1 -->|Cierre Calidad| H1[CERRADO]
-        D1 -->|Cierre Calidad| H1
+        C1 -- Aprobado + requires_recollection=true --> E1[AUTORIZADO]
+        C1 -- Aprobado + requires_recollection=false --> E1_1[AUTORIZADO]
+        E1 -->|Evento Backend: Chofer Recolecta| F1[RECOLECTADO]
+        F1 -->|Evento Backend: Reingreso Rampa| G1[RECIBIDO_ALMACEN]
+        G1 -->|Cierre Manual Calidad| H1[CERRADO]
+        E1_1 -->|Cierre Manual Calidad| H1
+        D1 -->|Cierre Manual Calidad| H1
     end
 
-    subgraph RUTA_CAL_FOR_02 [Ruta CAL-FOR-02: Sin Posesión]
-        A2[Recepción Rampa Previa] -->|Captura Calidad| B2[ABIERTO]
-        B2 -->|Dictamen Calidad| C2[DICTAMINADO]
-        C2 -->|Firma Admin| D2{¿Dictamen?}
+    subgraph RUTA_CAL_FOR_02 [Ruta CAL-FOR-02: Sin Posesión - NCC-SP-YY-#####]
+        A2[Recepción Rampa Previa] -->|Registro Calidad + Vincular ID| B2[ABIERTO]
+        B2 -->|Firma Dictamen Calidad| C2[DICTAMINADO]
+        C2 -->|Firma Admin| D2{¿Dictamen Admin?}
         D2 -- Aprobado --> E2[AUTORIZADO]
         D2 -- Rechazado --> F2[RECHAZADO]
-        E2 -->|Cierre Calidad| G2[CERRADO]
-        F2 -->|Cierre Calidad| G2
+        E2 -->|Cierre Manual Calidad| G2[CERRADO]
+        F2 -->|Cierre Manual Calidad| G2
     end
 
-    H1 --> I1[Fin del Proceso]
-    G2 --> I1
+    H1 -->|Evento Backend: Sync QMS| I1[quality_non_conformities: source_type=RECLAMO_CLIENTE]
+    G2 -->|Evento Backend: Sync QMS| I1
+    I1 --> J1[FIN DEL CICLO DE VIDA]
 ```
 
 #### Referencias
 
 - Reglas de Negocio (BR):
+  - **[BR-CPR-01]:** Prefijos de folios (NCC-CP / NCC-SP) e integración automática con QMS al llegar a CERRADO.
   - **[BR-CPR-02]:** Flujo Asincrónico y Secuencia de Estados por tipo de formato.
-  - **[BR-CPR-08]:** Requisito de firmas conjuntas para mover a 'AUTORIZADO' o 'RECHAZADO'.
-  - **[BR-CPR-09]:** Transición a 'RECOLECTADO' y 'RECIBIDO_ALMACEN' gatillada por el flujo logístico en CAL-FOR-01.
-  - **[BR-CPR-10]:** Cierre manual exclusivo por Gerencia de Calidad.
+  - **[BR-CPR-08]:** Requisito de doble firma (Calidad y Administración) para mover a AUTORIZADO o RECHAZADO.
+  - **[BR-CPR-09]:** Generación automática de orden logística y eventos asincrónicos para transiciones a RECOLECTADO y RECIBIDO_ALMACEN.
+  - **[BR-CPR-10]:** Cierre manual exclusivo por Gerencia de Calidad diferenciado por tipo de formato (RECIBIDO_ALMACEN para CAL-FOR-01, AUTORIZADO para CAL-FOR-02).
 - Historias de Usuario (US):
-  - **[US-CPR-01]:** Inicio de estados en CAL-FOR-01.
-  - **[US-CPR-02]:** Precondición de recepción previa en rampa para CAL-FOR-02.
-  - **[US-CPR-03]:** Transición al estado 'DICTAMINADO'.
-  - **[US-CPR-04]:** Transiciones a 'AUTORIZADO', 'RECHAZADO', 'RECOLECTADO', 'RECIBIDO_ALMACEN' y 'CERRADO'.
+  - **[US-CPR-01]:** Inicio en ABIERTO para CAL-FOR-01.
+  - **[US-CPR-02]:** Precondición de recepción previa en rampa (id_quality_warehouse_reception) para CAL-FOR-02.
+  - **[US-CPR-03]:** Transición al estado DICTAMINADO.
+  - **[US-CPR-04]:** Transiciones a AUTORIZADO, RECHAZADO, RECOLECTADO, RECIBIDO_ALMACEN y CERRADO.
 - Criterios de Aceptación (C.A):
-  - **[C.A-1.3]:** Inicio en 'ABIERTO' para CAL-FOR-01.
-  - **[C.A-2.4]:** Inicio en 'ABIERTO' para CAL-FOR-02 tras recepción en almacén.
-  - **[C.A-3.3]:** Cambio a estado 'DICTAMINADO'.
-  - **[C.A-4.1]:** Cambio a 'AUTORIZADO' o 'RECHAZADO'.
-  - **[C.A-4.3]:** Avance operativo a 'RECOLECTADO' y 'RECIBIDO_ALMACEN'.
-  - **[C.A-4.4]:** Cierre explícito a 'CERRADO'.
+  - **[C.A-1.3]:** Estado inicial ABIERTO en CAL-FOR-01.
+  - **[C.A-2.4]:** Estado inicial ABIERTO en CAL-FOR-02.
+  - **[C.A-3.3]:** Transición a DICTAMINADO.
+  - **[C.A-4.1]:** Transición a AUTORIZADO o RECHAZADO.
+  - **[C.A-4.2]:** Disparo automático de orden de recolección en backend.
+  - **[C.A-4.3]:** Avance operativo a RECOLECTADO y RECIBIDO_ALMACEN mediante eventos backend.
+  - **[C.A-4.4]:** Habilitación condicional del botón de cierre y transición final a CERRADO.
 
 ---
 
