@@ -1141,6 +1141,7 @@ Table quality_recollection_authorizations {
   id uuid [primary key, not null]
   id_complaint uuid [not null, unique]        // Enlace 1:1 con la queja origen
   folio varchar [unique, not null]            // 'CAL-FOR-16-AA-#####'
+  invoice_reference varchar [not null]        // No. Factura o Remisión
 
   id_driver_user uuid                         // Chofer asignado
   id_vehicle uuid                             // Unidad interna de la empresa
@@ -1223,6 +1224,7 @@ Table quality_warehouse_receptions {
   is_mot_no_cash_total boolean [default: false]
   is_mot_no_cash_cod boolean [default: false]
   is_mot_wrong_location boolean [default: false]
+  is_mot_other boolean [default: false]
   mot_other_specify text
 
   // ACCIÓN A REALIZAR
@@ -1502,7 +1504,6 @@ Ref: quality_recollection_authorizations.id_complaint - quality_customer_complai
 Ref: quality_recollection_authorizations.id_vehicle > vehicles.id
 Ref: quality_recollection_authorizations.id_assigned_by > users.id
 Ref: quality_recollection_authorizations.id_updated_by > users.id
-Ref: quality_recollection_authorizations.id_driver_user > users.id
 Ref: quality_customer_complaints.id_quality_warehouse_reception - quality_warehouse_receptions.id
 
 // Relaciones del Detalle de Autorización de Recolección
