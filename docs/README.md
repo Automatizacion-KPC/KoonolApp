@@ -212,12 +212,18 @@ Cada nuevo archivo Markdown generado en la ruta `docs/modules/nombre-modulo.md` 
 
 [Breve descripción institucional del propósito del módulo y los procesos que digitaliza].
 
+---
+
+---
+
 ## 💼 Reglas de Negocio (Business Rules)
 
 ### BR-[SIGLAS]-[NÚMERO]: [Título de la Regla]
 
 - **Descripción:** [Explicación detallada de la lógica o validación técnica].
 - **Comportamiento Global:** [Impacto o comportamiento de la regla a nivel base de datos/backend].
+
+---
 
 ---
 
@@ -231,6 +237,8 @@ Cada nuevo archivo Markdown generado en la ruta `docs/modules/nombre-modulo.md` 
 - **Criterios de Aceptación:**
   - **C.A. [US].[REF]:** [Validación o restricción de UI/UX o Backend].
   - **C.A. [US].[REF]:** [Comportamiento esperado ligado a las tablas o campos].
+
+---
 
 ---
 
