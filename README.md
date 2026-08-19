@@ -180,6 +180,93 @@ Se abre un PR con destino a la rama `develop`.
 
 El código deberá ser revisado, auditado y aprobado por los roles con facultades globales de administración (**ADMIN** o **GOD**) antes de su fusión definitiva.
 
+## 5.4 Convención y Política de Mensajes de Commit
+
+Para mantener la trazabilidad entre el código y la documentación funcional del sistema (`docs/README.md`), todos los mensajes de commit deben seguir la especificación de **Conventional Commits** enriquecida con la nomenclatura oficial de **Módulos**, **Historias de Usuario (US)** y **Reglas de Negocio (BR)** del proyecto.
+
+### 📜 Estructura del Mensaje
+
+```text
+<tipo>(<módulo>/<capa>): <descripción imperativa> [<REFERENCIA_DOCUMENTACIÓN>]
+```
+
+#### 1. Tipos de Commit (`<tipo>`)
+
+- **`feat`**: Nueva funcionalidad para el usuario final (ligada a una US).
+- **`fix`**: Corrección de un error o bug en el código.
+- **`docs`**: Cambios exclusivamente en la documentación (`/docs` o `README.md`).
+- **`refactor`**: Reestructuración de código sin alterar su comportamiento externo o reglas de negocio.
+- **`style`**: Formateo de código, espacios, puntos y comas (sin cambios en lógica).
+- **`test`**: Añadir o modificar pruebas unitarias/integración.
+- **`chore`**: Tareas auxiliares (configuraciones, dependencias, scripts de build, `.gitignore`).
+
+#### 2. Alcance (`<módulo>/<capa>`)
+
+El alcance debe combinar la sigla oficial del módulo en minúsculas y la capa o directorio afectado del monorepo:
+
+##### Módulos Válidos (Siglas Oficiales):
+
+- **`usr`**: Core / Usuarios
+- **`soc`**: Social / Muro
+- **`prd`**: Productividad / Tareas
+- **`srm`**: Recepción de Muestras
+- **`rdr`**: Solicitudes I+D
+- **`hrm`**: Recursos Humanos
+- **`veh`**: Vehículos
+- **`gtc`**: Caseta / Accesos
+- **`wem`**: Equipo de Almacén
+- **`vhi`**: Calidad - Inspección Vehicular
+- **`gbp`**: Calidad - Vidrio y Plástico
+- **`cpr`**: Calidad - Devoluciones
+- **`qlr`**: Calidad/Logística - Recolección
+- **`qwr`**: Calidad - Recepción Almacén
+- **`global`**: Afecta a todo el ecosistema o utilidades comunes
+
+##### Capas Válidas:
+
+- `backend`
+- `frontend`
+- `mobile`
+- `database`
+- `docs`
+
+##### Sintaxis del Alcance:
+
+`módulo/capa`  
+_(Ejemplos: `vhi/backend`, `soc/frontend`, `qwr/database`, `global/docs`)_
+
+#### 3. Referencia a Documentación Funcional (`[US-XXX-YY]` / `[BR-XXX-YY]`)
+
+Al final del mensaje de commit (o en corchetes), es obligatorio hacer referencia al identificador técnico documentado en `docs/modules/`:
+
+- **Nuevas Funcionalidades:** Incluir el ID de la historia `[US-SIGLAS-XX]`.
+- **Ajustes por Reglas de Negocio:** Incluir el ID de la regla `[BR-SIGLAS-XX]`.
+- **Mantenimiento/Chore:** Si el commit no corresponde a una US/BR directa, se omite el corchete final o se usa `[chore]`.
+
+#### 📝 Ejemplos Correctos por Escenario:
+
+##### 🚀 Desarrollo de Historias de Usuario (`feat`)
+
+```bash
+git commit -m "feat(vhi/backend): crear endpoint para registro de precarga [US-VHI-01]"
+git commit -m "feat(soc/frontend): implementar componente de reacciones en muro [US-SOC-02]"
+git commit -m "feat(qwr/mobile): agregar captura de fotografías en recepción [US-QWR-03]"
+```
+
+##### 🛠️ Aplicación de Reglas de Negocio o Correcciones (fix / refactor)
+
+```bash
+git commit -m "fix(hrm/backend): validar límite de días de vacaciones según antigüedad [BR-HRM-02]"
+git commit -m "refactor(gtc/database): aplicar soft delete en bitácora de accesos [BR-GTC-01]"
+```
+
+##### 📖 Documentación y Mantenimiento (docs / chore)
+
+```bash
+git commit -m "docs(rdr/docs): actualizar diagrama Mermaid de solicitudes I+D"
+git commit -m "chore(global/backend): actualizar versión de TypeORM y drivers de postgres"
+```
+
 ---
 
 # 📖 6. Documentación Funcional y de Negocio

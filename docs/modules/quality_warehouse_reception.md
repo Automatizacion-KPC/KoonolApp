@@ -1,4 +1,4 @@
-# 👥 Módulo: Recepción de Devoluciones en Almacén (Quality Warehouse Receptions - QWR)
+# 🔍 Módulo: Calidad - Recepción de Devoluciones en Almacén (Quality Warehouse Receptions - QWR)
 
 El módulo de **Recepción de Devoluciones en Almacén** digitaliza y estandariza la bitácora operativa de entrada en rampa de mercancías devueltas, procedentes tanto de rechazos inmediatos en ruta de reparto (Sin Posesión - CAL-FOR-02) como de recolecciones autorizadas previamente (Con Posesión - CAL-FOR-01). Garantiza la captura imparcial de lotes, caducidades y pesajes por parte del personal de inspección en rampa, detonando de forma coordinada las transiciones de estado en el flujo global y alimentando el módulo de quejas de clientes.
 
