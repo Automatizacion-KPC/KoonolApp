@@ -286,6 +286,8 @@ La documentación detallada de cada vertical operativa se encuentra segmentada e
 - 🔍 [Módulo: Calidad, Devoluciones de Producto - CPR](./modules/product_rejection.md) - _Control de registros de Devoluciones._
 - 🚛 [Módulo: Calidad/Logistica, Recolección de Mercancías - QLR](./modules/product_recollection.md) - _Control de Recolección de Pedidos Devueltos._
 - 🔍 [Módulo: Calidad, Recepción Almacén - QWR](./modules/quality_warehouse_reception.md) - _Control de Recepciones en Almacén por Calidad._
+- 🔍 [Módulo: Calidad, No Conformidades - QNC](./modules/quality_nc) - _Control General de No Conformidades._
+- 🔔 [Módulo: Notificaciones - NTF](./modules/notifications.md) - _Notificaciones internas del Sistema._
 
 ---
 

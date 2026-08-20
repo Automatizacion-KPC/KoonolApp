@@ -220,6 +220,8 @@ El alcance debe combinar la sigla oficial del módulo en minúsculas y la capa o
 - **`cpr`**: Calidad - Devoluciones
 - **`qlr`**: Calidad/Logística - Recolección
 - **`qwr`**: Calidad - Recepción Almacén
+- **`qnc`**: Calidad - No Conformidades
+- **`ntf`**: Notificaciones
 - **`global`**: Afecta a todo el ecosistema o utilidades comunes
 
 ##### Capas Válidas:
