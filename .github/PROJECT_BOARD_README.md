@@ -170,7 +170,7 @@ El proyecto clasifica el trabajo en 6 tipos de tarjetas organizadas bajo una jer
   _Ejemplo:_ `DOCS-RDR: Actualizar diagrama Mermaid de flujo de solicitudes I+D`
 - **Corrección de Errores (Bugs):** `BUG-[SIGLAS]: [Descripción breve del fallo]`  
   _Ejemplo:_ `BUG-VHI: Error de renderizado en checklist de postlavado`
-- **Tareas Técnicas:** `CHORE-[CAPA/MÓDULO]: [Descripción del mantenimiento]`  
+- **Tareas Técnicas:** `CHORE-[MÓDULO/CAPA]: [Descripción del mantenimiento]`  
   _Ejemplo:_ `CHORE-GLOBAL/BACKEND: Actualizar versión de TypeORM y drivers PostgreSQL`
 
 ---
