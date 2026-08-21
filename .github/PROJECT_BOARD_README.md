@@ -7,7 +7,7 @@ Bienvenido al espacio de trabajo central de **KoonolApp** en GitHub Projects. Es
 ## 🧭 1. Visión del Proyecto y Alcance Operativo
 
 - **Propósito del Sistema:** Digitalizar, automatizar y auditar procesos operativos y formatos físicos (Calidad, Almacén, Vehículos, RH, etc.) no cubiertos por el ERP central.
-- **Arquitectura Monorepo Desacoplado:** Centralizado en 4 capas operativas (`/backend`, `/frontend`, `/mobile`, `/docs`).
+- **Arquitectura Monorepo Desacoplado:** Centralizado en carpetas operativas (`/backend`, `/frontend`, `/mobile`, `/docs`) y la capa `global` para archivos de raíz, infraestructura (Docker, CI/CD) y validaciones transversales.
 - **Regla de Oro de Alcance:** Este desarrollo **NO** gestiona transacciones comerciales o financieras directas (compras, ventas, divisa, impuestos), las cuales son facultad y responsabilidad exclusiva de SAP Business One.
 - **Integración:** Sincronización reactiva de catálogos maestros mediante SAP Service Layer y Webhooks en tiempo real.
 
@@ -151,7 +151,16 @@ El proyecto clasifica el trabajo en 6 tipos de tarjetas organizadas bajo una jer
 | **`ntf`**    | Notificaciones                  | Registro General de Notificaciones Internas              |
 | **`global`** | Transversal / Infraestructura   | Cambios en configuración global o librerías del monorepo |
 
-### 4.3 Estructura de Títulos en las Tarjetas
+### 4.3 Opciones de la Columna Capa Monorepo
+
+- **`backend`**: Servidor Node.js, Express, TypeORM, controladores y servicios API.
+- **`frontend`**: Aplicación web interactiva en React / Next.js.
+- **`mobile`**: Aplicación móvil para Android / iOS.
+- **`database`**: Scripts SQL, migraciones, esquemas DBML y modelos Entidad-Relación.
+- **`docs`**: Especificaciones funcionales (`.md`), historias de usuario, diagramas Mermaid y manuales en `/docs/`.
+- **`global`**: Configuraciones en la raíz del repositorio (`docker-compose.yml`, `.github/workflows/`), despliegue DevOps, certificación QA integral y herramientas transversales.
+
+### 4.4 Estructura de Títulos en las Tarjetas
 
 - **Historias de Usuario:** `US-[SIGLAS]-[NÚMERO]: [Descripción corta de la funcionalidad]`  
   _Ejemplo:_ `US-SOC-02: Publicar anuncios con imágenes en el muro`
@@ -178,7 +187,7 @@ Una tarjeta **NO** puede pasar al _"Sprint Backlog"_ ni asignarse a un desarroll
 - [ ] **Redacción Clarificada:** Está escrita en formato estándar de Historia de Usuario (_Como [rol] quiero [acción] para [beneficio]_) o especificación técnica.
 - [ ] **Criterios de Aceptación (C.A.):** Explica claramente qué condiciones específicas se deben cumplir para dar por buena la tarjeta.
 - [ ] **Reglas de Negocio Vinculadas:** Cita la regla de negocio (BR) o diagramas de flujo de `/docs/modules/` si modifica lógica o base de datos.
-- [ ] **Capas Identificadas:** Define claramente qué partes del monorepo se van a tocar (`/backend`, `/frontend`, `/mobile`, `/database` o `/docs`).
+- [ ] **Capas Identificadas:** Define claramente qué opción de la columna **Capa Monorepo** se modificará (`/backend`, `/frontend`, `/mobile`, `/database`, `/docs` o `global`).
 - [ ] **Estimada y Asignada:** Se discutió en la planeación del Sprint y se le asignó un nivel de esfuerzo.
 
 ### ✅ 5.2 Definition of Done (DoD) — ¿Está la tarjeta completamente terminada?
