@@ -730,7 +730,7 @@ Table equipment_maintenances {
 // Inspección Diaria (Pre-Carga)
 Table vehicle_daily_inspections {
   id uuid [primary key, not null]
-  folio varchar [unique, not null]                 // 'IVI-AA-#####'
+  folio varchar [unique, not null]                 // 'IVI-YY-#####'
   id_vehicle uuid [not null]
   id_inspector_user uuid [not null]
   id_driver_user uuid                              // Chofer asignado a la ruta del día
@@ -791,7 +791,7 @@ Table vehicle_daily_inspections {
 // Inspección Post-Lavado Semanal
 Table vehicle_wash_inspections {
   id uuid [primary key, not null]
-  folio varchar [unique, not null]                 // 'VLV-AA-#####'
+  folio varchar [unique, not null]                 // 'VLV-YY-#####'
   id_vehicle uuid [not null]
   id_inspector_user uuid [not null]
   id_driver_user uuid                              // Chofer asignado a la ruta del día
@@ -832,7 +832,7 @@ Table vehicle_wash_inspections {
 // Inspección de Recepción de Mercancía
 Table vehicle_reception_inspections {
   id uuid [primary key, not null]
-  folio varchar [unique, not null]                 // 'IVE-AA-#####'
+  folio varchar [unique, not null]                 // 'IVE-YY-#####'
   id_inspector_user uuid [not null]
 
   inspection_date date [not null]                  // FECHA DE REVISIÓN
@@ -960,7 +960,7 @@ Table glass_brittle_plastics {
 
 Table quality_glass_plastic_verifications {
   id uuid [primary key, not null]
-  folio varchar [unique, not null]                 // 'CAL-VVP-AA-#####'
+  folio varchar [unique, not null]                 // 'CAL-VVP-YY-#####'
   id_inspector_user uuid [not null]
   inspection_date date [not null] 
   inspection_time time [not null]
@@ -1020,7 +1020,7 @@ indexes {
 Table quality_customer_complaints {
   id uuid [primary key, not null]
   form_type varchar [not null]                    // 'CAL-FOR-01' (Con Posesión) o 'CAL-FOR-02' (Sin Posesión)
-  folio varchar [unique, not null]                // 'NCC-CP-AA-#####' o 'NCC-SP-AA-#####'
+  folio varchar [unique, not null]                // 'NCC-CP-YY-#####' o 'NCC-SP-YY-#####'
   status varchar [default: 'ABIERTO']             // 'ABIERTO', 'DICTAMINADO', 'AUTORIZADO', 'RECHAZADO', 'RECOLECTADO', 'RECIBIDO_ALMACEN', 'CERRADO'
 
   // Datos Generales del Documentos
@@ -1140,7 +1140,7 @@ indexes {
 Table quality_recollection_authorizations {
   id uuid [primary key, not null]
   id_complaint uuid [not null, unique]        // Enlace 1:1 con la queja origen
-  folio varchar [unique, not null]            // 'CAL-FOR-16-AA-#####'
+  folio varchar [unique, not null]            // 'CAL-FOR-16-YY-#####'
   invoice_reference varchar [not null]        // No. Factura o Remisión
 
   id_driver_user uuid                         // Chofer asignado
@@ -1192,7 +1192,7 @@ Table quality_recollection_authorization_details {
 // ALM-FOR-01: Recepción de Producto en Almacén
 Table quality_warehouse_receptions {
   id uuid [primary key, not null]
-  folio varchar [unique, not null]             // Folio 'ALM-AA-#####'
+  folio varchar [unique, not null]             // Folio 'ALM-YY-#####'
   id_inspector_user uuid [not null]            // Personal de Calidad/Almacén que recibe
   reception_date date [not null]
   reception_time time [not null]
@@ -1275,7 +1275,7 @@ Table quality_warehouse_reception_details {
 
 Table quality_non_conformities {
   id uuid [primary key, not null]
-  folio varchar [unique, not null]                 // Ej. 'NC-AA-#####'
+  folio varchar [unique, not null]                 // Ej. 'NC-YY-#####'
   status varchar [default: 'ABIERTA']              // 'ABIERTA', 'EN_PROCESO', 'VERIFICADA', 'CERRADA'
 
   source_type varchar [not null]                   // 'PRE_CARGA', 'POST_LAVADO', 'RECEPCION_MERCANCIA', 'VIDRIO_PLASTICO', 'RECLAMO_CLIENTE', 'MANUAL'

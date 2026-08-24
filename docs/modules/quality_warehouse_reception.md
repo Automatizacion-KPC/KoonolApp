@@ -83,7 +83,7 @@ El módulo de **Recepción de Devoluciones en Almacén** digitaliza y estandariz
   - **C.A. 1.1:** El formulario solicita obligatoriamente: fecha/hora de recepción, cliente (`id_client`), ejecutivo (`id_sales_executive`), tipo de devolución (`return_type` = `'PARCIAL'` o `'TOTAL'` determinado mediante cotejo contra el documento físico), referencia de factura (`invoice_reference`) y exactamente un motivo (`is_mot_*` = `true`).
   - **C.A. 1.2:** Si se selecciona `is_mot_other` = `true`, la UI exige la captura de `mot_other_specify`.
   - **C.A. 1.3:** Permite capturar renglones en `quality_warehouse_reception_details` ingresando `id_product`, `lot_number_received`, `expiration_date_received`, `unit_package`, `pieces_quantity` ($> 0$) y `total_weight_kg` ($> 0$). Un mismo producto puede repetirse si proviene de distintos lotes o caducidades.
-  - **C.A. 1.4:** Al guardar, se genera el folio `ALM-AA-#####` e `id_inspector_user`. El backend evalúa `invoice_reference`:
+  - **C.A. 1.4:** Al guardar, se genera el folio `ALM-YY-#####` e `id_inspector_user`. El backend evalúa `invoice_reference`:
     - Si la factura existe en una orden de recolección activa, asocia `id_recollection_authorization` e `id_complaint`, e invoca síncronamente la actualización de la recolección a `ENTREGADO_ALMACEN` y de la queja padre a `RECIBIDO_ALMACEN` (**BR-QWR-06**).
     - Evalúa el peso recibido contra el peso de la orden de recolección. Si la variación es mayor al $1\%$, genera una alerta de discrepancia para auditoría de Calidad (**BR-QWR-04**).
 
