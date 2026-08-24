@@ -1150,6 +1150,8 @@ Table quality_recollection_authorizations {
   driver_observations text                    // Novedades/Inconformidades reportadas por el chofer en campo
 
   status varchar [default: 'PENDIENTE']       // 'PENDIENTE', 'PROGRAMADO', 'REPROGRAMADO', 'RECOLECTADO', 'ENTREGADO_ALMACEN'
+  recollected_at timestamp
+  delivered_to_warehouse_at timestamp
   created_at timestamp [default: `now()`]
   updated_at timestamp
   id_assigned_by uuid                         //Mando de logística que programa la recolección
@@ -1172,6 +1174,8 @@ Table quality_recollection_authorization_details {
   // Queja original
   id_complaint_item uuid [not null]
 
+  lot_number varchar [not null]
+  expiration_date date [not null]
   unit_package varchar [not null]           // Empaque unitario. "sales_uom" (SCO, BOL, BID)
   pieces_to_recollect numeric [not null]    // Cuántos bultos tiene permiso de subir al camión Ej: 3.25
   weight_per_package numeric [not null]     // Ej: 1 kg
@@ -1234,6 +1238,10 @@ Table quality_warehouse_receptions {
 
   general_observations text                       // Línea de observaciones inferior
 
+  has_discrepancy boolean [default: false]
+  discrepancy_percentage numeric
+  discrepancy_notes text
+
   created_at timestamp [default: `now()`]
   updated_at timestamp
 
@@ -1255,6 +1263,9 @@ Table quality_warehouse_reception_details {
   id_reception uuid [not null]                    // Cabecera de ALM-FOR-01
   id_product uuid [not null]                      // Producto (Vínculo a tu tabla local de artículos)
 
+  id_recollection_authorization_detail uuid
+  id_complaint_item uuid
+
   // Lo que ingresa físicamente a la planta (Validación ciega)
   lot_number_received varchar [not null]   
   expiration_date_received date [not null]
@@ -1266,6 +1277,8 @@ Table quality_warehouse_reception_details {
     expiration_date_received [name: 'idx_quality_warehouse_reception_details_expiration']
     (id_reception, id_product) [name: 'idx_quality_warehouse_reception_details_reception_product']
     (id_product, lot_number_received) [name: 'idx_quality_warehouse_reception_details_product_lot']
+    id_recollection_authorization_detail [name: 'idx_quality_warehouse_reception_details_id_recollection_detail']
+    id_complaint_item [name: 'idx_quality_warehouse_reception_details_id_complaint_item']
   }
 }
 
@@ -1518,7 +1531,9 @@ Ref: quality_warehouse_reception_details.id_reception > quality_warehouse_recept
 Ref: quality_warehouse_reception_details.id_product > products.id
 Ref: quality_warehouse_receptions.id_sales_executive > users.id
 Ref: quality_warehouse_receptions.id_inspector_user > users.id
-Ref: quality_warehouse_receptions.id_updated_by > users.id 
+Ref: quality_warehouse_receptions.id_updated_by > users.id
+Ref: quality_warehouse_reception_details.id_recollection_authorization_detail > quality_recollection_authorization_details.id
+Ref: quality_warehouse_reception_details.id_complaint_item > quality_complaint_items.id
 
 // Relaciones del Control de Firmas y Responsables contra la Tabla de Usuarios Internos
 Ref: quality_customer_complaints.id_quality_reviewer > users.id
