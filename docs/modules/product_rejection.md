@@ -180,15 +180,15 @@ graph TD
   - **[US-CPR-03]:** Dictamen Técnico, Análisis de Causa Raíz y Plan de Acción.
   - **[US-CPR-04]:** Autorización Administrativa, Disparo Logístico y Cierre del Folio.
 - Criterios de Aceptación (C.A):
-  - **[C.A-1.1]:** Captura de datos del cliente, factura/remisión, productos, lotes, peso en KG y descripción.
-  - **[C.A-1.2]:** Carga obligatoria de al menos una foto en photos_url.
-  - **[C.A-1.3]:** Generación de folio NCC-CP-YY-##### en estado ABIERTO.
-  - **[C.A-3.1]:** Exigencia de causa raíz, solución final, flag de recolección y plan de acción para dictaminar.
-  - **[C.A-3.2]:** Firma digital del Gerente de Calidad (id_quality_reviewer).
-  - **[C.A-4.1]:** Firma del Gerente de Administración (id_admin_authorizer) para pasar a AUTORIZADO o RECHAZADO.
-  - **[C.A-4.2]:** Disparo automático de orden en quality_recollection_authorizations (PENDIENTE).
-  - **[C.A-4.3]:** Actualización automática por eventos a RECOLECTADO y RECIBIDO_ALMACEN.
-  - **[C.A-4.4]:** Habilitación del botón "Cerrar Queja" y transición manual a CERRADO.
+  - **[C.A 1.1]:** Captura de datos del cliente, factura/remisión, productos, lotes, peso en KG y descripción.
+  - **[C.A 1.2]:** Carga obligatoria de al menos una foto en photos_url.
+  - **[C.A 1.3]:** Generación de folio NCC-CP-YY-##### en estado ABIERTO.
+  - **[C.A 3.1]:** Exigencia de causa raíz, solución final, flag de recolección y plan de acción para dictaminar.
+  - **[C.A 3.2]:** Firma digital del Gerente de Calidad (id_quality_reviewer).
+  - **[C.A 4.1]:** Firma del Gerente de Administración (id_admin_authorizer) para pasar a AUTORIZADO o RECHAZADO.
+  - **[C.A 4.2]:** Disparo automático de orden en quality_recollection_authorizations (PENDIENTE).
+  - **[C.A 4.3]:** Actualización automática por eventos a RECOLECTADO y RECIBIDO_ALMACEN.
+  - **[C.A 4.4]:** Habilitación del botón "Cerrar Queja" y transición manual a CERRADO.
 
 ### 2. Flujo Operativo CAL-FOR-02: Rechazo Inmediato (Sin Posesión del Cliente)
 
@@ -231,14 +231,14 @@ graph TD
   - **[US-CPR-03]:** Dictamen Técnico, Análisis de Causa Raíz y Plan de Acción.
   - **[US-CPR-04]:** Autorización Administrativa y Cierre del Folio.
 - Criterios de Aceptación (C.A):
-  - **[C.A-2.1]:** Selección obligatoria de id_quality_warehouse_reception, autocompletado y edición manual habilitada.
-  - **[C.A-2.2]:** Selección exclusiva de una sola causa global de rechazo (is*dev*\_).
-  - **[C.A-2.3]:** Carga opcional de evidencia fotográfica.
-  - **[C.A-2.4]:** Generación de folio NCC-SP-YY-##### en estado ABIERTO.
-  - **[C.A-3.1]:** Captura de causa raíz, solución final y plan de acción para dictaminar.
-  - **[C.A-3.2]:** Firma digital del MANAGER de Calidad (id_quality_reviewer).
-  - **[C.A-4.1]:** Firma del MANAGER de Administración (id_admin_authorizer) para pasar a AUTORIZADO o RECHAZADO.
-  - **[C.A-4.4]:** Cierre explícito por el MANAGER de Calidad a CERRADO.
+  - **[C.A 2.1]:** Selección obligatoria de id_quality_warehouse_reception, autocompletado y edición manual habilitada.
+  - **[C.A 2.2]:** Selección exclusiva de una sola causa global de rechazo (is*dev*\_).
+  - **[C.A 2.3]:** Carga opcional de evidencia fotográfica.
+  - **[C.A 2.4]:** Generación de folio NCC-SP-YY-##### en estado ABIERTO.
+  - **[C.A 3.1]:** Captura de causa raíz, solución final y plan de acción para dictaminar.
+  - **[C.A 3.2]:** Firma digital del MANAGER de Calidad (id_quality_reviewer).
+  - **[C.A 4.1]:** Firma del MANAGER de Administración (id_admin_authorizer) para pasar a AUTORIZADO o RECHAZADO.
+  - **[C.A 4.4]:** Cierre explícito por el MANAGER de Calidad a CERRADO.
 
 ### 3. Diagrama de Transición de Estados y Disparadores del Folio
 
@@ -286,13 +286,13 @@ graph TD
   - **[US-CPR-03]:** Transición al estado DICTAMINADO.
   - **[US-CPR-04]:** Transiciones a AUTORIZADO, RECHAZADO, RECOLECTADO, RECIBIDO_ALMACEN y CERRADO.
 - Criterios de Aceptación (C.A):
-  - **[C.A-1.3]:** Estado inicial ABIERTO en CAL-FOR-01.
-  - **[C.A-2.4]:** Estado inicial ABIERTO en CAL-FOR-02.
-  - **[C.A-3.3]:** Transición a DICTAMINADO.
-  - **[C.A-4.1]:** Transición a AUTORIZADO o RECHAZADO.
-  - **[C.A-4.2]:** Disparo automático de orden de recolección en backend.
-  - **[C.A-4.3]:** Avance operativo a RECOLECTADO y RECIBIDO_ALMACEN mediante eventos backend.
-  - **[C.A-4.4]:** Habilitación condicional del botón de cierre y transición final a CERRADO.
+  - **[C.A 1.3]:** Estado inicial ABIERTO en CAL-FOR-01.
+  - **[C.A 2.4]:** Estado inicial ABIERTO en CAL-FOR-02.
+  - **[C.A 3.3]:** Transición a DICTAMINADO.
+  - **[C.A 4.1]:** Transición a AUTORIZADO o RECHAZADO.
+  - **[C.A 4.2]:** Disparo automático de orden de recolección en backend.
+  - **[C.A 4.3]:** Avance operativo a RECOLECTADO y RECIBIDO_ALMACEN mediante eventos backend.
+  - **[C.A 4.4]:** Habilitación condicional del botón de cierre y transición final a CERRADO.
 
 ---
 

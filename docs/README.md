@@ -260,8 +260,8 @@ graph TD
   - **[US-AAA-01]:** [Descripción breve de la Historia de Usuario]
   - **[US-AAA-02]:** [Descripción breve de la Historia de Usuario]
 - Criterios de Aceptación (C.A):
-  - **[C.A-01.1]:** [Descripción del criterio de aceptación específico]
-  - **[C.A-02.3]:** [Descripción del criterio de aceptación específico]
+  - **[C.A 01.1]:** [Descripción del criterio de aceptación específico]
+  - **[C.A 02.3]:** [Descripción del criterio de aceptación específico]
 ````
 
 ---

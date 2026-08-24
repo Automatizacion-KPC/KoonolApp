@@ -161,11 +161,11 @@ graph TD
   - **[US-QLR-04]:** Reprogramación de Recolecciones Pendientes
   - **[US-QLR-05]:** Cierre Automático por Recepción Física en Almacén
 - Criterios de Aceptación (C.A):
-  - **[C.A-2.3]:** Al guardar la asignación, el sistema registra id_assigned_by y pasa a PROGRAMADO
-  - **[C.A-3.3]:** Al confirmar recolección, el estado cambia a RECOLECTADO y actualiza la queja a RECOLECTADO
-  - **[C.A-4.2]:** Al confirmar nueva fecha, el estado cambia a REPROGRAMADO
-  - **[C.A-5.1]:** Identificación de queja/factura vinculada tras recepción física
-  - **[C.A-5.2]:** Actualización automática a ENTREGADO_ALMACEN en recolección y RECIBIDO_ALMACEN en queja
+  - **[C.A 2.3]:** Al guardar la asignación, el sistema registra id_assigned_by y pasa a PROGRAMADO
+  - **[C.A 3.3]:** Al confirmar recolección, el estado cambia a RECOLECTADO y actualiza la queja a RECOLECTADO
+  - **[C.A 4.2]:** Al confirmar nueva fecha, el estado cambia a REPROGRAMADO
+  - **[C.A 5.1]:** Identificación de queja/factura vinculada tras recepción física
+  - **[C.A 5.2]:** Actualización automática a ENTREGADO_ALMACEN en recolección y RECIBIDO_ALMACEN en queja
 
 ### 2. Generación Automática y Revisión Técnica de Calidad
 
@@ -201,10 +201,10 @@ graph TD
 - Historias de Usuario (US):
   - **[US-QLR-01]**: Edición Técnica, Ajuste de Mermas/Pesos e Instrucciones (Calidad)
 - Criterios de Aceptación (C.A):
-  - **[C.A-1.1]:** Muestra folios en PENDIENTE derivados de quejas de origen
-  - **[C.A-1.2]:** Validar que $0 < \text{pieces\_to\_recollect} \le \text{pieces\_quantity}$ de la queja
-  - **[C.A-1.3]:** Permitir captura o corrección directa de total_weight_kg
-  - **[C.A-1.4]:** Habilitar captura y guardado de observaciones técnicas
+  - **[C.A 1.1]:** Muestra folios en PENDIENTE derivados de quejas de origen
+  - **[C.A 1.2]:** Validar que $0 < \text{pieces\_to\_recollect} \le \text{pieces\_quantity}$ de la queja
+  - **[C.A 1.3]:** Permitir captura o corrección directa de total_weight_kg
+  - **[C.A 1.4]:** Habilitar captura y guardado de observaciones técnicas
 
 ### 3. Programación y Reprogramación Logística de Rutas
 
@@ -247,11 +247,11 @@ graph TD
   - **[US-QLR-02]:** Programación Logística de Ruta y Asignación
   - **[US-QLR-04]:** Reprogramación de Recolecciones Pendientes
 - Criterios de Aceptación (C.A):
-  - **[C.A-2.1]:** Filtro de choferes pertenecientes al departamento de Logística
-  - **[C.A-2.2]:** Filtro de unidades con estatus DISPONIBLE o EN_RUTA
-  - **[C.A-2.3]:** Registra id_assigned_by del usuario autenticado y pasa a PROGRAMADO
-  - **[C.A-4.1]:** Edición de fecha permitida únicamente en PROGRAMADO o REPROGRAMADO
-  - **[C.A-4.2]:** Transición automática a REPROGRAMADO al cambiar fecha
+  - **[C.A 2.1]:** Filtro de choferes pertenecientes al departamento de Logística
+  - **[C.A 2.2]:** Filtro de unidades con estatus DISPONIBLE o EN_RUTA
+  - **[C.A 2.3]:** Registra id_assigned_by del usuario autenticado y pasa a PROGRAMADO
+  - **[C.A 4.1]:** Edición de fecha permitida únicamente en PROGRAMADO o REPROGRAMADO
+  - **[C.A 4.2]:** Transición automática a REPROGRAMADO al cambiar fecha
 
 ### 4. Confirmación de Campo en App Móvil y Cierre Automático por Almacén
 
@@ -291,11 +291,11 @@ graph TD
   - **[US-QLR-03]:** Confirmación de Recolección en Domicilio del Cliente desde App
   - **[US-QLR-05]:** Cierre Automático por Recepción Física en Almacén
 - Criterios de Aceptación (C.A):
-  - **[C.A-3.1]:** Chofer visualiza asignaciones asociadas a su id_driver_user en PROGRAMADO o REPROGRAMADO
-  - **[C.A-3.2]:** Permite captura de texto opcional en driver_observations
-  - **[C.A-3.3]:** Actualización a RECOLECTADO, marca updated_at e invoca actualización de la queja a RECOLECTADO
-  - **[C.A-5.1]:** Identificación automática de queja/factura asociada al insertar recepción física
-  - **[C.A-5.2]:** Cierre automático a estado ENTREGADO_ALMACEN en recolección y RECIBIDO_ALMACEN en la queja
+  - **[C.A 3.1]:** Chofer visualiza asignaciones asociadas a su id_driver_user en PROGRAMADO o REPROGRAMADO
+  - **[C.A 3.2]:** Permite captura de texto opcional en driver_observations
+  - **[C.A 3.3]:** Actualización a RECOLECTADO, marca updated_at e invoca actualización de la queja a RECOLECTADO
+  - **[C.A 5.1]:** Identificación automática de queja/factura asociada al insertar recepción física
+  - **[C.A 5.2]:** Cierre automático a estado ENTREGADO_ALMACEN en recolección y RECIBIDO_ALMACEN en la queja
 
 ---
 
