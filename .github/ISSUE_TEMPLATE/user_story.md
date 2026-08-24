@@ -33,8 +33,8 @@ assignees: ""
 
 ## ✅ Criterios de Aceptación (C.A.)
 
-- [ ] **C.A.1.1:** [Condición técnica o funcional a cumplir]
-- [ ] **C.A.1.2:** [Segundo criterio de aceptación]
+- [ ] **C.A 1.1:** [Condición técnica o funcional a cumplir]
+- [ ] **C.A 1.2:** [Segundo criterio de aceptación]
 
 ---
 
