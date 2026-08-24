@@ -14,6 +14,10 @@ El módulo de **Recolección de Devoluciones** gestiona el ciclo operativo y la 
 - **Comportamiento Global:**
   - Se prohíbe la creación manual directa de autorizaciones de recolección; existe una relación de origen estricta 1:1 con la queja autorizada.
   - De forma síncrona, el backend poblará la tabla `quality_recollection_authorization_details` replicando las partidas de `quality_complaint_items`:
+    - `id_complaint_item` $\leftarrow$ `quality_complaint_items.id`
+    - `id_product` $\leftarrow$ `quality_complaint_items.id_product`
+    - `lot_number` $\leftarrow$ `quality_complaint_items.lot_number`
+    - `expiration_date` $\leftarrow$ `quality_complaint_items.expiration_date`
     - `unit_package` $\leftarrow$ `quality_complaint_items.unit_package`
     - `pieces_to_recollect` $\leftarrow$ `quality_complaint_items.pieces_quantity`
     - `weight_per_package` $\leftarrow$ `quality_complaint_items.weight_per_package`
@@ -39,8 +43,8 @@ El módulo de **Recolección de Devoluciones** gestiona el ciclo operativo y la 
   - **`PENDIENTE`:** Estado inicial al crearse de forma automatizada.
   - **`PROGRAMADO`:** Transición al guardar la asignación completa de chofer, vehículo y fecha programada.
   - **`REPROGRAMADO`:** Transición al actualizar `scheduled_date` en un registro `PROGRAMADO` o `REPROGRAMADO` previa ejecución.
-  - **`RECOLECTADO`:** Asentado en sitio por el chofer asignado desde la aplicación móvil/web; el backend disparará de forma síncrona la actualización del estado de la queja padre (`quality_customer_complaints.status`) a `RECOLECTADO`.
-  - **`ENTREGADO_ALMACEN`:** Transición automática disparada tras la recepción física en rampa.
+  - **`RECOLECTADO`:** Asentado en sitio por el chofer asignado desde la aplicación móvil/web; el backend registra la marca temporal en `recollected_at` y disparará de forma síncrona la actualización del estado de la queja padre (`quality_customer_complaints.status`) a `RECOLECTADO`.
+  - **`ENTREGADO_ALMACEN`:** Transición automática disparada tras la recepción física en rampa. Registra la marca temporal en `delivered_to_warehouse_at`.
 - **Comportamiento Global:** Las transiciones son secuenciales y no pueden violar el orden cronológico del flujo.
 
 ### BR-QLR-05: Ajuste Manual de Pesos por Pérdida/Incompletos y Tope de Piezas
