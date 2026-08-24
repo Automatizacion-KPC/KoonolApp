@@ -74,11 +74,11 @@ El módulo de **Devoluciones y Rechazos de Producto por Cliente** gestiona el fl
 
 ### BR-CPR-10: Cierre Manual del Expediente
 
-- **Descripción:** La conclusión definitiva de un folio de queja/devolución es una acción manual explícita y exclusiva ejecutada por el **MANAGER de Calidad**.
+- **Descripción:** La conclusión definitiva de un folio de queja/devolución es una acción manual explícita y exclusiva ejecutada por el **MANAGER de Calidad**. El seguimiento al cumplimiento de los compromisos en `quality_complaint_action_plans` es una responsabilidad estrictamente operativa del personal a cargo, fuera del alcance del sistema.
 - **Comportamiento Global:**
-  - En estado `AUTORIZADO`, la transición a `CERRADO` es realizada manualmente por el **MANAGER de Calidad** tras verificar el cumplimiento de los compromisos en `quality_complaint_action_plans`.
-  - **Para CAL-FOR-01:** El sistema permitirá el cierre únicamente si la queja se encuentra en estado `RECIBIDO_ALMACEN` (o `RECHAZADO` en aprobación administrativa).
-  - **Para CAL-FOR-02:** El sistema permitirá el cierre únicamente si la queja se encuentra en estado `AUTORIZADO` (o `RECHAZADO`).
+  - **Para CAL-FOR-01 con recolección (`requires_recollection = true`):** El sistema permitirá el cierre únicamente si el estado actual es `RECIBIDO_ALMACEN` (o `RECHAZADO`).
+  - **Para CAL-FOR-01 sin recoleccion (`requires_recollection = false`):** El sistema permitirá el cierre directamente cuando el estado se encuentre en `AUTORIZADO` (o `RECHAZADO`).
+  - **Para CAL-FOR-02:** El sistema permitirá el cierre únicamente si el estado se encuentra en `AUTORIZADO` (o `RECHAZADO`).
 
 ---
 
@@ -127,7 +127,10 @@ El módulo de **Devoluciones y Rechazos de Producto por Cliente** gestiona el fl
   - **C.A. 4.1:** El `MANAGER` de Administración revisa el folio dictaminado y emite su firma (`id_admin_authorizer`, `admin_signature_at`), aprobando o rechazando el plan de acción. El estado cambia a `AUTORIZADO` o `RECHAZADO` (**BR-CPR-08**).
   - **C.A. 4.2:** Si el folio es `CAL-FOR-01`, su estado es `AUTORIZADO` y `requires_recollection = true`, el sistema crea en automático la orden de recolección en `quality_recollection_authorizations` con estado `PENDIENTE` (**BR-CPR-09**).
   - **C.A. 4.3:** En solicitudes `CAL-FOR-01`, el estado de la queja actualizará automáticamente a `RECOLECTADO` cuando el chofer confirme en ruta, y a `RECIBIDO_ALMACEN` cuando se registre el reingreso en rampa (**BR-CPR-02**, **BR-QLR-04**, **BR-QLR-07**).
-  - **C.A. 4.4:** El botón de **"Cerrar Queja"** se habilitará para el **MANAGER de Calidad** únicamente si el folio está en `RECIBIDO_ALMACEN` (para **CAL-FOR-01**) o `AUTORIZADO` (para **CAL-FOR-02**). Al ejecutarlo, el estado pasará a `CERRADO` (**BR-CPR-10**).
+  - **C.A. 4.4:** El botón de **"Cerrar Queja"** se habilitará para el **MANAGER de Calidad** cuando se cumpla alguna de las siguientes condiciones:
+    - Folio `CAL-FOR-01` en estado `RECIBIDO_ALMACEN` o `RECHAZADO`.
+    - Folio `CAL-FOR-01` con `requires_recollection = false` en estado `AUTORIZADO`.
+    - Folio `CAL-FOR-02` en estado `AUTORIZADO` o `RECHAZADO`. Al ejecutar la acción, el estado pasará a `CERRADO`.
 
 ---
 
