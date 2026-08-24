@@ -10,7 +10,7 @@ El módulo de **Recolección de Devoluciones** gestiona el ciclo operativo y la 
 
 ### BR-QLR-01: Generación Automática del Encabezado y Mapeo de Partidas
 
-- **Descripción:** Cuando una queja (`quality_customer_complaints`) con `form_type = 'CAL-FOR-01'` transiciona a estado `AUTORIZADO` y posee el indicador `requires_recollection = true`, el backend creará en automático la orden en `quality_recollection_authorizations` (estado `PENDIENTE`, folio `CAL-FOR-16-YY-#####`).
+- **Descripción:** Cuando una queja (`quality_customer_complaints`) con `form_type = 'CAL-FOR-01'` transiciona a estado `AUTORIZADO` y posee el indicador `requires_recollection = true`, el backend creará en automático la orden en `quality_recollection_authorizations` (estado `PENDIENTE`, folio `LOG-YY-#####`).
 - **Comportamiento Global:**
   - Se prohíbe la creación manual directa de autorizaciones de recolección; existe una relación de origen estricta 1:1 con la queja autorizada.
   - De forma síncrona, el backend poblará la tabla `quality_recollection_authorization_details` replicando las partidas de `quality_complaint_items`:
@@ -82,7 +82,7 @@ El módulo de **Recolección de Devoluciones** gestiona el ciclo operativo y la 
 ### US-QLR-02: Programación Logística de Ruta y Asignación
 
 - **Como:** Colaborador con rol `LEADER`, `SUPERVISOR` o `MANAGER` del departamento de Logística.
-- **Quiero:** Asignar un operador, una unidad vehicular y una fecha programada al folio `CAL-FOR-16`.
+- **Quiero:** Asignar un operador, una unidad vehicular y una fecha programada al folio `LOG-YY-#####`.
 - **Para:** Incorporar la recolección a la planeación de rutas diarias de la empresa.
 - **Criterios de Aceptación:**
   - **C.A. 2.1:** El selector de choferes filtra y muestra únicamente usuarios pertenecientes al departamento de Logística (**BR-QLR-03**).
@@ -123,11 +123,11 @@ El módulo de **Recolección de Devoluciones** gestiona el ciclo operativo y la 
 
 ## 🔄 Diagramas de Flujo
 
-### 1. Ciclo de Vida y Transición de Estados del Folio CAL-FOR-16
+### 1. Ciclo de Vida y Transición de Estados del Folio LOG-YY-#####
 
 ```mermaid
 graph TD
-    A([Inicio: Queja quality_customer_complaints en estado AUTORIZADO con requires_recollection = true]) --> B[Backend genera orden CAL-FOR-16 en estado PENDIENTE y mapea partidas de forma síncrona]
+    A([Inicio: Queja quality_customer_complaints en estado AUTORIZADO con requires_recollection = true]) --> B[Backend genera orden LOG-YY-##### en estado PENDIENTE y mapea partidas de forma síncrona]
     B --> C[Manager de Calidad revisa y ajusta piezas, peso total u observaciones técnicas]
     C --> D[Logística asigna Chofer de Logística, Vehículo elegible y Fecha programada]
     D --> E[Estado transiciona a PROGRAMADO]
@@ -174,7 +174,7 @@ graph TD
     A([Evento: Queja quality_customer_complaints transiciona a AUTORIZADO]) --> B{¿form_type = CAL-FOR-01 y requires_recollection = true?}
     B -- No --> C([No genera orden de recolección])
     B -- Sí --> D[Backend crea registro en quality_recollection_authorizations]
-    D --> E["Estado inicial: PENDIENTE | Folio: CAL-FOR-16-YY-#####"]
+    D --> E["Estado inicial: PENDIENTE | Folio: LOG-YY-#####"]
     E --> F["Poblamiento síncrono en quality_recollection_authorization_details:<br/>- unit_package <- unit_package<br/>- pieces_to_recollect <- pieces_quantity<br/>- weight_per_package <- weight_per_package<br/>- total_weight_kg <- reported_weight_kg"]
 
     F --> G[Manager de Calidad ingresa al módulo QLR]

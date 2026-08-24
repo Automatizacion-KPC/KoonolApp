@@ -1140,7 +1140,7 @@ indexes {
 Table quality_recollection_authorizations {
   id uuid [primary key, not null]
   id_complaint uuid [not null, unique]        // Enlace 1:1 con la queja origen
-  folio varchar [unique, not null]            // 'CAL-FOR-16-YY-#####'
+  folio varchar [unique, not null]            // 'LOG-YY-#####'
   invoice_reference varchar [not null]        // No. Factura o Remisión
 
   id_driver_user uuid                         // Chofer asignado
