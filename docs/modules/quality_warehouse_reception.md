@@ -31,7 +31,7 @@ El módulo de **Recepción de Devoluciones en Almacén** digitaliza y estandariz
 
 - **Descripción:** La captura de lotes, piezas y kilogramos en `quality_warehouse_reception_details` se realiza por pesado y conteo físico directo en rampa.
 - **Comportamiento Global:**
-  - Los campos `total_weight_kg > 0` y `pieces_quantity > 0` y `unit_package` (por ejemplo: `'SCO'`, `'BOL'`, `'BID'`) son estrictamente obligatorios.
+  - Los campos `total_weight_kg > 0`, `pieces_quantity > 0`, `weight_per_package > 0` y `unit_package` (por ejemplo: `'SCO'`, `'BOL'`, `'BID'`) son estrictamente obligatorios.
   - **Control de Discrepancias:** Cuando la recepción esté vinculada a una recolección previa (`id_recollection_authorization`), el backend calculará la variación porcentual del peso total recibido contra el peso ordenado. Si la discrepancia supera el $1\%$ (límite universal), el backend marcará `has_discrepancy = true`, registrará el porcentaje en `discrepancy_percentage` y guardará la observación en `discrepancy_notes` para consulta de Calidad.
 
 ### BR-QWR-05: Carácter Informativo de la Acción a Realizar
@@ -50,23 +50,10 @@ El módulo de **Recepción de Devoluciones en Almacén** digitaliza y estandariz
     4. **Trigger Síncrono:** Actualiza `quality_customer_complaints.status` $\rightarrow$ `'RECIBIDO_ALMACEN'`.
   - **Para Rechazos Sin Posesión (`CAL-FOR-02`):** La recepción en rampa se crea sin orden de recolección (`id_recollection_authorization = NULL`) e `id_complaint` queda nulo momentáneamente. Cuando el Manager de Calidad crea la queja `CAL-FOR-02` asignando el ID de esta recepción, el backend actualiza `quality_warehouse_receptions.id_complaint` con la queja resultante.
 
-### BR-QWR-07: Asistencia de Mapeo y Responsabilidad Manual del Dictamen (CAL-FOR-02)
+### BR-QWR-07: Independencia entre Recepción en Rampa y Levantamiento de Queja (CAL-FOR-02)
 
-- **Descripción:** Al iniciar la creación de una queja sin posesión (**CAL-FOR-02**) vinculando una recepción de rampa, el sistema ofrecerá una sugerencia previa de clasificación basada en el motivo capturado en almacén. Sin embargo, el dictamen final, la selección de la causa global y el checklist de desviaciones son responsabilidad exclusiva y manual del **MANAGER de Calidad**.
-- **Comportamiento Global:**
-  - El **MANAGER de Calidad** conservará en todo momento la facultad y la obligación de confirmar, cambiar o modificar manualmente la causa global (`quality_customer_complaints.is_dev_*`) o las desviaciones por partida (`quality_complaint_items.is_dev_*`) según la investigación técnica antes de proceder con el guardado o dictamen.
-  - El sistema mapeará el motivo de rampa (`quality_warehouse_receptions.is_mot_*`) únicamente como una sugerencia de precarga en la UI del siguiente modo:
-
-| Motivo en Rampa (`quality_warehouse_receptions`)                                     | Causa Global / Checklist en Queja (`quality_customer_complaints`) |
-| :----------------------------------------------------------------------------------- | :---------------------------------------------------------------- |
-| `is_mot_not_found`, `is_mot_wrong_location`                                          | `is_dev_not_found = true` (Cliente no se encontraba)              |
-| `is_mot_delayed_delivery`, `is_mot_wait_time`, `is_mot_excess_customers`             | `is_dev_outside_hours = true` (Fuera de horario)                  |
-| `is_mot_no_cash_total`, `is_mot_no_cash_cod`                                         | `is_dev_payment_missing = true` (Falta de pago)                   |
-| `is_mot_customer_error`, `is_mot_sales_error`, `is_mot_driver_error`, `is_mot_other` | `is_dev_customer_rejected = true` (El cliente no lo quiso)        |
-| `is_mot_out_of_spec`                                                                 | `is_quality_deviation = true` (Detalle por partida)               |
-| `is_mot_safety_issue`                                                                | `is_food_safety_deviation = true` (Detalle por partida)           |
-| `is_mot_incomplete_weight`, `is_mot_incomplete_order`                                | `is_dev_incomplete_weight = true` (Detalle por partida)           |
-| `is_mot_picking_error`, `is_mot_documentation_error`                                 | `is_dev_wrong_product = true` (Detalle por partida)               |
+- **Descripción:** La captura de la recepción en almacén (**ALM-FOR-01**) y la creación del expediente de queja sin posesión (**CAL-FOR-02**) son registros totalmente independientes.
+- **Comportamiento Global:** Al crear el folio `CAL-FOR-02` seleccionando una recepción física en rampa (`id_quality_warehouse_reception`), la captura del motivo de devolución en rampa (`quality_warehouse_receptions.is_mot_*`) y la investigación de desviaciones en la queja (`quality_customer_complaints` / `quality_complaint_items`) son procesos completamente independientes. El motivo registrado por Almacén no precargará ni limitará la causa global ni el checklist de desviaciones que el MANAGER de Calidad determine en el módulo CPR.
 
 ---
 
@@ -82,7 +69,7 @@ El módulo de **Recepción de Devoluciones en Almacén** digitaliza y estandariz
 - **Criterios de Aceptación:**
   - **C.A. 1.1:** El formulario solicita obligatoriamente: fecha/hora de recepción, cliente (`id_client`), ejecutivo (`id_sales_executive`), tipo de devolución (`return_type` = `'PARCIAL'` o `'TOTAL'` determinado mediante cotejo contra el documento físico), referencia de factura (`invoice_reference`) y exactamente un motivo (`is_mot_*` = `true`).
   - **C.A. 1.2:** Si se selecciona `is_mot_other` = `true`, la UI exige la captura de `mot_other_specify`.
-  - **C.A. 1.3:** Permite capturar renglones en `quality_warehouse_reception_details` ingresando `id_product`, `lot_number_received`, `expiration_date_received`, `unit_package`, `pieces_quantity` ($> 0$) y `total_weight_kg` ($> 0$). Un mismo producto puede repetirse si proviene de distintos lotes o caducidades.
+  - **C.A. 1.3:** Permite capturar renglones en `quality_warehouse_reception_details` ingresando `id_product`, `lot_number_received`, `expiration_date_received`, `unit_package`, `pieces_quantity` ($> 0$), `weight_per_package` ($> 0$) y `total_weight_kg` ($> 0$). Un mismo producto puede repetirse si proviene de distintos lotes o caducidades.
   - **C.A. 1.4:** Al guardar, se genera el folio `ALM-YY-#####` e `id_inspector_user`. El backend busca la referencia de factura (`invoice_reference`) en las órdenes de recolección activas. Al encontrar coincidencia, enlaza `id_recollection_authorization` e `id_complaint`, transicionando los estados correspondientes a `ENTREGADO_ALMACEN` y `RECIBIDO_ALMACEN`. Si la diferencia entre el peso recibido y el ordenado supera el $1\%$, asienta `has_discrepancy = true` y registra la diferencia en `discrepancy_percentage`.
 
 ### US-QWR-02: Asignación Informativa de Acción a Realizar por Dirección de Calidad
