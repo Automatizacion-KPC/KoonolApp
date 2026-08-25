@@ -1238,10 +1238,6 @@ Table quality_warehouse_receptions {
 
   general_observations text                       // Línea de observaciones inferior
 
-  has_discrepancy boolean [default: false]
-  discrepancy_percentage numeric
-  discrepancy_notes text
-
   created_at timestamp [default: `now()`]
   updated_at timestamp
 
@@ -1272,6 +1268,11 @@ Table quality_warehouse_reception_details {
   total_weight_kg numeric [not null]              // Cantidad total kg
   pieces_quantity numeric [not null]              // Número de piezas
   unit_package varchar [not null]                 // Empaque unitario (SCO, BOL, BID)
+  weight_per_package numeric [not null]
+
+  has_discrepancy boolean [default: false]
+  discrepancy_percentage numeric
+  discrepancy_notes text
 
   indexes {
     expiration_date_received [name: 'idx_quality_warehouse_reception_details_expiration']
