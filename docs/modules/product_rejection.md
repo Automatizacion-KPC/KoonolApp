@@ -1,6 +1,6 @@
 # 🔍 Módulo: Calidad - Devoluciones y Rechazos de Producto por Cliente (Customer Product Rejection - CPR)
 
-El módulo de **Devoluciones y Rechazos de Producto por Cliente** gestiona el flujo operativo, investigación técnica, dictamen y resolución ante no conformidades reportadas por el cliente. Abarca tanto reclamaciones posteriores a la entrega con mercancía en poder del cliente (**Con Posesión - CAL-FOR-01**) como rechazos inmediatos en ruta de reparto (**Sin Posesión - CAL-FOR-02**). Garantiza la trazabilidad de lotes/pesos, la ejecución de planes de acción correctiva y la aprobación administrativa/técnica interdepartamental; apoyándose de los subsistemas de recolección logística, recepción en almacén y registro central de no conformidades (Quality Management System - QMS).
+El módulo de **Devoluciones y Rechazos de Producto por Cliente** gestiona el flujo operativo, investigación técnica, dictamen y resolución ante no conformidades reportadas por el cliente. Abarca tanto reclamaciones posteriores a la entrega con mercancía en poder del cliente (**Con Posesión - CAL-FOR-01**) como rechazos inmediatos en ruta de reparto (**Sin Posesión - CAL-FOR-02**). Garantiza la trazabilidad de lotes/pesos, la ejecución de planes de acción correctiva y la aprobación administrativa/técnica interdepartamental; apoyándose de los subsistemas de recolección logística, recepción en almacén y registro central de no conformidades (QNC).
 
 ---
 
@@ -8,14 +8,14 @@ El módulo de **Devoluciones y Rechazos de Producto por Cliente** gestiona el fl
 
 ## 💼 Reglas de Negocio (Business Rules)
 
-### BR-CPR-01: Tipificación de Formatos, Folios Distintivos e Integración con el QMS
+### BR-CPR-01: Tipificación de Formatos, Folios Distintivos e Integración con el QNC
 
 - **Descripción:** Las solicitudes de devolución y rechazo deben clasificarse según la posesión física de la mercancía.
 - **Comportamiento Global:**
   - **`CAL-FOR-01` (Con Posesión):** Aplica cuando el cliente recibió formalmente el pedido y posteriormente reporta un reclamo. Genera folios con el prefijo `NCC-CP-YY-#####`.
   - **`CAL-FOR-02` (Sin Posesión):** Aplica cuando el cliente rechaza la entrega de forma inmediata en la unidad de transporte. Genera folios con el prefijo `NCC-SP-YY-#####`.
   - `YY` corresponde a los dos últimos dígitos del año en curso y `#####` a un consecutivo de 5 dígitos reiniciado anualmente.
-- **Integración QMS:** Al cambiar el estado del folio a `CERRADO`, el backend actualiza automáticamente el expediente vinculado en el sistema central de no conformidades (`quality_non_conformities`) con `source_type = 'RECLAMO_CLIENTE'`.
+- **Integración QNC:** Al cambiar el estado del folio a `CERRADO`, el backend actualiza automáticamente el expediente vinculado en el sistema central de no conformidades (`quality_non_conformities`) con `source_type = 'RECLAMO_CLIENTE'`.
 
 ### BR-CPR-02: Flujo Asincrónico y Secuencia de Estados
 
@@ -24,7 +24,7 @@ El módulo de **Devoluciones y Rechazos de Producto por Cliente** gestiona el fl
   - **Ruta `CAL-FOR-01` (Con Posesión):**
     `ABIERTO (Ventas)` $\rightarrow$ `DICTAMINADO (Calidad)` $\rightarrow$ `AUTORIZADO / RECHAZADO (Administración)` $\rightarrow$ `RECOLECTADO (Evento Backend por Chofer)` $\rightarrow$ `RECIBIDO_ALMACEN (Evento Backend por Almacén)` $\rightarrow$ `CERRADO (Manual por Calidad)`
   - **Ruta `CAL-FOR-02` (Sin Posesión):**
-    Recepción física previa en rampa $\rightarrow$ `ABIERTO (Calidad)` $\rightarrow$ `DICTAMINADO (Calidad)` $\rightarrow$ `AUTORIZADO / RECHAZADO (Administración)` $\rightarrow$ `CERRADO (Manual por Calidad)`
+    Recepción física previa en rampa $\rightarrow$ `RECIBIDO_ALMACEN (Calidad)` $\rightarrow$ `DICTAMINADO (Calidad)` $\rightarrow$ `AUTORIZADO / RECHAZADO (Administración)` $\rightarrow$ `CERRADO (Manual por Calidad)`
   - **Transiciones Automáticas:** Las transiciones a los estados `RECOLECTADO` y `RECIBIDO_ALMACEN` en `quality_customer_complaints` son ejecutadas automáticamente por eventos del backend al cambiar el estatus en los módulos de Recolección y Recepción respectivamente.
   - Las solicitudes `CAL-FOR-02` omiten por completo la orden de recolección y el estado `RECOLECTADO`.
 
@@ -57,7 +57,7 @@ El módulo de **Devoluciones y Rechazos de Producto por Cliente** gestiona el fl
 ### BR-CPR-07: Dictamen Técnico y Plan de Acción Mínimo
 
 - **Descripción:** Para que un folio pueda avanzar al estado `DICTAMINADO`, el departamento de Calidad debe documentar el análisis técnico y los compromisos de solución.
-- **Comportamiento Global:** El backend impide la transición a `DICTAMINADO` si no se ha capturado el análisis de causa raíz (`root_cause_analysis`), la solución final (`final_solution`), la definición del flag `requires_recollection` (booleano) y al menos un registro activo en la tabla `quality_complaint_action_plans`.
+- **Comportamiento Global:** El backend impide la transición a `DICTAMINADO` si no se ha capturado el análisis de causa raíz (`root_cause_analysis`), la solución final (`final_solution`), la definición del flag `requires_recollection` (booleano) y al menos un registro activo en la tabla `quality_complaint_action_plans`.Si `form_type = 'CAL-FOR-02'`, el backend forzará automáticamente `requires_recollection = false` e inhabilitará su edición en la interfaz.
 
 ### BR-CPR-08: Matriz de Firmas y Doble Autorización
 
@@ -78,7 +78,7 @@ El módulo de **Devoluciones y Rechazos de Producto por Cliente** gestiona el fl
 - **Comportamiento Global:**
   - **Para CAL-FOR-01 con recolección (`requires_recollection = true`):** El sistema permitirá el cierre únicamente si el estado actual es `RECIBIDO_ALMACEN` (o `RECHAZADO`).
   - **Para CAL-FOR-01 sin recoleccion (`requires_recollection = false`):** El sistema permitirá el cierre directamente cuando el estado se encuentre en `AUTORIZADO` (o `RECHAZADO`).
-  - **Para CAL-FOR-02:** El sistema permitirá el cierre únicamente si el estado se encuentra en `AUTORIZADO` (o `RECHAZADO`).
+  - **Para CAL-FOR-02:** El sistema permitirá el cierre únicamente si el estado se encuentra en `AUTORIZADO` (o `RECHAZADO`), habiendo iniciado previamente desde `RECIBIDO_ALMACEN`.
 
 ---
 
@@ -106,7 +106,7 @@ El módulo de **Devoluciones y Rechazos de Producto por Cliente** gestiona el fl
   - **C.A. 2.1:** El registro exige seleccionar una recepción en rampa (`id_quality_warehouse_reception`). Al elegirla, la UI precargará automáticamente `id_client`, `id_sales_executive` e `invoice_reference`, permitiendo al **MANAGER de Calidad** la edición libre de estos campos en caso de requerir corrección (**BR-CPR-04**).
   - **C.A. 2.2:** Permite seleccionar únicamente una causa global de rechazo en ruta (`is_dev_*`) (**BR-CPR-05**) y desglosar las partidas afectadas.
   - **C.A. 2.3:** La carga de imágenes fotográficas es opcional (**BR-CPR-06**).
-  - **C.A. 2.4:** Al guardar, se genera el folio `NCC-SP-YY-#####` en estado inicial `ABIERTO` (**BR-CPR-01**, **BR-CPR-02**).
+  - **C.A. 2.4:** Al guardar, se genera el folio `NCC-SP-YY-#####` en estado inicial `RECIBIDO_ALMACEN` (**BR-CPR-01**, **BR-CPR-02**).
 
 ### US-CPR-03: Dictamen Técnico, Análisis de Causa Raíz y Plan de Acción
 
@@ -163,14 +163,14 @@ graph TD
     Q --> R[Backend actualiza estado a RECIBIDO_ALMACEN]
     R --> K
     K --> S[Estado cambia a CERRADO]
-    S --> T[Backend actualiza QMS quality_non_conformities con source_type = RECLAMO_CLIENTE]
+    S --> T[Backend actualiza QNC quality_non_conformities con source_type = RECLAMO_CLIENTE]
     T --> U[Fin del Proceso]
 ```
 
 #### Referencias
 
 - Reglas de Negocio (BR):
-  - **[BR-CPR-01]:** Tipificación de Formatos, Folios Distintivos (NCC-CP-YY-#####) e Integración con el QMS al Cierre.
+  - **[BR-CPR-01]:** Tipificación de Formatos, Folios Distintivos (NCC-CP-YY-#####) e Integración con el QNC al Cierre.
   - **[BR-CPR-02]:** Flujo Asincrónico, Secuencia de Estados (Ruta CAL-FOR-01) y Transiciones Automáticas del Backend.
   - **[BR-CPR-03]:** Registro de Queja Con Posesión (CAL-FOR-01) desde Ventas.
   - **[BR-CPR-06]:** Obligatoriedad Condicional de Evidencia Fotográfica (has_photo_evidence = true y URLs obligatorias).
@@ -214,14 +214,14 @@ graph TD
     M --> O[MANAGER de Calidad realiza Cierre Manual]
     N --> O
     O --> P[Estado cambia a CERRADO]
-    P --> Q[Backend actualiza QMS quality_non_conformities con source_type = RECLAMO_CLIENTE]
+    P --> Q[Backend actualiza QNC quality_non_conformities con source_type = RECLAMO_CLIENTE]
     Q --> R[Fin del Proceso]
 ```
 
 #### Referencias
 
 - Reglas de Negocio (BR):
-  - **[BR-CPR-01]:** Tipificación de Formatos, Folios Distintivos (NCC-SP-YY-#####) e Integración QMS al Cierre.
+  - **[BR-CPR-01]:** Tipificación de Formatos, Folios Distintivos (NCC-SP-YY-#####) e Integración QNC al Cierre.
   - **[BR-CPR-02]:** Flujo Asincrónico y Secuencia de Estados (Ruta CAL-FOR-02, omite recolección).
   - **[BR-CPR-04]:** Registro de Rechazo Inmediato Sin Posesión (CAL-FOR-02) con precargado y facultad de edición manual.
   - **[BR-CPR-05]:** Exclusividad Mutua en Desviaciones Logísticas Globales (is*dev*\*).
@@ -270,15 +270,15 @@ graph TD
         F2 -->|Cierre Manual Calidad| G2
     end
 
-    H1 -->|Evento Backend: Sync QMS| I1[quality_non_conformities: source_type=RECLAMO_CLIENTE]
-    G2 -->|Evento Backend: Sync QMS| I1
+    H1 -->|Evento Backend: Sync QNC| I1[quality_non_conformities: source_type=RECLAMO_CLIENTE]
+    G2 -->|Evento Backend: Sync QNC| I1
     I1 --> J1[FIN DEL CICLO DE VIDA]
 ```
 
 #### Referencias
 
 - Reglas de Negocio (BR):
-  - **[BR-CPR-01]:** Prefijos de folios (NCC-CP / NCC-SP) e integración automática con QMS al llegar a CERRADO.
+  - **[BR-CPR-01]:** Prefijos de folios (NCC-CP / NCC-SP) e integración automática con QNC al llegar a CERRADO.
   - **[BR-CPR-02]:** Flujo Asincrónico y Secuencia de Estados por tipo de formato.
   - **[BR-CPR-08]:** Requisito de doble firma (Calidad y Administración) para mover a AUTORIZADO o RECHAZADO.
   - **[BR-CPR-09]:** Generación automática de orden logística y eventos asincrónicos para transiciones a RECOLECTADO y RECIBIDO_ALMACEN.
