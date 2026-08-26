@@ -86,3 +86,134 @@ El módulo de **Recepción de Devoluciones en Almacén** digitaliza y estandariz
   - **C.A. 2.1:** La UI permite al usuario con rol **MANAGER** consultar el listado de recepciones y editar únicamente la sección "Acción a Realizar" (`act_*`) de un folio guardado (**BR-QWR-05**).
   - **C.A. 2.2:** La UI permite seleccionar como máximo una acción (`act_product_change`, `act_reschedule_delivery` o `act_order_cancellation`). Al seleccionar una, desmarca automáticamente las demás (**BR-QWR-05**).
   - **C.A. 2.3:** Al guardar, el backend asienta `id_updated_by` y `updated_at`, manteniendo intacta la información original registrada por el inspector. El sistema despliega un aviso recordando que la resolución comercial y contable formal debe asentarse en el Módulo de Quejas (**BR-QWR-05**).
+
+---
+
+---
+
+## 🔄 Diagramas de Flujo
+
+### 1. Proceso de Inspección y Registro de Recepción en Rampa
+
+```mermaid
+graph TD
+    A["Inicio: Llegada de mercancía devuelta a rampa"] --> B["Cotejar física y documentalmente Factura / Remisión"]
+    B --> C{"¿Reingresa la totalidad del pedido amparado?"}
+    C -- Sí --> D["Asignar return_type = 'TOTAL'"]
+    C -- No --> E["Asignar return_type = 'PARCIAL'"]
+
+    D --> F["Capturar cabecera: Fecha, Cliente, Ejecutivo, Ref. Factura"]
+    E --> F
+
+    F --> G["Seleccionar Motivo de Devolución (Exclusivo)"]
+    G --> H{"¿Motivo seleccionado es 'Otro' (is_mot_other)?"}
+    H -- Sí --> I["Captura obligatoria de mot_other_specify"]
+    H -- No --> J["Captura ciega de detalles del producto"]
+    I --> J
+
+    J --> K["Ingresar: id_product, lote, caducidad, empaque, piezas, pesajes"]
+    K --> L{"¿Piezas > 0, Peso/Bulto > 0 y Peso Total > 0?"}
+    L -- No --> M["Rechazar renglón / Mostrar alerta en UI"]
+    M --> K
+    L -- Sí --> N["Guardar Registro de Recepción"]
+    N --> O["Backend genera Folio ALM-YY-##### e id_inspector_user"]
+    O --> P["Fin del Registro en Rampa"]
+```
+
+#### Referencias
+
+- Reglas de Negocio (BR):
+  - **[BR-QWR-01]:** Inmutabilidad del Registro de Recepción (Bitácora de Control).
+  - **[BR-QWR-02]:** Exclusividad Mutua en Motivos de Devolución y justificación Obligatoria para Motivo "Otro".
+  - **[BR-QWR-03]:** Determinación del Tipo de Devolución por Documento Físico.
+  - **[BR-QWR-04]:** Captura Ciega de Detalles de Producto, Agrupación y Notificación de Discrepancias.
+- Historias de Usuario (US):
+  - **[US-QWR-01]:** Registro e Inspección en Rampa y Disparo de Eventos.
+- Criterios de Aceptación (C.A):
+  - **[C.A 1.1]:** Validación de datos obligatorios en cabecera y selección de exactamente un motivo.
+  - **[C.A 1.2]:** Justificación textual requerida al marcar el motivo "Otro".
+  - **[C.A 1.3]:** Captura ciega con valores de pesaje y piezas estrictamente mayores a cero.
+
+### 2. Vinculación de Origen, Validación de Discrepancias y Transiciones Síncronas
+
+```mermaid
+graph TD
+    A["Inicio: Evento post-inserción de recepción ALM-YY-#####"] --> B{"¿invoice_reference existe en QLR con estatus PROGRAMADO, REPROGRAMADO o RECOLECTADO?"}
+
+    B -- Sí (Con Posesión CAL-FOR-01) --> C["Enlazar id_recollection_authorization e id_complaint"]
+    C --> D["Actualizar QLR status -> 'ENTREGADO_ALMACEN' y delivered_to_warehouse_at"]
+    D --> E["Actualizar CPR status -> 'RECIBIDO_ALMACEN'"]
+    E --> F["Agrupar partidas por id_product (Sumar totales recibidos vs autorizados)"]
+
+    F --> G{"¿Variación de Peso > 1% O Piezas Recibidas != Piezas Autorizadas?"}
+    G -- Sí --> H["Iterar renglones de la recepción para el id_product"]
+    H --> I["Asentar en renglones: has_discrepancy = true, discrepancy_percentage y discrepancy_notes"]
+    G -- No --> J["Asentar en renglones: has_discrepancy = false"]
+
+    B -- No (Sin Posesión CAL-FOR-02) --> K["Asignar id_recollection_authorization = NULL e id_complaint = NULL"]
+    K --> L["Esperar creación de expediente CAL-FOR-02 por el Manager de Calidad"]
+    L --> M["Iniciar Transacción DB"]
+    M --> N["Crear registro en quality_customer_complaints"]
+    N --> O["Actualizar id_complaint en quality_warehouse_receptions"]
+    O --> P{"¿Transacción exitosa?"}
+    P -- Sí --> Q["Commit Transacción"]
+    P -- No --> R["Rollback Transacción"]
+
+    I --> S["Fin del Proceso Backend"]
+    J --> S
+    Q --> S
+    R --> S
+```
+
+#### Referencias
+
+- Reglas de Negocio (BR):
+  - **[BR-QWR-04]:** Captura Ciega de Detalles de Producto, Agrupación y Notificación de Discrepancias.
+  - **[BR-QWR-06]:** Vinculación de Origen, Llaves Foráneas y Eventos Síncronos.
+  - **[BR-QWR-07]:** Independencia entre Recepción en Rampa y Levantamiento de Queja (CAL-FOR-02).
+- Historias de Usuario (US):
+  - **[US-QWR-01]:** Registro e Inspección en Rampa y Disparo de Eventos.
+- Criterios de Aceptación (C.A):
+  - **[C.A 1.4]:** Búsqueda de coincidencia por factura, vinculación de folios, actualización síncrona de estatus y cálculo consolidado de discrepancias por producto.
+
+### 3. Asignación Informativa de Acción a Realizar en Rampa
+
+```mermaid
+graph TD
+    A["Inicio: Manager de Calidad consulta Bitácora de Recepciones"] --> B["Seleccionar Folio ALM-YY-#####"]
+    B --> C["Habilitar edición exclusiva de la sección 'Acción a Realizar' (act_*)"]
+    C --> D{"Seleccionar Acción Informativa"}
+
+    D -- Cambio de Producto --> E["Marcar act_product_change = true"]
+    D -- Reprogramación --> F["Marcar act_reschedule_delivery = true"]
+    D -- Cancelación --> G["Marcar act_order_cancellation = true"]
+
+    E --> H["Desactivar automáticamente las demás banderas (Exclusividad Mutua)"]
+    F --> H
+    G --> H
+
+    H --> I["Guardar Cambios"]
+    I --> J["Backend asienta updated_at e id_updated_by"]
+    J --> K["Mantener inmutables la cabecera original e ítems registrados por el Inspector"]
+    K --> L["Desplegar aviso: 'Resolución formal debe asentarse en el Módulo de Quejas'"]
+    L --> M["Fin de la Asignación Informativa"]
+```
+
+#### Referencias
+
+- Reglas de Negocio (BR):
+  - **[BR-QWR-01]:** Inmutabilidad del Registro de Recepción (Bitácora de Control).
+  - **[BR-QWR-05]:** Carácter Informativo de la Acción a Realizar.
+- Historias de Usuario (US):
+  - **[US-QWR-02]:** Asignación Informativa de Acción a Realizar por Dirección de Calidad.
+- Criterios de Aceptación (C.A):
+  - **[C.A 2.1]:** Restricción de edición exclusiva para el rol MANAGER sobre campos act\_\*.
+  - **[C.A 2.2]:** Exclusividad mutua en la selección de acciones.
+  - **[C.A 2.3]:** Registro de auditoría (updated_at, id_updated_by), preservación de inmutabilidad y despliegue de aviso legal/administrativo.
+
+---
+
+---
+
+- ⬆️ [Volver arriba](#)
+- 📖 [Ir al Índice](../README.md#-5-índice-de-módulos-funcionales)
