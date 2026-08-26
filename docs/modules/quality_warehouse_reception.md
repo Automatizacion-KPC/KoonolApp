@@ -27,12 +27,15 @@ El módulo de **Recepción de Devoluciones en Almacén** digitaliza y estandariz
   - `'TOTAL'`: Si reingresa la totalidad del pedido/partidas amparadas en el documento físico.
   - `'PARCIAL'`: Si reingresa únicamente una fracción del volumen o ciertas partidas del documento físico.
 
-### BR-QWR-04: Captura Ciega de Detalles de Producto y Notificación de Discrepancias
+### BR-QWR-04: Captura Ciega de Detalles de Producto, Agrupación y Notificación de Discrepancias
 
-- **Descripción:** La captura de lotes, piezas y kilogramos en `quality_warehouse_reception_details` se realiza por pesado y conteo físico directo en rampa.
+- **Descripción:** La captura de lotes, piezas y kilogramos en `quality_warehouse_reception_details` se realiza por pesado y conteo físico directo en rampa sin precargar los lotes esperados (captura ciega).
 - **Comportamiento Global:**
-  - Los campos `total_weight_kg > 0`, `pieces_quantity > 0`, `weight_per_package > 0` y `unit_package` (por ejemplo: `'SCO'`, `'BOL'`, `'BID'`) son estrictamente obligatorios.
-  - **Control de Discrepancias:** Cuando la recepción esté vinculada a una recolección previa (`id_recollection_authorization`), el backend calculará la variación porcentual del peso total recibido contra el peso ordenado. Si la discrepancia supera el $1\%$ (límite universal), el backend marcará `has_discrepancy = true`, registrará el porcentaje en `discrepancy_percentage` y guardará la observación en `discrepancy_notes` para consulta de Calidad.
+  - Los campos `total_weight_kg > 0`, `pieces_quantity > 0`, `weight_per_package > 0` y `unit_package` (por ejemplo: `'SCO'`, `'BOL'`, `'BID'`) son estrictamente obligatorios a nivel de renglón.
+  - **Evaluación de Discrepancias:** Cuando la recepción esté vinculada a una recolección previa (`id_recollection_authorization`), el backend consolidará la información **agrupando las partidas por `id_product`** (sumando los totales autorizados en QLR vs. los totales recibidos en QWR) para evitar fallos por inconsistencia en número de lote.
+  - **Detonación de Discrepancia:** El backend marcará `has_discrepancy = true`, registrará el porcentaje en `discrepancy_percentage` y guardará el detalle en `discrepancy_notes` si al agrupar por `id_product` se cumple cualquiera de las siguientes dos condiciones:
+    1. **Variación en Peso:** La variación porcentual del peso total recibido contra el peso ordenado excede el $1\%$ ($|\text{Peso Recibido} - \text{Peso Ordenado}| / \text{Peso Ordenado} > 0.01$).
+    2. **Diferencia en Bultos/Piezas:** La sumatoria de `pieces_quantity` física recibida es distinta a la sumatoria de `pieces_to_recollect` autorizada.
 
 ### BR-QWR-05: Carácter Informativo de la Acción a Realizar
 
@@ -70,7 +73,7 @@ El módulo de **Recepción de Devoluciones en Almacén** digitaliza y estandariz
   - **C.A. 1.1:** El formulario solicita obligatoriamente: fecha/hora de recepción, cliente (`id_client`), ejecutivo (`id_sales_executive`), tipo de devolución (`return_type` = `'PARCIAL'` o `'TOTAL'` determinado mediante cotejo contra el documento físico), referencia de factura (`invoice_reference`) y exactamente un motivo (`is_mot_*` = `true`).
   - **C.A. 1.2:** Si se selecciona `is_mot_other` = `true`, la UI exige la captura de `mot_other_specify`.
   - **C.A. 1.3:** Permite capturar renglones en `quality_warehouse_reception_details` ingresando `id_product`, `lot_number_received`, `expiration_date_received`, `unit_package`, `pieces_quantity` ($> 0$), `weight_per_package` ($> 0$) y `total_weight_kg` ($> 0$). Un mismo producto puede repetirse si proviene de distintos lotes o caducidades.
-  - **C.A. 1.4:** Al guardar, se genera el folio `ALM-YY-#####` e `id_inspector_user`. El backend busca la referencia de factura (`invoice_reference`) en las órdenes de recolección activas con estatus `PROGRAMADO`, `REPROGRAMADO` o `RECOLECTADO`. Al encontrar coincidencia, enlaza `id_recollection_authorization` e `id_complaint`, transicionando los estados correspondientes a `ENTREGADO_ALMACEN` y `RECIBIDO_ALMACEN`. Si la diferencia entre el peso recibido y el ordenado supera el $1\%$, asienta `has_discrepancy = true` y registra la diferencia en `discrepancy_percentage`.
+  - **C.A. 1.4:** Al guardar, se genera el folio `ALM-YY-#####` e `id_inspector_user`. El backend busca la referencia de factura (`invoice_reference`) en las órdenes de recolección activas con estatus `PROGRAMADO`, `REPROGRAMADO` o `RECOLECTADO`. Al encontrar coincidencia, enlaza `id_recollection_authorization` e `id_complaint`, transicionando los estados correspondientes a `ENTREGADO_ALMACEN` y `RECIBIDO_ALMACEN`. El backend agrupa las partidas por `id_product` y compara las sumatorias de peso y piezas contra la orden de recolección; si el peso varía más del $1\%$ **O** la cantidad de piezas no coincide exactamente, asienta `has_discrepancy = true`, calcula `discrepancy_percentage` e ingresa la nota correspondiente.
 
 ### US-QWR-02: Asignación Informativa de Acción a Realizar por Dirección de Calidad
 
