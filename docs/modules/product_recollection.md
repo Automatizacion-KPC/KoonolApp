@@ -43,7 +43,7 @@ El módulo de **Recolección de Devoluciones** gestiona el ciclo operativo y la 
   - **`PENDIENTE`:** Estado inicial al crearse de forma automatizada.
   - **`PROGRAMADO`:** Transición al guardar la asignación completa de chofer, vehículo y fecha programada.
   - **`REPROGRAMADO`:** Transición al actualizar `scheduled_date` en un registro `PROGRAMADO` o `REPROGRAMADO` previa ejecución.
-  - **`RECOLECTADO`:** Asentado en sitio por el chofer asignado desde la aplicación móvil/web; el backend registra la marca temporal en `recollected_at` y disparará de forma síncrona la actualización del estado de la queja padre (`quality_customer_complaints.status`) a `RECOLECTADO`.
+  - **`RECOLECTADO`:** Asentado en sitio de forma obligatoria por el chofer asignado desde la aplicación móvil/web; el backend registra la marca temporal en `recollected_at` y disparará de forma síncrona la actualización del estado de la queja padre (`quality_customer_complaints.status`) a `RECOLECTADO`.
   - **`ENTREGADO_ALMACEN`:** Transición automática disparada tras la recepción física en rampa. Registra la marca temporal en `delivered_to_warehouse_at`.
 - **Comportamiento Global:** Las transiciones son secuenciales y no pueden violar el orden cronológico del flujo.
 
