@@ -1162,6 +1162,7 @@ Table quality_recollection_authorizations {
     (scheduled_date, status) [name: 'idx_quality_recollection_authorizations_schedule_status']
     (id_driver_user, scheduled_date) [name: 'idx_quality_recollection_authorizations_driver_schedule']
     (id_vehicle, scheduled_date) [name: 'idx_quality_recollection_authorizations_vehicle_schedule']
+    (invoice_reference, status) [name: 'idx_quality_recollection_authorizations_invoice_status']
   }
 }
 
