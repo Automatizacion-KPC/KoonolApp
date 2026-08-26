@@ -50,7 +50,7 @@ El módulo de **Recepción de Devoluciones en Almacén** digitaliza y estandariz
   - **Para Devoluciones Con Posesión (`CAL-FOR-01`):** El backend busca `invoice_reference` en `quality_recollection_authorizations` con `status IN ('PROGRAMADO', 'REPROGRAMADO', 'RECOLECTADO')`. Al encontrar coincidencia:
     1. Puebla `quality_warehouse_receptions.id_recollection_authorization`.
     2. Hereda el ID de la queja en `quality_warehouse_receptions.id_complaint`.
-    3. **Trigger Síncrono:** Actualiza `quality_recollection_authorizations.status` $\rightarrow$ `'ENTREGADO_ALMACEN'`.
+    3. **Trigger Síncrono:** Actualiza `quality_recollection_authorizations.status` $\rightarrow$ `'ENTREGADO_ALMACEN'` y asienta `CURRENT_TIMESTAMP` en `delivered_to_warehouse_at`.
     4. **Trigger Síncrono:** Actualiza `quality_customer_complaints.status` $\rightarrow$ `'RECIBIDO_ALMACEN'`.
   - **Para Rechazos Sin Posesión (`CAL-FOR-02`):** La recepción en rampa se crea sin orden de recolección (`id_recollection_authorization = NULL`) e `id_complaint` queda nulo momentáneamente. Cuando el Manager de Calidad crea la queja `CAL-FOR-02` asignando el ID de esta recepción, el backend actualiza `quality_warehouse_receptions.id_complaint` con la queja resultante.
 - **Restricción Técnica (Backend):** La creación del registro en quality_customer_complaints y el consecuente UPDATE del id_complaint en quality_warehouse_receptions deben ejecutarse obligatoriamente dentro de una única Transacción de Base de Datos (DB Transaction) para garantizar la atomicidad. Si alguna de las dos operaciones falla, se debe hacer un rollback completo para evitar referencias huérfanas bidireccionales.
