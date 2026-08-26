@@ -1021,7 +1021,7 @@ Table quality_customer_complaints {
   id uuid [primary key, not null]
   form_type varchar [not null]                    // 'CAL-FOR-01' (Con Posesión) o 'CAL-FOR-02' (Sin Posesión)
   folio varchar [unique, not null]                // 'NCC-CP-YY-#####' o 'NCC-SP-YY-#####'
-  status varchar [default: 'ABIERTO']             // 'ABIERTO', 'DICTAMINADO', 'AUTORIZADO', 'RECHAZADO', 'RECOLECTADO', 'RECIBIDO_ALMACEN', 'CERRADO'
+  status varchar [not null]                       // 'ABIERTO', 'DICTAMINADO', 'AUTORIZADO', 'RECHAZADO', 'RECOLECTADO', 'RECIBIDO_ALMACEN', 'CERRADO'
 
   // Datos Generales del Documentos
   id_reported_by uuid [not null]                  // Usuario de ventas o Calidad que reporta
