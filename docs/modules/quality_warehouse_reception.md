@@ -36,6 +36,7 @@ El módulo de **Recepción de Devoluciones en Almacén** digitaliza y estandariz
   - **Detonación de Discrepancia:** El backend marcará `has_discrepancy = true`, registrará el porcentaje en `discrepancy_percentage` y guardará el detalle en `discrepancy_notes` si al agrupar por `id_product` se cumple cualquiera de las siguientes dos condiciones:
     1. **Variación en Peso:** La variación porcentual del peso total recibido contra el peso ordenado excede el $1\%$ ($|\text{Peso Recibido} - \text{Peso Ordenado}| / \text{Peso Ordenado} > 0.01$).
     2. **Diferencia en Bultos/Piezas:** La sumatoria de `pieces_quantity` física recibida es distinta a la sumatoria de `pieces_to_recollect` autorizada.
+- **Restricción Técnica (Backend):** Dado que la validación se hace agrupando por id_product, pero los campos de discrepancia viven a nivel de renglón (quality_warehouse_reception_details), si el cálculo consolidado detona una alerta, el backend debe iterar sobre todos los renglones (lotes) de ese producto en la recepción actual y actualizar en cada uno: has_discrepancy = true, el discrepancy_percentage calculado, y el texto "Discrepancia calculada a nivel consolidado del producto" en discrepancy_notes.
 
 ### BR-QWR-05: Carácter Informativo de la Acción a Realizar
 
@@ -52,6 +53,7 @@ El módulo de **Recepción de Devoluciones en Almacén** digitaliza y estandariz
     3. **Trigger Síncrono:** Actualiza `quality_recollection_authorizations.status` $\rightarrow$ `'ENTREGADO_ALMACEN'`.
     4. **Trigger Síncrono:** Actualiza `quality_customer_complaints.status` $\rightarrow$ `'RECIBIDO_ALMACEN'`.
   - **Para Rechazos Sin Posesión (`CAL-FOR-02`):** La recepción en rampa se crea sin orden de recolección (`id_recollection_authorization = NULL`) e `id_complaint` queda nulo momentáneamente. Cuando el Manager de Calidad crea la queja `CAL-FOR-02` asignando el ID de esta recepción, el backend actualiza `quality_warehouse_receptions.id_complaint` con la queja resultante.
+- **Restricción Técnica (Backend):** La creación del registro en quality_customer_complaints y el consecuente UPDATE del id_complaint en quality_warehouse_receptions deben ejecutarse obligatoriamente dentro de una única Transacción de Base de Datos (DB Transaction) para garantizar la atomicidad. Si alguna de las dos operaciones falla, se debe hacer un rollback completo para evitar referencias huérfanas bidireccionales.
 
 ### BR-QWR-07: Independencia entre Recepción en Rampa y Levantamiento de Queja (CAL-FOR-02)
 
