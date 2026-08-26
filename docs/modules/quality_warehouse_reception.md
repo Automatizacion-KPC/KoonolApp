@@ -10,8 +10,8 @@ El módulo de **Recepción de Devoluciones en Almacén** digitaliza y estandariz
 
 ### BR-QWR-01: Inmutabilidad del Registro de Recepción (Bitácora de Control)
 
-- **Descripción:** Las recepciones registradas en la tabla `quality_warehouse_receptions` actúan como registros inmutables de bitácora. No se permite el borrado físico ni lógico (`deleted_at` inexistente) de las recepciones ni de sus renglones de detalle.
-- **Comportamiento Global:** Una vez insertada una recepción por el Inspector de Calidad, la estructura de la cabecera y los renglones capturados no pueden modificarse ni eliminarse. Los campos de auditoría de actualización (`updated_at` e `id_updated_by`) están reservados exclusivamente para las interacciones posteriores del Manager de Calidad.
+- **Descripción:** Las recepciones registradas en la tabla `quality_warehouse_receptions` actúan como registros inmutables de bitácora desde la perspectiva del usuario en interfaz. No se permite el borrado físico ni lógico (`deleted_at` inexistente), asi como tampoco la edición manual de los datos capturados por el inspector.
+- **Comportamiento Global:** Una vez insertada una recepción por el Inspector de Calidad, la estructura de la cabecera y los renglones capturados no pueden modificarse ni eliminarse. Los campos de auditoría de actualización (`updated_at` e `id_updated_by`) y las llaves foráneas de vinculación (`id_complaint`, `id_complaint_item`, `act_*`) están reservados exclusivamente para las interacciones posteriores del Manager de Calidad y para las actualizaciones automáticas del backend.
 
 ### BR-QWR-02: Exclusividad Mutua en Motivos de Devolución y justificación Obligatoria para Motivo "Otro"
 
@@ -43,7 +43,7 @@ El módulo de **Recepción de Devoluciones en Almacén** digitaliza y estandariz
 
 - **Descripción:** Al insertar la recepción en rampa, el backend vincula de forma autogestionada las llaves de origen y ejecuta las transiciones de estado hacia los módulos CPR y QLR.
 - **Comportamiento Global:**
-  - **Para Devoluciones Con Posesión (`CAL-FOR-01`):** El backend busca `invoice_reference` en `quality_recollection_authorizations` con `status IN ('PROGRAMADO', 'RECOLECTADO')`. Al encontrar coincidencia:
+  - **Para Devoluciones Con Posesión (`CAL-FOR-01`):** El backend busca `invoice_reference` en `quality_recollection_authorizations` con `status IN ('PROGRAMADO', 'REPROGRAMADO', 'RECOLECTADO')`. Al encontrar coincidencia:
     1. Puebla `quality_warehouse_receptions.id_recollection_authorization`.
     2. Hereda el ID de la queja en `quality_warehouse_receptions.id_complaint`.
     3. **Trigger Síncrono:** Actualiza `quality_recollection_authorizations.status` $\rightarrow$ `'ENTREGADO_ALMACEN'`.
@@ -70,7 +70,7 @@ El módulo de **Recepción de Devoluciones en Almacén** digitaliza y estandariz
   - **C.A. 1.1:** El formulario solicita obligatoriamente: fecha/hora de recepción, cliente (`id_client`), ejecutivo (`id_sales_executive`), tipo de devolución (`return_type` = `'PARCIAL'` o `'TOTAL'` determinado mediante cotejo contra el documento físico), referencia de factura (`invoice_reference`) y exactamente un motivo (`is_mot_*` = `true`).
   - **C.A. 1.2:** Si se selecciona `is_mot_other` = `true`, la UI exige la captura de `mot_other_specify`.
   - **C.A. 1.3:** Permite capturar renglones en `quality_warehouse_reception_details` ingresando `id_product`, `lot_number_received`, `expiration_date_received`, `unit_package`, `pieces_quantity` ($> 0$), `weight_per_package` ($> 0$) y `total_weight_kg` ($> 0$). Un mismo producto puede repetirse si proviene de distintos lotes o caducidades.
-  - **C.A. 1.4:** Al guardar, se genera el folio `ALM-YY-#####` e `id_inspector_user`. El backend busca la referencia de factura (`invoice_reference`) en las órdenes de recolección activas. Al encontrar coincidencia, enlaza `id_recollection_authorization` e `id_complaint`, transicionando los estados correspondientes a `ENTREGADO_ALMACEN` y `RECIBIDO_ALMACEN`. Si la diferencia entre el peso recibido y el ordenado supera el $1\%$, asienta `has_discrepancy = true` y registra la diferencia en `discrepancy_percentage`.
+  - **C.A. 1.4:** Al guardar, se genera el folio `ALM-YY-#####` e `id_inspector_user`. El backend busca la referencia de factura (`invoice_reference`) en las órdenes de recolección activas con estatus `PROGRAMADO`, `REPROGRAMADO` o `RECOLECTADO`. Al encontrar coincidencia, enlaza `id_recollection_authorization` e `id_complaint`, transicionando los estados correspondientes a `ENTREGADO_ALMACEN` y `RECIBIDO_ALMACEN`. Si la diferencia entre el peso recibido y el ordenado supera el $1\%$, asienta `has_discrepancy = true` y registra la diferencia en `discrepancy_percentage`.
 
 ### US-QWR-02: Asignación Informativa de Acción a Realizar por Dirección de Calidad
 
