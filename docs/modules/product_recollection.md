@@ -101,7 +101,7 @@ El módulo de **Recolección de Devoluciones** gestiona el ciclo operativo y la 
 - **Criterios de Aceptación:**
   - **C.A. 3.1:** El chofer visualiza la lista de recolecciones donde `id_driver_user` coincide con su usuario y el estado es `PROGRAMADO` o `REPROGRAMADO`.
   - **C.A. 3.2:** Permite capturar texto opcional en el campo `driver_observations` (**BR-QLR-06**).
-  - **C.A. 3.3:** Al presionar "Confirmar Recolección", el sistema actualiza el estado a `RECOLECTADO` y asienta la fecha/hora en `updated_at`, e invocará el evento backend para actualizar la queja de origen (`quality_customer_complaints`) al estado `RECOLECTADO` (**BR-QLR-04**).
+  - **C.A. 3.3:** Al presionar "Confirmar Recolección", el sistema actualiza el estado a `RECOLECTADO` y asienta la fecha/hora en `updated_at` y `recollected_at`, e invocará el evento backend para actualizar la queja de origen (`quality_customer_complaints`) al estado `RECOLECTADO` (**BR-QLR-04**).
 
 ### US-QLR-04: Reprogramación de Recolecciones Pendientes
 
@@ -119,7 +119,7 @@ El módulo de **Recolección de Devoluciones** gestiona el ciclo operativo y la 
 - **Para:** Finalizar automáticamente el ciclo de vida de la recolección pasando su estatus a `ENTREGADO_ALMACEN`.
 - **Criterios de Aceptación:**
   - **C.A. 5.1:** Ante la inserción exitosa en `quality_warehouse_receptions`, el backend identifica la queja/factura asociada y localiza la orden de recolección vinculada.
-  - **C.A. 5.2:** El sistema actualiza el estado de `quality_recollection_authorizations` a `ENTREGADO_ALMACEN` y asienta la marca temporal en `updated_at` (**BR-QLR-07**).
+  - **C.A. 5.2:** El sistema actualiza el estado de `quality_recollection_authorizations` a `ENTREGADO_ALMACEN` y asienta la marca temporal en `updated_at` y `delivered_to_warehouse_at` (**BR-QLR-07**).
 
 ---
 
