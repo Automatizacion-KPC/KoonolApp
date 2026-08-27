@@ -131,23 +131,23 @@ El módulo de **Recolección de Devoluciones** gestiona el ciclo operativo y la 
 
 ```mermaid
 graph TD
-    A([Inicio: Queja quality_customer_complaints en estado AUTORIZADO con requires_recollection = true]) --> B[Backend genera orden LOG-YY-##### en estado PENDIENTE y mapea partidas de forma síncrona]
+    A([Inicio: Queja quality_customer_complaints en estado AUTORIZADO con form_type = 'CAL-FOR-01' y requires_recollection = true]) --> B[Backend genera orden LOG-YY-##### en estado PENDIENTE y mapea partidas de forma síncrona]
     B --> C[Manager de Calidad revisa y ajusta piezas, peso total u observaciones técnicas]
     C --> D[Logística asigna Chofer de Logística, Vehículo elegible y Fecha programada]
-    D --> E[Estado transiciona a PROGRAMADO]
+    D --> E[Estado transiciona a PROGRAMADO e inserta id_assigned_by]
 
     E --> F{¿Se requiere cambio de fecha por contratiempo?}
-    F -- Sí --> G[Logística actualiza scheduled_date]
+    F -- Sí --> G[Logística actualiza scheduled_date en estado PROGRAMADO o REPROGRAMADO]
     G --> H[Estado transiciona a REPROGRAMADO]
     H --> F
 
-    F -- No --> I[Chofer ejecuta recolección en sitio y confirma desde App Móvil/Web]
-    I --> J[Estado transiciona a RECOLECTADO]
+    F -- No --> I[Chofer ejecuta recolección en sitio, captura observaciones opcionales y confirma desde App Móvil/Web]
+    I --> J[Estado transiciona a RECOLECTADO y asienta recollected_at y updated_at]
     J --> K[Backend actualiza en paralelo la queja padre a estado RECOLECTADO]
     K --> L[Unidad traslada mercancía a rampa de almacén]
     L --> M[Se registra ingreso físico en quality_warehouse_receptions]
     M --> N[Backend ejecuta doble actualización automática de estado]
-    N --> O["1. CAL-FOR-16 pasa a ENTREGADO_ALMACEN<br/>2. Queja padre pasa a RECIBIDO_ALMACEN"]
+    N --> O["1. CAL-FOR-16 pasa a ENTREGADO_ALMACEN y asienta delivered_to_warehouse_at<br/>2. Queja padre pasa a RECIBIDO_ALMACEN"]
     O --> P([Fin del Ciclo de Recolección / Cierre del Folio])
 ```
 
@@ -156,6 +156,7 @@ graph TD
 - Reglas de Negocio (BR):
   - **[BR-QLR-01]:** Generación Automática del Encabezado y Mapeo de Partidas
   - **[BR-QLR-02]:** Segregación de Responsabilidades y Modificación por Calidad
+  - **[BR-QLR-03]:** Elegibilidad de Operador y Unidad Vehicular
   - **[BR-QLR-04]:** Transición de Estados Operativos del Folio
   - **[BR-QLR-07]:** Cierre Automático por Recepción Física en Almacén
 - Historias de Usuario (US):
@@ -165,31 +166,32 @@ graph TD
   - **[US-QLR-04]:** Reprogramación de Recolecciones Pendientes
   - **[US-QLR-05]:** Cierre Automático por Recepción Física en Almacén
 - Criterios de Aceptación (C.A):
+  - **[C.A 1.1]:** Muestra los folios en estado PENDIENTE derivados de quejas de origen
   - **[C.A 2.3]:** Al guardar la asignación, el sistema registra id_assigned_by y pasa a PROGRAMADO
-  - **[C.A 3.3]:** Al confirmar recolección, el estado cambia a RECOLECTADO y actualiza la queja a RECOLECTADO
-  - **[C.A 4.2]:** Al confirmar nueva fecha, el estado cambia a REPROGRAMADO
-  - **[C.A 5.1]:** Identificación de queja/factura vinculada tras recepción física
-  - **[C.A 5.2]:** Actualización automática a ENTREGADO_ALMACEN en recolección y RECIBIDO_ALMACEN en queja
+  - **[C.A 3.3]:** Al confirmar recolección, el estado cambia a RECOLECTADO, asienta recollected_at e invoca actualización de la queja a RECOLECTADO
+  - **[C.A 4.2]:** Al confirmar nueva fecha, el estado cambia automáticamente a REPROGRAMADO
+  - **[C.A 5.1]:** Identificación de queja/factura vinculada tras recepción física en rampa
+  - **[C.A 5.2]:** Actualización automática a ENTREGADO_ALMACEN con marca temporal delivered_to_warehouse_at y RECIBIDO_ALMACEN en queja padre
 
 ### 2. Generación Automática y Revisión Técnica de Calidad
 
 ```mermaid
 graph TD
-    A([Evento: Queja quality_customer_complaints transiciona a AUTORIZADO]) --> B{¿form_type = CAL-FOR-01 y requires_recollection = true?}
+    A([Evento: Queja quality_customer_complaints transiciona a AUTORIZADO]) --> B{¿form_type = 'CAL-FOR-01' y requires_recollection = true?}
     B -- No --> C([No genera orden de recolección])
     B -- Sí --> D[Backend crea registro en quality_recollection_authorizations]
     D --> E["Estado inicial: PENDIENTE | Folio: LOG-YY-#####"]
-    E --> F["Poblamiento síncrono en quality_recollection_authorization_details:<br/>- unit_package <- unit_package<br/>- pieces_to_recollect <- pieces_quantity<br/>- weight_per_package <- weight_per_package<br/>- total_weight_kg <- reported_weight_kg"]
+    E --> F["Poblamiento síncrono en quality_recollection_authorization_details:<br/>- id_complaint_item <- id<br/>- id_product <- id_product<br/>- lot_number <- lot_number<br/>- expiration_date <- expiration_date<br/>- unit_package <- unit_package<br/>- pieces_to_recollect <- pieces_quantity<br/>- weight_per_package <- weight_per_package<br/>- total_weight_kg <- reported_weight_kg"]
 
     F --> G[Manager de Calidad ingresa al módulo QLR]
-    G --> H[Backend valida Token JWT: Rol MANAGER de Calidad]
+    G --> H[Backend valida Token JWT: Rol MANAGER y Departamento de Calidad]
     H --> I[Consulta lista de folios en estado PENDIENTE]
     I --> J[Selecciona folio y edita detalle de partidas]
 
     J --> K{¿pieces_to_recollect > pieces_quantity o <= 0?}
     K -- Sí --> L[Backend/Frontend bloquea guardado con mensaje de validación]
     L --> J
-    K -- No --> M[Permite ajuste manual de total_weight_kg por empaques incompletos/mermas]
+    K -- No --> M[Permite ajuste manual directo de total_weight_kg por empaques incompletos/mermas]
 
     M --> N[Captura especificaciones e instrucciones técnicas en observations]
     N --> O[Guarda cambios en Backend]
@@ -203,12 +205,12 @@ graph TD
   - **[BR-QLR-02]:** Segregación de Responsabilidades y Modificación por Calidad
   - **[BR-QLR-05]:** Ajuste Manual de Pesos por Pérdida/Incompletos y Tope de Piezas
 - Historias de Usuario (US):
-  - **[US-QLR-01]**: Edición Técnica, Ajuste de Mermas/Pesos e Instrucciones (Calidad)
+  - **[US-QLR-01]:** Edición Técnica, Ajuste de Mermas/Pesos e Instrucciones (Calidad)
 - Criterios de Aceptación (C.A):
-  - **[C.A 1.1]:** Muestra folios en PENDIENTE derivados de quejas de origen
+  - **[C.A 1.1]:** Muestra folios en PENDIENTE cuyos datos provienen de quality_complaint_items
   - **[C.A 1.2]:** Validar que $0 < \text{pieces\_to\_recollect} \le \text{pieces\_quantity}$ de la queja
-  - **[C.A 1.3]:** Permitir captura o corrección directa de total_weight_kg
-  - **[C.A 1.4]:** Habilitar captura y guardado de observaciones técnicas
+  - **[C.A 1.3]:** Permitir captura o corrección directa de total_weight_kg independientemente del peso nominal
+  - **[C.A 1.4]:** Habilitar captura y guardado de especificaciones en el campo observations
 
 ### 3. Programación y Reprogramación Logística de Rutas
 
@@ -219,16 +221,16 @@ graph TD
 
     %% Flujo de Asignación Inicial
     C -- Programación Inicial --> D[Selecciona folio en estado PENDIENTE]
-    D --> E[Despliega selector de Choferes]
+    D --> E[Despliega selector de Choferes id_driver_user]
     E --> F[Backend filtra únicamente usuarios del departamento de Logística]
-    F --> G[Despliega selector de Unidades Vehiculares]
+    F --> G[Despliega selector de Unidades Vehiculares id_vehicle]
     G --> H[Backend filtra unidades con estatus DISPONIBLE o EN_RUTA]
     H --> I{¿Unidad en INACTIVO, MANTENIMIENTO, SIN_SEGURO o RETENIDO?}
     I -- Sí --> J[Backend rechaza la asignación]
     J --> G
     I -- No --> K[Ingresa fecha programada scheduled_date]
     K --> L[Confirma y guarda programación]
-    L --> M[Backend asienta id_assigned_by desde JWT y transiciona a PROGRAMADO]
+    L --> M[Backend registra id_assigned_by desde JWT, guarda id_driver_user, id_vehicle, scheduled_date y transiciona a PROGRAMADO]
     M --> N([Folio PROGRAMADO])
 
     %% Flujo de Reprogramación
@@ -237,7 +239,7 @@ graph TD
     P -- No --> Q[Backend deniega edición de fecha]
     P -- Sí --> R[Modifica scheduled_date con la nueva fecha]
     R --> S[Confirma actualización]
-    S --> T[Backend asienta nueva fecha y transiciona estado a REPROGRAMADO]
+    S --> T[Backend asienta nueva fecha scheduled_date y transiciona estado a REPROGRAMADO]
     T --> U([Folio REPROGRAMADO])
 ```
 
@@ -251,11 +253,11 @@ graph TD
   - **[US-QLR-02]:** Programación Logística de Ruta y Asignación
   - **[US-QLR-04]:** Reprogramación de Recolecciones Pendientes
 - Criterios de Aceptación (C.A):
-  - **[C.A 2.1]:** Filtro de choferes pertenecientes al departamento de Logística
-  - **[C.A 2.2]:** Filtro de unidades con estatus DISPONIBLE o EN_RUTA
-  - **[C.A 2.3]:** Registra id_assigned_by del usuario autenticado y pasa a PROGRAMADO
-  - **[C.A 4.1]:** Edición de fecha permitida únicamente en PROGRAMADO o REPROGRAMADO
-  - **[C.A 4.2]:** Transición automática a REPROGRAMADO al cambiar fecha
+  - **[C.A 2.1]:** El selector de choferes filtra y muestra únicamente usuarios pertenecientes al departamento de Logística
+  - **[C.A 2.2]:** El selector de unidades despliega solo vehículos en estatus DISPONIBLE o EN_RUTA
+  - **[C.A 2.3]:** Registra id_assigned_by del usuario autenticado y transiciona el estado a PROGRAMADO
+  - **[C.A 4.1]:** Permite la edición de scheduled_date únicamente si el estado es PROGRAMADO o REPROGRAMADO
+  - **[C.A 4.2]:** Transición automática a REPROGRAMADO al confirmar la nueva fecha
 
 ### 4. Confirmación de Campo en App Móvil y Cierre Automático por Almacén
 
@@ -264,7 +266,7 @@ graph TD
     A([Chofer USER de Logística ingresa a App Móvil/Web]) --> B[Consulta recolecciones asignadas a su id_driver_user desde JWT]
     B --> C[Sistema muestra folios en estado PROGRAMADO o REPROGRAMADO]
     C --> D[Arribo al domicilio del cliente y revisión física de la mercancía]
-    D --> E{¿Existen incidencias, discrepancias o mermas en sitio?}
+    D --> E{¿Existen incidencias, mermas o inconformidades en sitio?}
 
     E -- Sí --> F[Captura observaciones de campo en driver_observations]
     E -- No --> G[Deja driver_observations vacío / sin modificaciones]
@@ -272,15 +274,15 @@ graph TD
     F --> H[Presiona 'Confirmar Recolección']
     G --> H
 
-    H --> I[Backend actualiza CAL-FOR-16 a estado RECOLECTADO y asienta updated_at]
-    I --> J[Backend dispara evento síncrono: Actualiza queja padre a RECOLECTADO]
+    H --> I[Backend actualiza CAL-FOR-16 a estado RECOLECTADO y asienta recollected_at y updated_at]
+    I --> J[Backend dispara evento síncrono: Actualiza queja padre quality_customer_complaints.status a RECOLECTADO]
     J --> K[Chofer traslada mercancía hacia la rampa de almacén]
 
     K --> L[Personal de Almacén/Calidad recibe producto en rampa]
     L --> M[Se registra ingreso físico en quality_warehouse_receptions]
     M --> N[Backend identifica de forma automática la queja/factura vinculada]
     N --> O[Backend ejecuta actualización simultánea de estados]
-    O --> P["1. quality_recollection_authorizations.status <- ENTREGADO_ALMACEN<br/>2. quality_customer_complaints.status <- RECIBIDO_ALMACEN"]
+    O --> P["1. quality_recollection_authorizations.status <- ENTREGADO_ALMACEN (asienta delivered_to_warehouse_at)<br/>2. quality_customer_complaints.status <- RECIBIDO_ALMACEN"]
     P --> Q([Fin del Ciclo de Recolección / Cierre Automático del Folio])
 ```
 
@@ -295,11 +297,11 @@ graph TD
   - **[US-QLR-03]:** Confirmación de Recolección en Domicilio del Cliente desde App
   - **[US-QLR-05]:** Cierre Automático por Recepción Física en Almacén
 - Criterios de Aceptación (C.A):
-  - **[C.A 3.1]:** Chofer visualiza asignaciones asociadas a su id_driver_user en PROGRAMADO o REPROGRAMADO
-  - **[C.A 3.2]:** Permite captura de texto opcional en driver_observations
-  - **[C.A 3.3]:** Actualización a RECOLECTADO, marca updated_at e invoca actualización de la queja a RECOLECTADO
-  - **[C.A 5.1]:** Identificación automática de queja/factura asociada al insertar recepción física
-  - **[C.A 5.2]:** Cierre automático a estado ENTREGADO_ALMACEN en recolección y RECIBIDO_ALMACEN en la queja
+  - **[C.A 3.1]:** Chofer visualiza asignaciones asociadas a su id_driver_user en estado PROGRAMADO o REPROGRAMADO
+  - **[C.A 3.2]:** Permite captura de texto opcional en driver_observations sin bloquear el flujo
+  - **[C.A 3.3]:** Actualización a RECOLECTADO, asienta recollected_at e invoca actualización de la queja padre a RECOLECTADO
+  - **[C.A 5.1]:** Identificación automática de queja/factura vinculada al registrar ingreso en quality_warehouse_receptions
+  - **[C.A 5.2]:** Cierre automático a ENTREGADO_ALMACEN con marca temporal delivered_to_warehouse_at y RECIBIDO_ALMACEN en la queja padre
 
 ---
 
