@@ -54,6 +54,7 @@ A excepción de los roles globales de administración, **el acceso a los módulo
 - 👥 RH (Recursos Humanos)
 - 💼 Administración
 - 💵 Crédito y Cobranza
+- 🔧 Mantenimiento
 
 ### 🌐 2.4 Módulos Transversales Comunes
 
