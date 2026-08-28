@@ -1,0 +1,83 @@
+# 🔍 Módulo: Calidad - No Conformidades (Quality Non Conformities - QNC)
+
+El módulo de **No Conformidades** centraliza la recolección, consolidación y seguimiento de hallazgos e incidencias fuera de norma detectadas por el personal durante las distintas inspecciones del departamento de Calidad (pre-carga vehicular, post-lavado, recepción de mercancías, reclamos de clientes y control de vidrio y plástico quebradizo), así como registros manuales. Funciona como una bitácora global de trazabilidad operativa y mejora continua sin bloquear el flujo operativo transaccional en KoonolApp ni en SAP Business One.
+
+---
+
+---
+
+## 💼 Reglas de Negocio (Business Rules)
+
+### BR-QNC-01: Arco Exclusivo de Origen
+
+- **Descripción:** Toda No Conformidad generada por el sistema debe estar asociada estrictamente a un único origen de inspección o reclamo. Solo uno de los campos punteros (`id_daily_inspection`, `id_wash_inspection`, `id_reception_inspection`, `id_customer_complaint`, `id_glass_plastic_detail`) puede contener un valor UUID no nulo a la vez. Cuando el origen sea de tipo `'MANUAL'`, la totalidad de los punteros anteriores deben ser obligatoriamente NULL.
+- **Comportamiento Global:** El backend valida mediante un constraint/check o DTO que exista exactamente una referencia poblada para orígenes automatizados y ninguna para registros manuales, rechazando la transacción con un error HTTP 400 en caso de conflicto.
+
+### BR-QNC-02: Generación Autogestionada por Inspección
+
+- **Descripción:** Al registrar un fallo o hallazgo fuera de norma en las inspecciones operativas (`vehicles_daily_inspections`, `vehicle_wash_inspections`, `vehicle_reception_inspections`, `quality_glass_plastic_details` o `quality_customer_complaints`), el backend debe instanciar de forma automática el registro hijo correspondiente en `quality_non_conformities`.
+- **Comportamiento Global:** Evento asíncrono o transacción enlazada en backend que crea el registro de No Conformidad con su `source_type` correspondiente e inicializando la entidad en estado `ABIERTA`.
+
+### BR-QNC-03: Formato y Secuencia Anual del Folio
+
+- **Descripción:** Cada No Conformidad debe poseer un folio único institucional con la estructura `NC-YY-#####`, donde YY corresponde a los dos últimos dígitos del año en curso y ##### es un consecutivo de 5 dígitos que se reinicia a `00001` al comenzar cada año calendario (ej. `NC-26-00001`).
+- **Comportamiento Global:** Secuencia lógica gestionada por base de datos o servicio backend con bloqueo transaccional para garantizar unicidad y prevenir saltos o duplicidades en registros concurrentes.
+
+### BR-QNC-04: Ciclo de Vida Secuencial e Imposibilidad de Reapertura
+
+- **Descripción:** El flujo de estados de una No Conformidad es estrictamente unidireccional: `ABIERTA` $\rightarrow$ `EN_PROCESO` $\rightarrow$ `VERIFICADA` $\rightarrow$ `CERRADA`. No se permiten retrocesos en la secuencia ni la reapertura de registros en estado `CERRADA`. Si un hallazgo recurre o reaparece, la operativa exige la creación de una nueva No Conformidad.
+- **Comportamiento Global:** El servicio REST rechaza cualquier intento de actualización de `status` que no siga el orden consecutivo estricto o que intente modificar una entidad previamente finalizada.
+
+### BR-QNC-05: Restricción de Cierre Exclusivo para Gerencia de Calidad
+
+- **Descripción:** La transición del estado `CERRADA` está restringida únicamente a colaboradores pertenecientes al departamento de **CALIDAD** que posean el rol de **MANAGER**.
+- **Comportamiento Global:** Middleware de autorización que evalúa el Token JWT del usuario solicitante, validando el departamento y rol antes de permitir la actualización de estado a `CERRADA`.
+
+### BR-QNC-06: Naturaleza Informativa y No Bloqueante
+
+- **Descripción:** La existencia de una No Conformidad en estado `ABIERTA`, `EN_PROCESO` o `VERIFICADA` no interrumpe ni bloquea transacciones posteriores en KoonolApp o SAP Business One (tales como despacho de rutas, recepción física de mercancía o movimientos de inventario).
+- **Comportamiento Global:** El módulo opera como una bitácora analítica de seguimiento de calidad sin Hooks o triggers bloqueantes en tablas transaccionales primarias.
+
+---
+
+---
+
+## 👥 Historias de Usuario (User Stories)
+
+### US-QNC-01: Generación Automática de No Conformidad desde Inspecciones
+
+- **Como:** Personal de Calidad (cualquier rol)
+- **Quiero:** Que el sistema genere automáticamente una No Conformidad al registrar un fallo durante las inspecciones operativas
+- **Para:** Garantizar el registro inmediato de desviaciones sin duplicar la captura de datos
+- **Criterios de Aceptación:**
+  - **C.A. 1.1:** Al guardar una inspección con fallos en los módulos de origen, el backend debe insertar un registro en `quality_non_conformities` enlazando el UUID correspondiente al origen y asignando el estado `ABIERTA`.
+  - **C.A. 1.2:** El sistema debe asignar automáticamente el folio `NC-YY-#####` consecutivo correspondiente al año en curso.
+
+### US-QNC-02: Registro Manual de No Conformidades
+
+- **Como:** Personal de Calidad (cualquier rol)
+- **Quiero:** Dar de alta manualmente una No Conformidad especificando la descripción de la incidencia
+- **Para:** Documentar desviaciones u observaciones que no provienen de un checklist de inspección estandarizado
+- **Criterios de Aceptación:**
+  - **C.A. 2.1:** La interfaz debe presentar un formulario para alta manual donde el `source_type` sea `'MANUAL'` y el campo `description` sea obligatorio.
+  - **C.A. 2.2:** La base de datos debe almacenar todos los punteros de inspección (`id_daily_inspection`, `id_wash_inspection`, `id_reception_inspection`, `id_customer_complaint`, `id_glass_plastic_detail`) con valor `NULL`.
+
+### US-QNC-03: Gestión de Avance y Verificación de No Conformidades
+
+- **Como:** SUPERVISOR / LEADER / USER (Líder Operativo / Responsable de Acción)
+- **Quiero:** Transicionar el estado de la No Conformidad a `EN_PROCESO` y posteriormente a `VERIFICADA`
+- **Para:** Reflejar la ejecución del análisis de causa raíz y la implementación de acciones correctivas
+- **Criterios de Aceptación:**
+  - **C.A. 3.1:** Un usuario autorizado puede cambiar el estado de `ABIERTA` a `EN_PROCESO` para formalizar la atención del hallazgo.
+  - **C.A. 3.2:** Una vez aplicadas las acciones correctivas, el usuario puede actualizar el estado de `EN_PROCESO` a `VERIFICADA`.
+  - **C.A. 3.3:** El sistema debe actualizar automáticamente las columnas `id_updated_by` y `updated_at` con el contexto del usuario en sesión.
+
+### US-QNC-04: Cierre Formal de No Conformidad por Gerencia
+
+- **Como:** MANAGER (Gerente de Calidad)
+- **Quiero:** Evaluar las evidencias depositadas y aprobar el pase final de la No Conformidad a estado `CERRADA`
+- **Para:** Validar oficialmente la efectividad de las acciones correctivas e independizar el cierre del proceso
+- **Criterios de Aceptación:**
+  - **C.A. 4.1:** Solo usuarios pertenecientes al departamento de Calidad con rol MANAGER verán habilitada la opción para finalizar la No Conformidad a estado `CERRADA`.
+  - **C.A. 4.2:** Si un usuario no autorizado intenta enviar la transición a `CERRADA`, la API debe retornar un código de respuesta `HTTP 403 Forbidden`.
+  - **C.A. 4.3:** Una vez alcanzado el estado `CERRADA`, la interfaz debe bloquear cualquier edición sobre el registro.
