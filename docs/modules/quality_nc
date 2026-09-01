@@ -10,13 +10,19 @@ El módulo de **No Conformidades** centraliza la recolección, consolidación y 
 
 ### BR-QNC-01: Arco Exclusivo de Origen
 
-- **Descripción:** Toda No Conformidad generada por el sistema debe estar asociada estrictamente a un único origen de inspección o reclamo. Solo uno de los campos punteros (`id_daily_inspection`, `id_wash_inspection`, `id_reception_inspection`, `id_customer_complaint`, `id_glass_plastic_detail`) puede contener un valor UUID no nulo a la vez. Cuando el origen sea de tipo `'MANUAL'`, la totalidad de los punteros anteriores deben ser obligatoriamente NULL.
-- **Comportamiento Global:** El backend valida mediante un constraint/check o DTO que exista exactamente una referencia poblada para orígenes automatizados y ninguna para registros manuales, rechazando la transacción con un error HTTP 400 en caso de conflicto.
+- **Descripción:** Toda No Conformidad debe estar vinculada a una única fuente de origen especificada en el campo `source_type`, cuyos valores permitidos son: `'PRE_CARGA'`, `'POST_LAVADO'`, `'RECEPCION_MERCANCIA'`, `'RECLAMO_CLIENTE'`, `'VIDRIO_PLASTICO'`, `'MANUAL'`.
+- **Comportamiento Global:** Debe existir exactamente una referencia UUID no nula hacia la tabla correspondiente según el source_type. Si source_type = 'MANUAL', todos los campos de referencia (id_daily_inspection, id_wash_inspection, id_reception_inspection, id_customer_complaint, id_glass_plastic_detail) deben ser obligatoriamente NULL. La base de datos/backend validará esta restricción antes de persistir.
 
 ### BR-QNC-02: Generación Autogestionada por Inspección
 
-- **Descripción:** Al registrar un fallo o hallazgo fuera de norma en las inspecciones operativas (`vehicles_daily_inspections`, `vehicle_wash_inspections`, `vehicle_reception_inspections`, `quality_glass_plastic_details` o `quality_customer_complaints`), el backend debe instanciar de forma automática el registro hijo correspondiente en `quality_non_conformities`.
-- **Comportamiento Global:** Evento asíncrono o transacción enlazada en backend que crea el registro de No Conformidad con su `source_type` correspondiente e inicializando la entidad en estado `ABIERTA`.
+- **Descripción:** Al guardar un registro de inspección, el backend generará máximo UN solo registro de No Conformidad (`status = 'ABIERTA'`) si se cumple al menos una de estas condiciones:
+  1. El estatus asignado a la inspección es `APROBADO_CON_NC` o `RECHAZADO` (Aplica a IVI, VLV e IVE).
+  2. La evaluación técnica incluye la marca `has_fumigation_certificate = false` (Aplica únicamente a IVE).
+- **Comportamiento Global:**
+  - Se creará **un solo registro** de No Conformidad por inspección.
+  - El campo `description` se construirá automáticamente combinando las observaciones del inspector y los hallazgos fuera de norma detectados por el sistema.
+  - El `campo id_created_by` heredará el `id_inspector_user` del registro padre.
+  - Si en una inspección IVE concurren un estatus de rechazo y un certificado vencido, ambos motivos se consolidan en la columna `description` de la misma transacción de No Conformidad.
 
 ### BR-QNC-03: Formato y Secuencia Anual del Folio
 
@@ -46,16 +52,24 @@ El módulo de **No Conformidades** centraliza la recolección, consolidación y 
 
 ### US-QNC-01: Generación Automática de No Conformidad desde Inspecciones
 
-- **Como:** Personal de Calidad (cualquier rol)
-- **Quiero:** Que el sistema genere automáticamente una No Conformidad al registrar un fallo durante las inspecciones operativas
-- **Para:** Garantizar el registro inmediato de desviaciones sin duplicar la captura de datos
+- **Como:** Personal del Departamento de Calidad (USER, LEADER, SUPERVISOR, MANAGER).
+- **Quiero:** Que el sistema genere automáticamente la entrada en la Bitácora de No Conformidades cuando una inspección registre desviaciones o sea finalizada con hallazgos.
+- **Para:** Asegurar la trazabilidad centralizada de no conformidades sin requerir una doble captura de datos por parte del usuario.
 - **Criterios de Aceptación:**
-  - **C.A. 1.1:** Al guardar una inspección con fallos en los módulos de origen, el backend debe insertar un registro en `quality_non_conformities` enlazando el UUID correspondiente al origen y asignando el estado `ABIERTA`.
-  - **C.A. 1.2:** El sistema debe asignar automáticamente el folio `NC-YY-#####` consecutivo correspondiente al año en curso.
+  - **C.A. 1.1:** Disparo Atómico. La creación de la No Conformidad ocurre dentro de la misma transacción de guardado de la inspección origen.
+  - **C.A. 1.2:** Mapeo de Origen y FKs.
+    - Si proviene de IVI: `source_type = 'PRE_CARGA'`, asigna `id_daily_inspection`.
+    - Si proviene de VLV: `source_type = 'POST_LAVADO'`, asigna `id_wash_inspection`.
+    - Si proviene de IVE: `source_type = 'RECEPCION_MERCANCIA'`, asigna `id_reception_inspection`.
+  - **C.A. 1.3:** Disparo por Regla de Negocio Preventiva (Exclusivo IVE). Si una inspección diaria (IVE) se guarda con `has_fumigation_certificate = false`, el backend debe generar la No Conformidad aun cuando el estatus manual asignado haya sido `APROBADO`.
+  - **C.A. 1.4:** Construcción de la Descripción. El backend debe poblar el campo `description` de la No Conformidad utilizando la plantilla: `"[Origen: {FOLIO_INSPECCION}] - Hallazgos: {FALLOS_DETECTADOS}. Observaciones: {OBSERVACIONES_INSPECTOR}"`.
+    - `{FALLOS_DETECTADOS}`: `"Estatus manual: RECHAZADO"`, `"Estatus manual: APROBADO_CON_NC"`, y/o `"Certificado de Fumigación Ausente/Vencido (>15 días)"`.
+    - `{OBSERVACIONES_INSPECTOR}`: Mapea la columna `notes` si proviene de IVI/VLV, o `rejection_reason` si proviene de IVE. Si está vacío, se registra `"Sin observaciones adicionales"`.
+  - **C.A. 1.5:** Valores Iniciales y Auditoría. El registro nace con `status = 'ABIERTA'`, folio `NC-YY-#####` y hereda `id_created_by = id_inspector_user`.
 
 ### US-QNC-02: Registro Manual de No Conformidades
 
-- **Como:** Personal de Calidad (cualquier rol)
+- **Como:** Personal del Departamento de Calidad (USER, LEADER, SUPERVISOR, MANAGER).
 - **Quiero:** Dar de alta manualmente una No Conformidad especificando la descripción de la incidencia
 - **Para:** Documentar desviaciones u observaciones que no provienen de un checklist de inspección estandarizado
 - **Criterios de Aceptación:**
