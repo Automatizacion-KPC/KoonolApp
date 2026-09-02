@@ -36,8 +36,10 @@ Comprende tres flujos de evaluación técnica:
 
 ### BR-VHI-05: Validación de Vigencia del Certificado de Fumigación
 
-- **Descripción:** La vigencia operativa de un certificado de fumigación es de **15 días naturales** calculados a partir de la fecha de servicio (`fumigation_service_date`).
-- **Comportamiento Global:** Al capturar la inspección, si la diferencia entre la fecha actual y `fumigation_service_date` es mayor a 15 días o el certificado está ausente, el sistema establece `has_fumigation_certificate = false`, despliega una advertencia preventiva en pantalla. Al guardar la inspección, el backend detonará automáticamente la creación de un registro en `quality_non_conformities` (asociado al folio de la inspección), independientemente de si el inspector asignó el estatus `APROBADO`, `APROBADO_CON_NC` o `RECHAZADO`.
+- **Descripción:** La vigencia operativa de un certificado de fumigación es de **15 días naturales** calculados a partir de la fecha de servicio (`fumigation_service_date`). Controla la validación de certificados de fumigación diferenciando la naturaleza de la unidad (interna vs. externa).
+- **Comportamiento Global:**
+  - **Flotilla Interna (IVI):** Si la fecha del certificado excede los días de vigencia normativos o no existe, el sistema marca `has_fumigation_certificate = false`, despliega una alerta preventiva en pantalla y dispara automáticamente una No Conformidad (`source_type = 'PRE_CARGA'`).
+  - **Unidades Externas / Fleteras (IVE):** Se registra la condición del certificado (`has_fumigation_certificate`) únicamente como evidencia documental del embarque recibido y se despliega una advertencia visual. No genera No Conformidad de forma automatizada; la generación de NC en IVE dependerá exclusivamente del dictamen manual del inspector (`APROBADO_CON_NC` o `RECHAZADO`).
 
 ### BR-VHI-06: Estructura Estándar de Folios Autogenerados
 
@@ -66,10 +68,11 @@ Comprende tres flujos de evaluación técnica:
 - **Para:** Garantizar que el vehículo cumpla con los estándares de inocuidad e higiene exigidos para la distribución de producto.
 - **Criterios de Aceptación:**
   - **C.A. 1.1:** El sistema debe verificar que la unidad tenga una inspección post-lavado VLV aprobada dentro de los últimos 7 días. En caso contrario, debe denegar el registro indicando la restricción (**BR-VHI-04**).
-  - **C.A. 1.2:** Se debe autogenerar el folio con la estructura `IVI-YY-####` (**BR-VHI-06**).
-  - **C.A. 1.3:** Si la fecha del certificado de fumigación excede los 15 días respecto a la fecha actual, la UI debe mostrar una alerta visual y registrar la marca `has_fumigation_certificate = false` (**BR-VHI-05**).
+  - **C.A. 1.2:** Se debe autogenerar el folio con la estructura `IVI-YY-#####` (**BR-VHI-06**).
+  - **C.A. 1.3:** Si la unidad no cuenta con certificado vigente, la UI despliega una alerta de advertencia y establece `has_fumigation_certificate = false` (**BR-VHI-05**).
   - **C.A. 1.4:** El usuario debe seleccionar manualmente el estado final (`APROBADO`, `RECHAZADO`, `APROBADO_CON_NC`) (**BR-VHI-01**).
-  - **C.A. 1.5:** Un estado `RECHAZADO` debe bloquear de inmediato la asignación de rutas y salida del vehículo en caseta (**BR-VHI-03**).
+  - **C.A. 1.5:** Si se guarda con `APROBADO_CON_NC`, `RECHAZADO` o con `has_fumigation_certificate = false`, el backend detona automáticamente la creación de la No Conformidad vinculando `id_daily_inspection` y asignando `source_type = 'PRE_CARGA'`.
+  - **C.A. 1.6:** Un estado `RECHAZADO` debe bloquear de inmediato la asignación de rutas y salida del vehículo en caseta (**BR-VHI-03**).
 
 ### US-VHI-02: Captura de Inspección Post-Lavado Semanal (VLV)
 
@@ -77,7 +80,7 @@ Comprende tres flujos de evaluación técnica:
 - **Quiero:** Documentar la inspección de higiene, secado y estado de la cabina de un vehículo tras su lavado semanal.
 - **Para:** Habilitar la unidad operativa para la realización de las inspecciones diarias de la semana.
 - **Criterios de Aceptación:**
-  - **C.A. 2.1:** El sistema debe autogenerar el folio único bajo el patrón `VLV-YY-####` (**BR-VHI-06**).
+  - **C.A. 2.1:** El sistema debe autogenerar el folio único bajo el patrón `VLV-YY-#####` (**BR-VHI-06**).
   - **C.A. 2.2:** La interfaz debe solicitar la selección del vehículo (`id_vehicle`), chofer asignado (`id_driver_user`) y almacenar el usuario autenticado como inspector (`id_inspector_user`).
   - **C.A. 2.3:** Al guardar con estatus `APROBADO`, el vehículo queda automáticamente habilitado para pasar inspecciones diarias IVI durante los siguientes 7 días naturales (**BR-VHI-04**).
 
@@ -89,8 +92,10 @@ Comprende tres flujos de evaluación técnica:
 - **Criterios de Aceptación:**
   - **C.A. 3.1:** El usuario debe poder definir si la unidad es interna (`is_internal_vehicle = true`) o externa (`is_internal_vehicle = false`), requiriendo los datos de fletera (`id_hauler`), placas (`external_plates`) y chofer (`driver_name`) para unidades externas.
   - **C.A. 3.2:** Debe permitir almacenar el listado de facturas asociadas en formato `JSONB` (`invoices_included`), así como la verificación de sellos de seguridad (`correct_seals`, `seal_number_received`).
-  - **C.A. 3.3:** La captura de alérgenos compartidos o carga no alimenticia se debe guardar como información estadística sin bloquear el formulario (**BR-VHI-01**).
-  - **C.A. 3.4:** El sistema autogenerará el folio `IVE-YY-#####` y admitirá únicamente el envío de estados `APROBADO`, `RECHAZADO` o `APROBADO_CON_NC` (**BR-VHI-06**, **BR-VHI-07**).
+  - **C.A. 3.3:** Permite capturar la presencia/ausencia del certificado de fumigación del proveedor/transporte. Si se indica que no cuenta con certificado, se muestra un aviso preventivo en pantalla y se guarda `has_fumigation_certificate = false` únicamente como registro documental de la recepción (**BR-VHI-05**).
+  - **C.A. 3.4:** La captura de alérgenos compartidos o carga no alimenticia se debe guardar como información estadística sin bloquear el formulario (**BR-VHI-01**).
+  - **C.A. 3.5:** El sistema autogenerará el folio `IVE-YY-#####` y admitirá únicamente el envío de estados `APROBADO`, `RECHAZADO` o `APROBADO_CON_NC` (**BR-VHI-06**, **BR-VHI-07**).
+  - **C.A. 3.6:** Al guardar con estado `RECHAZADO` o `APROBADO_CON_NC`, el backend crea automáticamente el registro en `quality_non_conformities` asociando `id_reception_inspection` y `source_type = 'RECEPCION_MERCANCIA'`. La sola ausencia del certificado de fumigación en IVE no detona No Conformidad automática.
 
 ---
 
@@ -137,33 +142,42 @@ graph TD
     P1 --> Q1[Vehículo en estatus RETENIDO: Bloqueo en Almacén y Caseta]
     Q1 --> R1[Corregir Deficiencias y Capturar NUEVO Formato IVI]
 
-    O -- APROBADO / APROBADO_CON_NC --> P2[Guardar IVI con Folio IVI-YY-#####]
+    O -- APROBADO_CON_NC --> P2[Guardar IVI con Folio IVI-YY-#####]
     P2 --> Q2[Unidad Liberada para Asignación de Ruta y Salida]
 
-    L -. Backend: Detona No Conformidad en quality_non_conformities al Guardar .-> P1
-    L -. Backend: Detona No Conformidad en quality_non_conformities al Guardar .-> P2
+    O -- APROBADO --> P3[Guardar IVI con Folio IVI-YY-#####]
+    P3 --> Q2
+
+    NC_CHECK{¿Estatus != APROBADO o has_fumigation_certificate == false?}
+    P1 -.-> NC_CHECK
+    P2 -.-> NC_CHECK
+    P3 -.-> NC_CHECK
+
+    NC_CHECK -- Sí --> NC_GEN[Backend: Detona Registro en quality_non_conformities\nsource_type = 'PRE_CARGA', vincula id_daily_inspection]
+    NC_CHECK -- No --> NC_END[No Genera No Conformidad]
 ```
 
 #### Referencias
 
 - Reglas de Negocio (BR):
-  - **[BR-VHI-01]:** Determinación manual y explícita del estatus final (APROBADO, RECHAZADO, APROBADO_CON_NC) por personal de Calidad al cerrar el checklist.
-  - **[BR-VHI-02]:** Inmutabilidad de inspecciones rechazadas; la re-inspección exige la captura de un registro totalmente nuevo con nuevo folio.
-  - **[BR-VHI-03]:** Bloqueo operativo de asignación de rutas en Almacén/Logística y rechazo de salida en Caseta (vehículo en estatus RETENIDO).
-  - **[BR-VHI-04]:** Prerrequisito de contar con una inspección post-lavado semanal (VLV) con status = 'APROBADO' creada en los últimos 7 días para poder generar la IVI.
-  - **[BR-VHI-05]:** Validación de vigencia de certificados de fumigación (15 días naturales); si vence o falta, se fija has_fumigation_certificate = false, alerta visual y detonación automática en backend de registro en quality_non_conformities al guardar.
-  - **[BR-VHI-06]:** Autogeneración de folios estándar con patrón de 5 dígitos consecutivas (IVI-YY-##### y VLV-YY-#####).
+  - **[BR-VHI-01]:** Determinación manual y explícita del estatus final (APROBADO, RECHAZADO, APROBADO_CON_NC) por el inspector de Calidad al cerrar el checklist.
+  - **[BR-VHI-02]:** Inmutabilidad de inspecciones rechazadas; la habilitación de la unidad exige la captura de un registro nuevo con un nuevo folio.
+  - **[BR-VHI-03]:** Bloqueo operativo de asignación de rutas en Almacén/Logística y rechazo de salida en Caseta cuando la unidad está en estatus RETENIDO.
+  - **[BR-VHI-04]:** Prerrequisito de contar con una inspección post-lavado semanal (VLV) en estatus APROBADO creada en los últimos 7 días para habilitar la generación de la IVI.
+  - **[BR-VHI-05]:** Validación de vigencia de certificados de fumigación (15 días naturales). Para flotilla interna, si excede vigencia o falta, establece has_fumigation_certificate = false, despliega alerta visual y dispara automáticamente una No Conformidad (source_type = 'PRE_CARGA').
+  - **[BR-VHI-06]:** Autogeneración de folios únicos con patrón consecutivo de 5 dígitos (IVI-YY-##### y VLV-YY-#####).
   - **[BR-VHI-07]:** Restricción de estados lógicos permitidos en base de datos (APROBADO, RECHAZADO, APROBADO_CON_NC).
 - Historias de Usuario (US):
   - **[US-VHI-01]:** Captura de Inspección Diaria Pre-Carga (IVI).
   - **[US-VHI-02]:** Captura de Inspección Post-Lavado Semanal (VLV).
 - Criterios de Aceptación (C.A):
-  - **[C.A. 1.1]:** Validación previa de VLV aprobada en los últimos 7 días.
-  - **[C.A. 1.2]:** Generación del folio IVI-YY-#####.
-  - **[C.A. 1.3]:** Alerta visual en UI y marca has_fumigation_certificate = false ante certificados vencidos/ausentes.
+  - **[C.A. 1.1]:** Validación previa de VLV aprobada en los últimos 7 días antes de permitir el registro IVI.
+  - **[C.A. 1.2]:** Autogeneración del folio IVI-YY-#####.
+  - **[C.A. 1.3]:** Alerta visual en UI y marca has_fumigation_certificate = false ante certificados vencidos o ausentes.
   - **[C.A. 1.4]:** Selección manual del estatus final por el inspector.
-  - **[C.A. 1.5]:** Bloqueo en Caseta y Almacén ante estado RECHAZADO.
-  - **[C.A. 2.1]:** Generación del folio VLV-YY-#####.
+  - **[C.A. 1.5]:** Detonación automática de No Conformidad en backend (source_type = 'PRE_CARGA') al guardar con APROBADO_CON_NC, RECHAZADO o has_fumigation_certificate = false.
+  - **[C.A. 1.6]:** Bloqueo en Caseta y Almacén ante estatus RECHAZADO.
+  - **[C.A. 2.1]:** Autogeneración del folio VLV-YY-#####.
   - **[C.A. 2.2]:** Captura obligatoria de id_vehicle, id_driver_user e id_inspector_user.
   - **[C.A. 2.3]:** Habilitación operativa por 7 días tras guardar VLV en estatus APROBADO.
 
@@ -171,7 +185,7 @@ graph TD
 
 ```mermaid
 graph TD
-    A1[Inicio: Arribo de Transporte con Mercancía] --> B1{¿Es Unidad Interna? is_internal_vehicle}
+    A1[Inicio: Arribo de Transporte con Mercancía IVE] --> B1{¿Es Unidad Interna? is_internal_vehicle}
 
     B1 -- Sí --> C1[Asociar id_vehicle de Flota]
     B1 -- No --> D1[Registrar Fletera id_hauler, Placas external_plates y Chofer driver_name]
@@ -182,7 +196,7 @@ graph TD
     E1 --> F1[Evaluación de Checklist: Estructura, Higiene y Registro Estadístico de Alérgenos / Carga No Alimenticia]
     F1 --> G1{¿Certificado de Fumigación > 15 días o Ausente?}
 
-    G1 -- Sí --> H1[Set has_fumigation_certificate = false + Alerta Visual UI]
+    G1 -- Sí --> H1[Set has_fumigation_certificate = false + Advertencia Visual UI]
     G1 -- No --> I1[Set has_fumigation_certificate = true]
 
     H1 --> J1[Dictamen Manual de Estatus Final por Calidad]
@@ -194,11 +208,19 @@ graph TD
     L1 --> M1[Prohibir Descarga de Mercancía e Ingreso a Almacén]
     M1 --> N1[Re-evaluar mediante Captura de NUEVO Registro IVE]
 
-    K1 -- APROBADO / APROBADO_CON_NC --> O1[Guardar IVE con Folio IVE-YY-#####]
+    K1 -- APROBADO_CON_NC --> O1[Guardar IVE con Folio IVE-YY-#####]
     O1 --> P1[Autorizar Descarga e Ingreso a Almacén]
 
-    H1 -. Backend: Detona No Conformidad en quality_non_conformities al Guardar .-> L1
-    H1 -. Backend: Detona No Conformidad en quality_non_conformities al Guardar .-> O1
+    K1 -- APROBADO --> O2[Guardar IVE con Folio IVE-YY-#####]
+    O2 --> P1
+
+    NC_CHECK_IVE{¿Estatus Final es RECHAZADO o APROBADO_CON_NC?}
+    L1 -.-> NC_CHECK_IVE
+    O1 -.-> NC_CHECK_IVE
+    O2 -.-> NC_CHECK_IVE
+
+    NC_CHECK_IVE -- Sí --> NC_GEN_IVE[Backend: Detona Registro en quality_non_conformities\nsource_type = 'RECEPCION_MERCANCIA', vincula id_reception_inspection]
+    NC_CHECK_IVE -- No --> NC_END_IVE[No Genera No Conformidad\nFalta de certificado es evidencia documental exclusivamente]
 ```
 
 #### Referencias
@@ -206,16 +228,18 @@ graph TD
 - Reglas de Negocio (BR):
   - **[BR-VHI-01]:** Determinación manual y explícita del estatus final por el inspector de Calidad sin automatización por checklist.
   - **[BR-VHI-02]:** Inmutabilidad del registro ante estatus RECHAZADO y exigencia de nuevo folio autogenerado para re-evaluaciones.
-  - **[BR-VHI-05]:** Verificación de vigencia de fumigación (15 días), alerta visual y creación automática de registro en quality_non_conformities en backend independientemente del estatus asignado.
-  - **[BR-VHI-06]:** Nomenclatura e inserción del folio autogenerado de 5 dígitos IVE-YY-#####.
-  - **[BR-VHI-07]:** Restricción estricta de valores de estado en base de datos (APROBADO, RECHAZADO, APROBADO_CON_NC).
+  - **[BR-VHI-05]:** En unidades externas/fleteras (IVE), la condición del certificado de fumigación es meramente evidencia documental. No genera No Conformidad de forma automatizada; la No Conformidad en IVE depende exclusivamente del dictamen manual (APROBADO_CON_NC o RECHAZADO).
+  - **[BR-VHI-06]:** Autogeneración de folios únicos con patrón consecutivo de 5 dígitos (IVE-YY-#####).
+  - **[BR-VHI-07]:** Restricción de estados lógicos permitidos en base de datos (APROBADO, RECHAZADO, APROBADO_CON_NC).
 - Historias de Usuario (US):
   - **[US-VHI-03]:** Captura de Inspección de Recepción de Mercancía (IVE).
 - Criterios de Aceptación (C.A):
-  - **[C.A. 3.1]:** Clasificación entre unidades internas y externas, requiriendo id_hauler, external_plates y driver_name para externas.
+  - **[C.A. 3.1]:** Clasificación entre unidades internas y externas, requiriendo id_hauler, external_plates y driver_name para unidades externas.
   - **[C.A. 3.2]:** Almacenamiento de facturas asociadas en formato JSONB (invoices_included) y verificación de sellos de seguridad (correct_seals, seal_number_received).
-  - **[C.A. 3.3]:** Registro estadístico no bloqueante para alérgenos compartidos o carga no alimenticia.
-  - **[C.A. 3.4]:** Asignación de folio IVE-YY-##### y validación de estados lógicos permitidos.
+  - **[C.A. 3.3]:** Registro documental y advertencia visual si falta el certificado de fumigación, especificando que su ausencia no genera No Conformidad automática en IVE.
+  - **[C.A. 3.4]:** Captura de alérgenos compartidos o carga no alimenticia como información estadística sin bloquear el formulario.
+  - **[C.A. 3.5]:** Autogeneración del folio IVE-YY-##### y validación de estados lógicos permitidos.
+  - **[C.A. 3.6]:** Creación automática de No Conformidad (source_type = 'RECEPCION_MERCANCIA') en backend únicamente al guardar con estado RECHAZADO o APROBADO_CON_NC.
 
 ---
 
