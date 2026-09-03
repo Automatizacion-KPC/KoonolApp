@@ -17,12 +17,12 @@ El módulo de **No Conformidades** centraliza la recolección, consolidación y 
 
 - **Descripción:** Al guardar un registro de inspección, el backend generará máximo UN solo registro de No Conformidad (`status = 'ABIERTA'`) si se cumple al menos una de estas condiciones:
   1. El estatus asignado a la inspección es `APROBADO_CON_NC` o `RECHAZADO` (Aplica a IVI, VLV e IVE).
-  2. La evaluación técnica incluye la marca `has_fumigation_certificate = false` (Aplica únicamente a IVE).
+  2. La evaluación técnica de la unidad interna (IVI) incluye la marca `has_fumigation_certificate = false` o certificado vencido.
 - **Comportamiento Global:**
   - Se creará **un solo registro** de No Conformidad por inspección.
   - El campo `description` se construirá automáticamente combinando las observaciones del inspector y los hallazgos fuera de norma detectados por el sistema.
   - El `campo id_created_by` heredará el `id_inspector_user` del registro padre.
-  - Si en una inspección IVE concurren un estatus de rechazo y un certificado vencido, ambos motivos se consolidan en la columna `description` de la misma transacción de No Conformidad.
+  - Si en una inspección IVI concurren un estatus de rechazo/aprobado con NC y un certificado de fumigación ausente/vencido, ambos motivos se consolidan en la columna `description` de la misma transacción.
 
 ### BR-QNC-03: Formato y Secuencia Anual del Folio
 
@@ -44,6 +44,11 @@ El módulo de **No Conformidades** centraliza la recolección, consolidación y 
 - **Descripción:** La existencia de una No Conformidad en estado `ABIERTA`, `EN_PROCESO` o `VERIFICADA` no interrumpe ni bloquea transacciones posteriores en KoonolApp o SAP Business One (tales como despacho de rutas, recepción física de mercancía o movimientos de inventario).
 - **Comportamiento Global:** El módulo opera como una bitácora analítica de seguimiento de calidad sin Hooks o triggers bloqueantes en tablas transaccionales primarias.
 
+### BR-QNC-07: Restricción de Borrado Lógico (Soft Delete)
+
+- **Descripción:** Los registros de No Conformidad generados automáticamente desde inspecciones (`PRE_CARGA`, `POST_LAVADO`, `RECEPCION_MERCANCIA`) son inmutables en su existencia y no pueden ser eliminados lógicamente (`deleted_at`).
+- **Comportamiento Global:** La actualización del campo deleted_at solo estará permitida para No Conformidades con `source_type = 'MANUAL'`, requiriendo autenticación de un usuario del departamento de **CALIDAD** con rol **MANAGER**.
+
 ---
 
 ---
@@ -61,11 +66,12 @@ El módulo de **No Conformidades** centraliza la recolección, consolidación y 
     - Si proviene de IVI: `source_type = 'PRE_CARGA'`, asigna `id_daily_inspection`.
     - Si proviene de VLV: `source_type = 'POST_LAVADO'`, asigna `id_wash_inspection`.
     - Si proviene de IVE: `source_type = 'RECEPCION_MERCANCIA'`, asigna `id_reception_inspection`.
-  - **C.A. 1.3:** Disparo por Regla de Negocio Preventiva (Exclusivo IVE). Si una inspección diaria (IVE) se guarda con `has_fumigation_certificate = false`, el backend debe generar la No Conformidad aun cuando el estatus manual asignado haya sido `APROBADO`.
+  - **C.A. 1.3:** Disparo por Regla de Negocio Preventiva (Exclusivo IVI). Si una inspección diaria (IVI) se guarda con `has_fumigation_certificate = false`, el backend debe generar la No Conformidad (`source_type = 'PRE_CARGA'`) aun cuando el estatus manual asignado haya sido `APROBADO`.
   - **C.A. 1.4:** Construcción de la Descripción. El backend debe poblar el campo `description` de la No Conformidad utilizando la plantilla: `"[Origen: {FOLIO_INSPECCION}] - Hallazgos: {FALLOS_DETECTADOS}. Observaciones: {OBSERVACIONES_INSPECTOR}"`.
-    - `{FALLOS_DETECTADOS}`: `"Estatus manual: RECHAZADO"`, `"Estatus manual: APROBADO_CON_NC"`, y/o `"Certificado de Fumigación Ausente/Vencido (>15 días)"`.
-    - `{OBSERVACIONES_INSPECTOR}`: Mapea la columna `notes` si proviene de IVI/VLV, o `rejection_reason` si proviene de IVE. Si está vacío, se registra `"Sin observaciones adicionales"`.
+    - `{FALLOS_DETECTADOS}`: Arreglo acumulativo con los valores activos: `"Estatus: {status}"` (si es `RECHAZADO` o `APROBADO_CON_NC`), y/o `"Certificado de Fumigación Vencido/Ausente"` (exclusivo IVI).
+    - `{OBSERVACIONES_INSPECTOR}`: Mapea la columna `notes` (para IVI, VLV,IVE). Si `status = 'RECHAZADO'` en IVE, concatena también `rejection_reason`. Si está vacío, se registra `"Sin observaciones adicionales"`.
   - **C.A. 1.5:** Valores Iniciales y Auditoría. El registro nace con `status = 'ABIERTA'`, folio `NC-YY-#####` y hereda `id_created_by = id_inspector_user`.
+  - **C.A. 1.6:** Garantía de Unicidad. Si la transacción intenta duplicar una NC para un mismo ID de inspección, la restricción de base de datos rechaza el duplicado y retorna la NC existente.
 
 ### US-QNC-02: Registro Manual de No Conformidades
 
