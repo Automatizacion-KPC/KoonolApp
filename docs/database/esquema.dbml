@@ -908,7 +908,8 @@ Table vehicle_reception_inspections {
   has_live_or_dead_flies boolean [not null]
 
   status varchar [default: 'APROBADO']             // APROBADO, RECHAZADO, APROBADO_CON_NC
-  rejection_reason text
+  rejection_reason text               // Solo si status = 'RECHAZADO'
+  notes text                          // Observaciones generales / APROBADO_CON_NC
   
   created_at timestamp [default: `now()`]
 
@@ -1313,11 +1314,11 @@ Table quality_non_conformities {
 
   indexes {
     id_updated_by [name: 'idx_quality_non_conformities_id_updated_by']
-    id_daily_inspection [name: 'idx_quality_non_conformities_id_daily_inspection']
-    id_wash_inspection [name: 'idx_quality_non_conformities_id_wash_inspection']
-    id_reception_inspection [name: 'idx_quality_non_conformities_id_reception_inspection']
-    id_customer_complaint [name: 'idx_quality_non_conformities_id_customer_complaint']
-    id_glass_plastic_detail [name: 'idx_quality_non_conformities_id_glass_plastic_detail']
+    id_daily_inspection [unique, name: 'idx_quality_non_conformities_id_daily_inspection']
+    id_wash_inspection [unique, name: 'idx_quality_non_conformities_id_wash_inspection']
+    id_reception_inspection [unique, name: 'idx_quality_non_conformities_id_reception_inspection']
+    id_customer_complaint [unique, name: 'idx_quality_non_conformities_id_customer_complaint']
+    id_glass_plastic_detail [unique, name: 'idx_quality_non_conformities_id_glass_plastic_detail']
     (status, created_at) [name: 'idx_quality_non_conformities_status_created']
     (source_type, status) [name: 'idx_quality_non_conformities_source_status']
     (id_created_by, status) [name: 'idx_quality_non_conformities_creator_status']
