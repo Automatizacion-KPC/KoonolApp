@@ -16,13 +16,13 @@ Comprende tres flujos de evaluación técnica:
 
 ### BR-VHI-01: Determinación Manual del Estatus de Inspección
 
-- **Descripción:** El estatus final de una inspección (`APROBADO`, `RECHAZADO` o `APROBADO_CON_NC`) es determinado y asignado de forma manual y explícita por el colaborador evaluador del Departamento de Calidad al finalizar el _checklist_. Las verificaciones booleanas de estructura, higiene y plagas sirven como evidencia técnica pero no disparan una conmutación automatizada por código para el estatus final.
+- **Descripción:** El estatus final de una inspección (`APROBADO`, `RECHAZADO` o `APROBADO_CON_NC`) es determinado y asignado de forma manual y explícita por el colaborador evaluador del Departamento de Calidad al finalizar el _checklist_ supervisado por el Manager del área. Las verificaciones booleanas de estructura, higiene y plagas sirven como evidencia técnica acumulativa pero no disparan una conmutación automatizada por código para el estatus final.
 - **Comportamiento Global:** El backend debe requerir obligatoriamente el envío de un estatus válido al momento del cierre. No existen reglas de rechazo automático en base de datos.
 
 ### BR-VHI-02: Inmutabilidad de Inspecciones y Procedimiento de Re-inspección
 
-- **Descripción:** Una vez finalizada y guardada una inspección con estatus `RECHAZADO`, el registro se vuelve inmutable y no puede ser editado para cambiar su estatus a aprobado.
-- **Comportamiento Global:** La habilitación operativa de una unidad rechazada exige la captura e inserción de un registro completamente nuevo con un nuevo folio único autogenerado.
+- **Descripción:** Todos los registros de inspección (IVI, VLV, IVE) son inmutables y actúan como entradas de bitácora histórica. Una vez finalizada y guardada una inspección con estatus `RECHAZADO`, el registro se vuelve inmutable y no puede ser editado para cambiar su estatus a aprobado.
+- **Comportamiento Global:** No se permiten operaciones de actualización (UPDATE) ni borrado (DELETE). La habilitación operativa de una unidad rechazada exige la captura e inserción de un registro completamente nuevo con un nuevo folio único autogenerado.
 
 ### BR-VHI-03: Bloqueo Operativo de Salida y Asignación de Rutas
 
@@ -72,17 +72,19 @@ Comprende tres flujos de evaluación técnica:
   - **C.A. 1.3:** Si la unidad no cuenta con certificado vigente, la UI despliega una alerta de advertencia y establece `has_fumigation_certificate = false` (**BR-VHI-05**).
   - **C.A. 1.4:** El usuario debe seleccionar manualmente el estado final (`APROBADO`, `RECHAZADO`, `APROBADO_CON_NC`) (**BR-VHI-01**).
   - **C.A. 1.5:** Si se guarda con `APROBADO_CON_NC`, `RECHAZADO` o con `has_fumigation_certificate = false`, el backend detona automáticamente la creación de la No Conformidad vinculando `id_daily_inspection` y asignando `source_type = 'PRE_CARGA'`.
-  - **C.A. 1.6:** Un estado `RECHAZADO` debe bloquear de inmediato la asignación de rutas y salida del vehículo en caseta (**BR-VHI-03**).
+  - **C.A. 1.6:** Un estado `RECHAZADO` debe bloquear de inmediato la asignación de rutas y salida del vehículo en caseta, actualizando en la misma transacción el estatus del vehículo a `RETENIDO` (**BR-VHI-03**).
 
 ### US-VHI-02: Captura de Inspección Post-Lavado Semanal (VLV)
 
 - **Como:** Colaborador del departamento de Calidad (`USER`, `LEADER`, `SUPERVISOR`, `MANAGER`).
 - **Quiero:** Documentar la inspección de higiene, secado y estado de la cabina de un vehículo tras su lavado semanal.
-- **Para:** Habilitar la unidad operativa para la realización de las inspecciones diarias de la semana.
+- **Para:** Habilitar la unidad operativa para las inspecciones diarias o registrar hallazgos de lavado deficiente.
 - **Criterios de Aceptación:**
   - **C.A. 2.1:** El sistema debe autogenerar el folio único bajo el patrón `VLV-YY-#####` (**BR-VHI-06**).
   - **C.A. 2.2:** La interfaz debe solicitar la selección del vehículo (`id_vehicle`), chofer asignado (`id_driver_user`) y almacenar el usuario autenticado como inspector (`id_inspector_user`).
   - **C.A. 2.3:** Al guardar con estatus `APROBADO`, el vehículo queda automáticamente habilitado para pasar inspecciones diarias IVI durante los siguientes 7 días naturales (**BR-VHI-04**).
+  - **C.A. 2.4:** Si se guarda con `status = 'RECHAZADO'` o `APROBADO_CON_NC`, el backend crea atómicamente la No Conformidad vinculando `id_wash_inspection` y asignando `source_type = 'POST_LAVADO'` (**BR-QNC-02**).
+  - **C.A. 2.5:** Un estado `RECHAZADO` en VLV marca de inmediato el vehículo como `RETENIDO`, impidiendo la creación de IVIs y el despacho de rutas (**BR-VHI-03**).
 
 ### US-VHI-03: Captura de Inspección de Recepción de Mercancía (IVE)
 
@@ -109,59 +111,61 @@ Comprende tres flujos de evaluación técnica:
 graph TD
     A[Inicio: Selección de Vehículo Interno id_vehicle] --> B{¿Cuenta con VLV Aprobada en últimos 7 días?}
 
-    B -- No --> C[Bloqueo de Registro IVI]
-    C --> D[Notificar: Requiere Inspección Post-Lavado VLV Aprobada en últimos 7 días]
-    D --> E[Realizar Lavado y Capturar Formato VLV: id_vehicle, id_driver_user, id_inspector_user]
+    B -- No --> C[Bloqueo Backend: Transacción Denegada]
+    C --> D[Notificar: Requiere VLV en estatus APROBADO en los últimos 7 días]
+    D --> E[Captura de Formato VLV: id_vehicle, id_driver_user, id_inspector_user]
     E --> F{Dictamen Manual de Estatus VLV por Calidad}
 
     F -- RECHAZADO --> G1[Guardar VLV Inmutable con Folio VLV-YY-#####]
-    G1 --> H1[Vehículo en estatus RETENIDO: Bloqueo Operativo]
-    H1 --> I1[Re-lavado y Captura de NUEVO Formato VLV]
+    G1 --> H1[Actualizar Vehículo a estatus RETENIDO]
+    H1 --> NC_VLV[Backend: Detona Registro en quality_non_conformities<br/>source_type = 'POST_LAVADO', vincula id_wash_inspection]
+    NC_VLV --> I1[Re-lavado y Captura de NUEVO Registro VLV con Nuevo Folio]
     I1 --> E
 
     F -- APROBADO_CON_NC --> G2[Guardar VLV con Folio VLV-YY-#####]
-    G2 --> H2[No Habilita IVI: Backend Exige Estatus APROBADO]
+    G2 --> NC_VLV2[Backend: Detona Registro en quality_non_conformities<br/>source_type = 'POST_LAVADO', vincula id_wash_inspection]
+    NC_VLV2 --> H2[No Habilita IVI: Exige Estatus APROBADO para Habilitación]
     H2 --> E
 
     F -- APROBADO --> G3[Guardar VLV con Folio VLV-YY-#####]
     G3 --> H3[Unidad Habilitada para Inspecciones IVI por 7 Días]
     H3 --> B
 
-    B -- Sí --> J[Captura de Checklist de Inspección Diaria IVI]
-    J --> K{¿Certificado de Fumigación > 15 días o Ausente?}
+    B -- Sí --> J[Captura de Checklist IVI: Estructura, Higiene y Plagas]
+    J --> K{¿Certificado Fumigación > 15 días o Ausente?}
 
-    K -- Sí --> L[Set has_fumigation_certificate = false + Alerta Visual UI]
+    K -- Sí --> L[Set has_fumigation_certificate = false + Alerta Preventiva UI]
     K -- No --> M[Set has_fumigation_certificate = true]
 
-    L --> N[Dictamen Manual de Estatus Final por Calidad]
+    L --> N[Dictamen Manual de Estatus Final IVI por Calidad]
     M --> N
 
     N --> O{Estatus Final Seleccionado}
 
     O -- RECHAZADO --> P1[Guardar IVI Inmutable con Folio IVI-YY-#####]
-    P1 --> Q1[Vehículo en estatus RETENIDO: Bloqueo en Almacén y Caseta]
-    Q1 --> R1[Corregir Deficiencias y Capturar NUEVO Formato IVI]
+    P1 --> Q1[Actualizar Vehículo a estatus RETENIDO<br/>Bloqueo Operativo en Almacén y Caseta]
+    Q1 --> R1[Corregir Deficiencias y Capturar NUEVO Registro IVI con Nuevo Folio]
 
     O -- APROBADO_CON_NC --> P2[Guardar IVI con Folio IVI-YY-#####]
-    P2 --> Q2[Unidad Liberada para Asignación de Ruta y Salida]
+    P2 --> Q2[Unidad Liberada para Asignación de Ruta y Salida en Caseta]
 
     O -- APROBADO --> P3[Guardar IVI con Folio IVI-YY-#####]
     P3 --> Q2
 
-    NC_CHECK{¿Estatus != APROBADO o has_fumigation_certificate == false?}
-    P1 -.-> NC_CHECK
-    P2 -.-> NC_CHECK
-    P3 -.-> NC_CHECK
+    NC_CHECK_IVI{¿Estatus != APROBADO o has_fumigation_certificate == false?}
+    P1 -.-> NC_CHECK_IVI
+    P2 -.-> NC_CHECK_IVI
+    P3 -.-> NC_CHECK_IVI
 
-    NC_CHECK -- Sí --> NC_GEN[Backend: Detona Registro en quality_non_conformities\nsource_type = 'PRE_CARGA', vincula id_daily_inspection]
-    NC_CHECK -- No --> NC_END[No Genera No Conformidad]
+    NC_CHECK_IVI -- Sí --> NC_GEN_IVI[Backend: Detona Registro en quality_non_conformities<br/>source_type = 'PRE_CARGA', vincula id_daily_inspection]
+    NC_CHECK_IVI -- No --> NC_END_IVI[No Genera No Conformidad]
 ```
 
 #### Referencias
 
 - Reglas de Negocio (BR):
   - **[BR-VHI-01]:** Determinación manual y explícita del estatus final (APROBADO, RECHAZADO, APROBADO_CON_NC) por el inspector de Calidad al cerrar el checklist.
-  - **[BR-VHI-02]:** Inmutabilidad de inspecciones rechazadas; la habilitación de la unidad exige la captura de un registro nuevo con un nuevo folio.
+  - **[BR-VHI-02]:** Inmutabilidad de inspecciones rechazadas; la habilitación de la unidad exige la captura de un registro nuevo con un nuevo folio único.
   - **[BR-VHI-03]:** Bloqueo operativo de asignación de rutas en Almacén/Logística y rechazo de salida en Caseta cuando la unidad está en estatus RETENIDO.
   - **[BR-VHI-04]:** Prerrequisito de contar con una inspección post-lavado semanal (VLV) en estatus APROBADO creada en los últimos 7 días para habilitar la generación de la IVI.
   - **[BR-VHI-05]:** Validación de vigencia de certificados de fumigación (15 días naturales). Para flotilla interna, si excede vigencia o falta, establece has_fumigation_certificate = false, despliega alerta visual y dispara automáticamente una No Conformidad (source_type = 'PRE_CARGA').
@@ -176,40 +180,42 @@ graph TD
   - **[C.A. 1.3]:** Alerta visual en UI y marca has_fumigation_certificate = false ante certificados vencidos o ausentes.
   - **[C.A. 1.4]:** Selección manual del estatus final por el inspector.
   - **[C.A. 1.5]:** Detonación automática de No Conformidad en backend (source_type = 'PRE_CARGA') al guardar con APROBADO_CON_NC, RECHAZADO o has_fumigation_certificate = false.
-  - **[C.A. 1.6]:** Bloqueo en Caseta y Almacén ante estatus RECHAZADO.
+  - **[C.A. 1.6]:** Bloqueo en Caseta y Almacén actualizando el estado del vehículo a RETENIDO ante un estatus RECHAZADO.
   - **[C.A. 2.1]:** Autogeneración del folio VLV-YY-#####.
   - **[C.A. 2.2]:** Captura obligatoria de id_vehicle, id_driver_user e id_inspector_user.
   - **[C.A. 2.3]:** Habilitación operativa por 7 días tras guardar VLV en estatus APROBADO.
+  - **[C.A. 2.4]:** Detonación de No Conformidad (source_type = 'POST_LAVADO') vinculando id_wash_inspection si VLV es RECHAZADO o APROBADO_CON_NC.
+  - **[C.A. 2.5]:** Marcado inmediato del vehículo como RETENIDO ante VLV en estado RECHAZADO.
 
 ### 2. Flujo Operativo de Recepción de Mercancía (IVE)
 
 ```mermaid
 graph TD
-    A1[Inicio: Arribo de Transporte con Mercancía IVE] --> B1{¿Es Unidad Interna? is_internal_vehicle}
+    A1[Inicio: Arribo de Transporte con Mercancía IVE] --> B1{¿Es Unidad Interna?<br/>is_internal_vehicle}
 
-    B1 -- Sí --> C1[Asociar id_vehicle de Flota]
-    B1 -- No --> D1[Registrar Fletera id_hauler, Placas external_plates y Chofer driver_name]
+    B1 -- Sí --> C1[Asociar id_vehicle de Flota Interna]
+    B1 -- No --> D1[Registrar Datos Fletera:<br/>id_hauler, external_plates, driver_name]
 
-    C1 --> E1[Captura de Facturas invoices_included JSONB y Sellos correct_seals, seal_number_received]
+    C1 --> E1[Captura Documental:<br/>invoices_included JSONB, correct_seals, seal_number_received]
     D1 --> E1
 
-    E1 --> F1[Evaluación de Checklist: Estructura, Higiene y Registro Estadístico de Alérgenos / Carga No Alimenticia]
-    F1 --> G1{¿Certificado de Fumigación > 15 días o Ausente?}
+    E1 --> F1[Evaluación de Checklist: Estructura e Higiene<br/>Captura Estadística de Alérgenos y Carga No Alimenticia]
+    F1 --> G1{¿Certificado Fumigación > 15 días o Ausente?}
 
-    G1 -- Sí --> H1[Set has_fumigation_certificate = false + Advertencia Visual UI]
+    G1 -- Sí --> H1[Set has_fumigation_certificate = false<br/>+ Advertencia Visual UI]
     G1 -- No --> I1[Set has_fumigation_certificate = true]
 
-    H1 --> J1[Dictamen Manual de Estatus Final por Calidad]
+    H1 --> J1[Dictamen Manual de Estatus Final IVE por Calidad]
     I1 --> J1
 
     J1 --> K1{Estatus Final Seleccionado}
 
     K1 -- RECHAZADO --> L1[Guardar IVE Inmutable con Folio IVE-YY-##### y Motivo]
     L1 --> M1[Prohibir Descarga de Mercancía e Ingreso a Almacén]
-    M1 --> N1[Re-evaluar mediante Captura de NUEVO Registro IVE]
+    M1 --> N1[Re-evaluar Mediante Captura de NUEVO Registro IVE con Nuevo Folio]
 
     K1 -- APROBADO_CON_NC --> O1[Guardar IVE con Folio IVE-YY-#####]
-    O1 --> P1[Autorizar Descarga e Ingreso a Almacén]
+    O1 --> P1[Autorizar Descarga de Mercancía e Ingreso a Almacén]
 
     K1 -- APROBADO --> O2[Guardar IVE con Folio IVE-YY-#####]
     O2 --> P1
@@ -219,15 +225,15 @@ graph TD
     O1 -.-> NC_CHECK_IVE
     O2 -.-> NC_CHECK_IVE
 
-    NC_CHECK_IVE -- Sí --> NC_GEN_IVE[Backend: Detona Registro en quality_non_conformities\nsource_type = 'RECEPCION_MERCANCIA', vincula id_reception_inspection]
-    NC_CHECK_IVE -- No --> NC_END_IVE[No Genera No Conformidad\nFalta de certificado es evidencia documental exclusivamente]
+    NC_CHECK_IVE -- Sí --> NC_GEN_IVE[Backend: Detona Registro en quality_non_conformities<br/>source_type = 'RECEPCION_MERCANCIA', vincula id_reception_inspection]
+    NC_CHECK_IVE -- No --> NC_END_IVE[No Genera No Conformidad<br/>Falta de certificado es evidencia documental exclusivamente]
 ```
 
 #### Referencias
 
 - Reglas de Negocio (BR):
   - **[BR-VHI-01]:** Determinación manual y explícita del estatus final por el inspector de Calidad sin automatización por checklist.
-  - **[BR-VHI-02]:** Inmutabilidad del registro ante estatus RECHAZADO y exigencia de nuevo folio autogenerado para re-evaluaciones.
+  - **[BR-VHI-02]:** Inmutabilidad del registro ante estatus RECHAZADO y exigencia de un nuevo folio autogenerado para re-evaluaciones.
   - **[BR-VHI-05]:** En unidades externas/fleteras (IVE), la condición del certificado de fumigación es meramente evidencia documental. No genera No Conformidad de forma automatizada; la No Conformidad en IVE depende exclusivamente del dictamen manual (APROBADO_CON_NC o RECHAZADO).
   - **[BR-VHI-06]:** Autogeneración de folios únicos con patrón consecutivo de 5 dígitos (IVE-YY-#####).
   - **[BR-VHI-07]:** Restricción de estados lógicos permitidos en base de datos (APROBADO, RECHAZADO, APROBADO_CON_NC).
