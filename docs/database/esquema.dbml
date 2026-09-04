@@ -1306,6 +1306,7 @@ Table quality_non_conformities {
 
   id_created_by uuid [not null]
   id_updated_by uuid
+  id_deleted_by uuid
   created_at timestamp [default: `now()`]
   updated_at timestamp
   deleted_at timestamp
@@ -1556,6 +1557,7 @@ Ref: quality_non_conformities.id_customer_complaint > quality_customer_complaint
 Ref: quality_non_conformities.id_glass_plastic_detail > quality_glass_plastic_details.id
 Ref: quality_non_conformities.id_created_by > users.id
 Ref: quality_non_conformities.id_updated_by > users.id
+Ref: quality_non_conformities.id_deleted_by > users.id
 
 // Relaciones de Notificaciones
 Ref: system_notifications.id_user > users.id
