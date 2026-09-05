@@ -11,7 +11,7 @@ El módulo de **No Conformidades** centraliza la recolección, consolidación y 
 ### BR-QNC-01: Arco Exclusivo de Origen
 
 - **Descripción:** Toda No Conformidad debe estar vinculada a una única fuente de origen especificada en el campo `source_type`, cuyos valores permitidos son: `'PRE_CARGA'`, `'POST_LAVADO'`, `'RECEPCION_MERCANCIA'`, `'RECLAMO_CLIENTE'`, `'VIDRIO_PLASTICO'`, `'MANUAL'`.
-- **Comportamiento Global:** Debe existir exactamente una referencia UUID no nula hacia la tabla correspondiente según el source_type. Si source_type = 'MANUAL', todos los campos de referencia (id_daily_inspection, id_wash_inspection, id_reception_inspection, id_customer_complaint, id_glass_plastic_detail) deben ser obligatoriamente NULL. La base de datos/backend validará esta restricción antes de persistir.
+- **Comportamiento Global:** Debe existir exactamente una referencia UUID no nula hacia la tabla correspondiente según el source_type. Si source_type = 'MANUAL', todos los campos de referencia (id_daily_inspection, id_wash_inspection, id_reception_inspection, id_customer_complaint, id_glass_plastic_detail) deben ser obligatoriamente NULL. La base de datos/backend/frontend validará esta restricción antes de persisti, vía CHECK constraint en base de datos, middleware en backend y input radio en frontend.
 
 ### BR-QNC-02: Generación Autogestionada por Inspección
 
@@ -46,8 +46,13 @@ El módulo de **No Conformidades** centraliza la recolección, consolidación y 
 
 ### BR-QNC-07: Restricción de Borrado Lógico (Soft Delete)
 
-- **Descripción:** Los registros de No Conformidad generados automáticamente desde inspecciones (`PRE_CARGA`, `POST_LAVADO`, `RECEPCION_MERCANCIA`) son inmutables en su existencia y no pueden ser eliminados lógicamente (`deleted_at`).
-- **Comportamiento Global:** La actualización del campo deleted_at solo estará permitida para No Conformidades con `source_type = 'MANUAL'`, requiriendo autenticación de un usuario del departamento de **CALIDAD** con rol **MANAGER**.
+- **Descripción:** Los registros de No Conformidad generados automáticamente desde inspecciones (`PRE_CARGA`, `POST_LAVADO`, `RECEPCION_MERCANCIA`) son inmutables en su existencia y no pueden ser eliminados lógicamente (`deleted_at`). El borrado lógico (`deleted_at`) aplica exclusivamente para No Conformidades con `source_type = 'MANUAL'`
+- **Comportamiento Global:** La actualización del campo deleted_at solo estará permitida para No Conformidades con `source_type = 'MANUAL'`, requiriendo autenticación de un usuario del departamento de **CALIDAD** con rol **MANAGER**, el backend registra obligatoriamente el id del usuario en la columna `id_deleted_by`.
+
+### BR-QNC-08: Atomicidad de la Transacción de Inspección y No Conformidad
+
+- **Descripción:** La creación del registro de inspección (IVI, VLV o IVE) y la inserción de su No Conformidad asociada (cuando aplique) deben ejecutarse dentro de un mismo bloque transaccional (`DB Transaction` con aislamiento mínimo `READ COMMITTED`).
+- **Comportamiento Global:** Si la inserción en `quality_non_conformities` falla por cualquier motivo (ej. error de concurrencia o violación de constraint), toda la transacción debe realizar un `ROLLBACK`, evitando que existan inspecciones rechazadas o con NC sin su correspondiente entrada en la bitácora global.
 
 ---
 
