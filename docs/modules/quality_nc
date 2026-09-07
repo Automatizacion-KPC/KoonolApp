@@ -11,7 +11,7 @@ El módulo de **No Conformidades** centraliza la recolección, consolidación y 
 ### BR-QNC-01: Arco Exclusivo de Origen
 
 - **Descripción:** Toda No Conformidad debe estar vinculada a una única fuente de origen especificada en el campo `source_type`, cuyos valores permitidos son: `'PRE_CARGA'`, `'POST_LAVADO'`, `'RECEPCION_MERCANCIA'`, `'RECLAMO_CLIENTE'`, `'VIDRIO_PLASTICO'`, `'MANUAL'`.
-- **Comportamiento Global:** Debe existir exactamente una referencia UUID no nula hacia la tabla correspondiente según el source_type. Si source_type = 'MANUAL', todos los campos de referencia (id_daily_inspection, id_wash_inspection, id_reception_inspection, id_customer_complaint, id_glass_plastic_detail) deben ser obligatoriamente NULL. La base de datos/backend/frontend validará esta restricción antes de persisti, vía CHECK constraint en base de datos, middleware en backend y input radio en frontend.
+- **Comportamiento Global:** Debe existir exactamente una referencia UUID no nula hacia la tabla correspondiente según el source_type. Si source_type = 'MANUAL', todos los campos de referencia (id_daily_inspection, id_wash_inspection, id_reception_inspection, id_customer_complaint, id_glass_plastic_detail) deben ser obligatoriamente NULL. La base de datos/backend/frontend validará esta restricción antes de persistir, vía CHECK constraint en base de datos, middleware en backend y input radio en frontend.
 
 ### BR-QNC-02: Generación Autogestionada por Inspección
 
@@ -72,9 +72,16 @@ El módulo de **No Conformidades** centraliza la recolección, consolidación y 
     - Si proviene de VLV: `source_type = 'POST_LAVADO'`, asigna `id_wash_inspection`.
     - Si proviene de IVE: `source_type = 'RECEPCION_MERCANCIA'`, asigna `id_reception_inspection`.
   - **C.A. 1.3:** Disparo por Regla de Negocio Preventiva (Exclusivo IVI). Si una inspección diaria (IVI) se guarda con `has_fumigation_certificate = false`, el backend debe generar la No Conformidad (`source_type = 'PRE_CARGA'`) aun cuando el estatus manual asignado haya sido `APROBADO`.
-  - **C.A. 1.4:** Construcción de la Descripción. El backend debe poblar el campo `description` de la No Conformidad utilizando la plantilla: `"[Origen: {FOLIO_INSPECCION}] - Hallazgos: {FALLOS_DETECTADOS}. Observaciones: {OBSERVACIONES_INSPECTOR}"`.
-    - `{FALLOS_DETECTADOS}`: Arreglo acumulativo con los valores activos: `"Estatus: {status}"` (si es `RECHAZADO` o `APROBADO_CON_NC`), y/o `"Certificado de Fumigación Vencido/Ausente"` (exclusivo IVI).
-    - `{OBSERVACIONES_INSPECTOR}`: Mapea la columna `notes` (para IVI, VLV,IVE). Si `status = 'RECHAZADO'` en IVE, concatena también `rejection_reason`. Si está vacío, se registra `"Sin observaciones adicionales"`.
+  - **C.A. 1.4:** Construcción de la Descripción. El backend debe poblar el campo `description` de la No Conformidad utilizando la siguiente estructura:
+    - Plantilla: `"[Origen: {FOLIO_INSPECCION}] - {CONTEXTO_UNIDAD} - Hallazgos: {FALLOS_DETECTADOS}. Motivo Rechazo: {MOTIVO_RECHAZO}. Observaciones: {OBSERVACIONES_INSPECTOR}"`.
+    - Definición de Variables:
+      - `{FOLIO_INSPECCION}`: Folio autogenerado de la inspección origen (IVI-YY-#####, VLV-YY-#####, IVE-YY-#####).
+      - `{CONTEXTO_UNIDAD}`:
+        - Si es vehículo interno (IVI,VLV o IVE Interna): `"Unidad: {id_vehicle}"`.
+        - Si es vehículo externo (IVE Fletera): `"Fletera: {id_hauler} | Placas: {external_plates} | Chofer: {driver_name}"`.
+      - `{FALLOS_DETECTADOS}`: Lista delimitada por el arreglo acumulativo de las desviaciones detectadas separadas por comas (`"Estatus: {status}"` [si es `RECHAZADO` o `APROBADO_CON_NC`] y/o `"Certificado de Fumigación Vencido/Ausente"`).
+      - `{MOTIVO_RECHAZO}`: Contenido de `rejection_reason`. Si no aplica o está vacío, se coloca `"N/A"`.
+      - `{OBSERVACIONES_INSPECTOR}`: Contenido del campo `notes`. Si está vacío, se registra `"Sin observaciones adicionales"`.
   - **C.A. 1.5:** Valores Iniciales y Auditoría. El registro nace con `status = 'ABIERTA'`, folio `NC-YY-#####` y hereda `id_created_by = id_inspector_user`.
   - **C.A. 1.6:** Garantía de Unicidad. Si la transacción intenta duplicar una NC para un mismo ID de inspección, la restricción de base de datos rechaza el duplicado y retorna la NC existente.
 
