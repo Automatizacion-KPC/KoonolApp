@@ -16,7 +16,7 @@ Comprende tres flujos de evaluación técnica:
 
 ### BR-VHI-01: Determinación Manual del Estatus de Inspección
 
-- **Descripción:** El estatus final de una inspección (`APROBADO`, `RECHAZADO` o `APROBADO_CON_NC`) es determinado y asignado de forma manual y explícita por el colaborador evaluador del Departamento de Calidad al finalizar el _checklist_ supervisado por el Manager del área. Las verificaciones booleanas de estructura, higiene y plagas sirven como evidencia técnica acumulativa pero no disparan una conmutación automatizada por código para el estatus final.
+- **Descripción:** El estatus final de una inspección (`APROBADO`, `RECHAZADO` o `APROBADO_CON_NC`) es determinado y asignado de forma manual y explícita por el colaborador evaluador del Departamento de Calidad al finalizar el _checklist_ supervisado por el Manager del área. Las verificaciones booleanas de estructura, higiene y plagas sirven como evidencia técnica acumulativa pero no disparan una conmutación automatizada por código para el estatus final. Sin embargo, si existe ausencia/vencimiento de certificado de fumigación en flotilla interna, el backend y frontend prohibirán la selección de `APROBADO`, exigiendo seleccionar únicamente `APROBADO_CON_NC` o `RECHAZADO`. Si el estatus es RECHAZADO, el llenado del campo rejection_reason es estrictamente obligatorio.
 - **Comportamiento Global:** El backend debe requerir obligatoriamente el envío de un estatus válido al momento del cierre. No existen reglas de rechazo automático en base de datos.
 
 ### BR-VHI-02: Inmutabilidad de Inspecciones y Procedimiento de Re-inspección
@@ -38,7 +38,7 @@ Comprende tres flujos de evaluación técnica:
 
 - **Descripción:** La vigencia operativa de un certificado de fumigación es de **15 días naturales** calculados a partir de la fecha de servicio (`fumigation_service_date`). Controla la validación de certificados de fumigación diferenciando la naturaleza de la unidad (interna vs. externa).
 - **Comportamiento Global:**
-  - **Flotilla Interna (IVI):** Al recibir el payload de creación, el backend debe calcular de forma autoritativa si la fecha del certificado excede los días 15 días de vigencia normativos o no existe; en tal caso, el sistema marca `has_fumigation_certificate = false` independientemente del valor enviado por el cliente, despliega una alerta preventiva en pantalla y dispara automáticamente una No Conformidad (`source_type = 'PRE_CARGA'`).
+  - **Flotilla Interna (IVI):** Al recibir el payload de creación, el backend debe calcular de forma autoritativa si la fecha del certificado excede los días 15 días de vigencia normativos o no existe; en tal caso, el sistema marca `has_fumigation_certificate = false` independientemente del valor enviado por el cliente, despliega una alerta preventiva en pantalla e inhabilita la opción `APROBADO`, obligando a guardar con `APROBADO_CON_NC` o `RECHAZADO`, lo cual detona automáticamente la No Conformidad (`source_type = 'PRE_CARGA'`).
   - **Unidades Externas / Fleteras (IVE):** Se registra la condición del certificado (`has_fumigation_certificate`) únicamente como evidencia documental del embarque recibido y se despliega una advertencia visual. No genera No Conformidad de forma automatizada; la generación de NC en IVE dependerá exclusivamente del dictamen manual del inspector (`APROBADO_CON_NC` o `RECHAZADO`).
 
 ### BR-VHI-06: Estructura Estándar de Folios Autogenerados
@@ -69,10 +69,12 @@ Comprende tres flujos de evaluación técnica:
 - **Criterios de Aceptación:**
   - **C.A. 1.1:** El sistema debe verificar que la unidad tenga una inspección post-lavado VLV aprobada dentro de los últimos 7 días. En caso contrario, debe denegar el registro indicando la restricción (**BR-VHI-04**).
   - **C.A. 1.2:** Se debe autogenerar el folio con la estructura `IVI-YY-#####` (**BR-VHI-06**).
-  - **C.A. 1.3:** Si la unidad no cuenta con certificado vigente, la UI despliega una alerta de advertencia y establece `has_fumigation_certificate = false` (**BR-VHI-05**).
-  - **C.A. 1.4:** El usuario debe seleccionar manualmente el estado final (`APROBADO`, `RECHAZADO`, `APROBADO_CON_NC`) (**BR-VHI-01**). Si el inspector selecciona el estatus `RECHAZADO`, la interfaz debe hacer **estrictamente obligatorio** el llenado del campo `rejection_reason` (Motivo de Rechazo) antes de permitir el envío del formulario.
-  - **C.A. 1.5:** Si se guarda con `APROBADO_CON_NC`, `RECHAZADO` o con `has_fumigation_certificate = false`, el backend detona automáticamente la creación de la No Conformidad vinculando `id_daily_inspection` y asignando `source_type = 'PRE_CARGA'`.
-  - **C.A. 1.6:** Un estado `RECHAZADO` debe bloquear de inmediato la asignación de rutas y salida del vehículo en caseta, actualizando en la misma transacción el estatus del vehículo a `RETENIDO` (**BR-VHI-03**).
+  - **C.A. 1.3:** Si la unidad no cuenta con certificado vigente, la UI despliega una alerta de advertencia y establece `has_fumigation_certificate = false` y deshabilita la opción de estatus `APROBADO` (**BR-VHI-05**).
+  - **C.A. 1.4:** El usuario debe seleccionar manualmente el estado final (`APROBADO`, `RECHAZADO`, `APROBADO_CON_NC`) (**BR-VHI-01**). Si el inspector selecciona el estatus `RECHAZADO`, la interfaz y el backend debe hacer **estrictamente obligatorio** el llenado del campo `rejection_reason` (Motivo de Rechazo) antes de permitir el envío del formulario.
+  - **C.A. 1.5:** Si el estatus es `APROBADO_CON_NC`, `RECHAZADO` o con `has_fumigation_certificate = false`, el backend ejecuta en la misma transacción de DB:
+    1. Guarda el registro en `vehicle_daily_inspections`.
+    2. Si `status = RECHAZADO` debe bloquear de inmediato la asignación de rutas y salida del vehículo en caseta, actualizando `vehicles.status = 'RETENIDO'`.
+    3. Detona automáticamente la creación de la No Conformidad en `quality_non_conformities` con `source_type = 'PRE_CARGA'`, vinculando `id_daily_inspection` y construyendo description según la plantilla estandarizada.
 
 ### US-VHI-02: Captura de Inspección Post-Lavado Semanal (VLV)
 
@@ -83,8 +85,11 @@ Comprende tres flujos de evaluación técnica:
   - **C.A. 2.1:** El sistema debe autogenerar el folio único bajo el patrón `VLV-YY-#####` (**BR-VHI-06**).
   - **C.A. 2.2:** La interfaz debe solicitar la selección del vehículo (`id_vehicle`), chofer asignado (`id_driver_user`) y almacenar el usuario autenticado como inspector (`id_inspector_user`).
   - **C.A. 2.3:** Al guardar con estatus `APROBADO`, el vehículo queda automáticamente habilitado para pasar inspecciones diarias IVI durante los siguientes 7 días naturales (**BR-VHI-04**).
-  - **C.A. 2.4:** Si se guarda con `status = 'RECHAZADO'` o `APROBADO_CON_NC`, el backend crea atómicamente la No Conformidad vinculando `id_wash_inspection` y asignando `source_type = 'POST_LAVADO'` (**BR-QNC-02**). Si el inspector selecciona el estatus `RECHAZADO`, la interfaz debe hacer **estrictamente obligatorio** el llenado del campo `rejection_reason` (Motivo de Rechazo) antes de permitir el envío del formulario.
-  - **C.A. 2.5:** Un estado `RECHAZADO` en VLV marca de inmediato el vehículo como `RETENIDO`, impidiendo la creación de IVIs y el despacho de rutas (**BR-VHI-03**).
+  - **C.A. 2.4:** Si el estatus es `APROBADO_CON_NC` o `RECHAZADO`, el backend ejecuta en la misma transacción de DB:
+    1. Guarda el registro en `vehicle_wash_inspections`.
+    2. Si `status = RECHAZADO` debe bloquear de inmediato la creación de IVIs y la asignación de rutas y salida del vehículo en caseta, actualizando `vehicles.status = 'RETENIDO'`.
+    3. Detona automáticamente la creación de la No Conformidad en `quality_non_conformities` con `source_type = 'POST_LAVADO'`, vinculando `id_wash_inspection` y construyendo description según la plantilla estandarizada.
+  - **C.A. 2.5:** Si el inspector selecciona el estatus `RECHAZADO`, la interfaz y el backend debe hacer **estrictamente obligatorio** el llenado del campo `rejection_reason` (Motivo de Rechazo) antes de permitir el envío del formulario.
 
 ### US-VHI-03: Captura de Inspección de Recepción de Mercancía (IVE)
 
@@ -93,11 +98,12 @@ Comprende tres flujos de evaluación técnica:
 - **Para:** Mantener la trazabilidad, inocuidad e integridad de la carga entrante al almacén.
 - **Criterios de Aceptación:**
   - **C.A. 3.1:** El usuario debe poder definir si la unidad es interna (`is_internal_vehicle = true`) o externa (`is_internal_vehicle = false`), requiriendo los datos de fletera (`id_hauler`), placas (`external_plates`) y chofer (`driver_name`) para unidades externas.
-  - **C.A. 3.2:** Debe permitir almacenar el listado de facturas asociadas en formato `JSONB` (`invoices_included`), así como la verificación de sellos de seguridad (`correct_seals`, `seal_number_received`).
+  - **C.A. 3.2:** Debe permitir almacenar el listado de facturas asociadas en formato `JSONB` (`invoices_included`), así como la verificación de sellos de seguridad (`correct_seals`, `seal_number_received`) y alergenos.
   - **C.A. 3.3:** Permite capturar la presencia/ausencia del certificado de fumigación del proveedor/transporte. Si se indica que no cuenta con certificado, se muestra un aviso preventivo en pantalla y se guarda `has_fumigation_certificate = false` únicamente como registro documental de la recepción (**BR-VHI-05**).
   - **C.A. 3.4:** La captura de alérgenos compartidos o carga no alimenticia se debe guardar como información estadística sin bloquear el formulario (**BR-VHI-01**).
   - **C.A. 3.5:** El sistema autogenerará el folio `IVE-YY-#####` y admitirá únicamente el envío de estados `APROBADO`, `RECHAZADO` o `APROBADO_CON_NC` (**BR-VHI-06**, **BR-VHI-07**).
   - **C.A. 3.6:** Al guardar con estado `RECHAZADO` o `APROBADO_CON_NC`, el backend crea automáticamente el registro en `quality_non_conformities` asociando `id_reception_inspection` y `source_type = 'RECEPCION_MERCANCIA'`. La sola ausencia del certificado de fumigación en IVE no detona No Conformidad automática.
+  - **C.A. 3.7:** Si el inspector selecciona el estatus `RECHAZADO`, la interfaz y el backend debe hacer **estrictamente obligatorio** el llenado del campo `rejection_reason` (Motivo de Rechazo) antes de permitir el envío del formulario.
 
 ---
 
