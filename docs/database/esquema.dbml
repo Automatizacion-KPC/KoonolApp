@@ -778,6 +778,7 @@ Table vehicle_daily_inspections {
 
   status varchar [default: 'APROBADO']             // APROBADO, RECHAZADO, APROBADO_CON_NC
   notes text
+  rejection_reason text               // Solo si status = 'RECHAZADO'
   created_at timestamp [default: `now()`]
 
   indexes {
@@ -819,6 +820,7 @@ Table vehicle_wash_inspections {
 
   status varchar [default: 'APROBADO']             // APROBADO, RECHAZADO, APROBADO_CON_NC
   notes text
+  rejection_reason text               // Solo si status = 'RECHAZADO'
   created_at timestamp [default: `now()`]
 
   indexes {
@@ -908,8 +910,8 @@ Table vehicle_reception_inspections {
   has_live_or_dead_flies boolean [not null]
 
   status varchar [default: 'APROBADO']             // APROBADO, RECHAZADO, APROBADO_CON_NC
+  notes text
   rejection_reason text               // Solo si status = 'RECHAZADO'
-  notes text                          // Observaciones generales / APROBADO_CON_NC
   
   created_at timestamp [default: `now()`]
 
