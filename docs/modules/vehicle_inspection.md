@@ -32,7 +32,7 @@ Comprende tres flujos de evaluación técnica:
 ### BR-VHI-04: Prerrequisito de Inspección Post-Lavado Semanal (VLV)
 
 - **Descripción:** Para poder registrar una Inspección Diaria (**IVI**) a una unidad interna, el vehículo debe contar obligatoriamente con una Inspección Post-Lavado Semanal (**VLV**) registrada en estatus `APROBADO` dentro de la semana operativa en curso.
-- **Comportamiento Global:** El backend valida la existencia de un registro en `vehicle_wash_inspections` asociado al `id_vehicle` con `status = 'APROBADO'` y `created_at` dentro de los últimos 7 días. De lo contrario, rechaza la transacción de creación de la IVI.
+- **Comportamiento Global:** El backend valida la existencia de un registro en `vehicle_wash_inspections` asociado al `id_vehicle` con `status = 'APROBADO'/'APROBADO_CON_NC'` y `created_at` dentro de los últimos 7 días. De lo contrario, rechaza la transacción de creación de la IVI.
 
 ### BR-VHI-05: Validación de Vigencia del Certificado de Fumigación
 
@@ -67,7 +67,7 @@ Comprende tres flujos de evaluación técnica:
 - **Quiero:** Registrar el checklist de condiciones físicas, higiene y plagas de una unidad interna antes de su carga.
 - **Para:** Garantizar que el vehículo cumpla con los estándares de inocuidad e higiene exigidos para la distribución de producto.
 - **Criterios de Aceptación:**
-  - **C.A. 1.1:** El sistema debe verificar que la unidad tenga una inspección post-lavado VLV aprobada dentro de los últimos 7 días. En caso contrario, debe denegar el registro indicando la restricción (**BR-VHI-04**).
+  - **C.A. 1.1:** El sistema debe verificar que la unidad tenga una inspección post-lavado VLV con `status = 'APROBADO'/'APROBADO_CON_NC'` dentro de los últimos 7 días. En caso contrario, debe denegar el registro indicando la restricción (**BR-VHI-04**).
   - **C.A. 1.2:** Se debe autogenerar el folio con la estructura `IVI-YY-#####` (**BR-VHI-06**).
   - **C.A. 1.3:** Si la unidad no cuenta con certificado vigente, la UI despliega una alerta de advertencia y establece `has_fumigation_certificate = false` y deshabilita la opción de estatus `APROBADO` (**BR-VHI-05**).
   - **C.A. 1.4:** El usuario debe seleccionar manualmente el estado final (`APROBADO`, `RECHAZADO`, `APROBADO_CON_NC`) (**BR-VHI-01**). Si el inspector selecciona el estatus `RECHAZADO`, la interfaz y el backend debe hacer **estrictamente obligatorio** el llenado del campo `rejection_reason` (Motivo de Rechazo) antes de permitir el envío del formulario.
@@ -84,7 +84,7 @@ Comprende tres flujos de evaluación técnica:
 - **Criterios de Aceptación:**
   - **C.A. 2.1:** El sistema debe autogenerar el folio único bajo el patrón `VLV-YY-#####` (**BR-VHI-06**).
   - **C.A. 2.2:** La interfaz debe solicitar la selección del vehículo (`id_vehicle`), chofer asignado (`id_driver_user`) y almacenar el usuario autenticado como inspector (`id_inspector_user`).
-  - **C.A. 2.3:** Al guardar con estatus `APROBADO`, el vehículo queda automáticamente habilitado para pasar inspecciones diarias IVI durante los siguientes 7 días naturales (**BR-VHI-04**).
+  - **C.A. 2.3:** Al guardar con estatus `APROBADO` o `'APROBADO_CON_NC'`, el vehículo queda automáticamente habilitado para pasar inspecciones diarias IVI durante los siguientes 7 días naturales (**BR-VHI-04**).
   - **C.A. 2.4:** Si el estatus es `APROBADO_CON_NC` o `RECHAZADO`, el backend ejecuta en la misma transacción de DB:
     1. Guarda el registro en `vehicle_wash_inspections`.
     2. Si `status = RECHAZADO` debe bloquear de inmediato la creación de IVIs y la asignación de rutas y salida del vehículo en caseta, actualizando `vehicles.status = 'RETENIDO'`.
