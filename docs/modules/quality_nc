@@ -10,19 +10,34 @@ El módulo de **No Conformidades** centraliza la recolección, consolidación y 
 
 ### BR-QNC-01: Arco Exclusivo de Origen
 
-- **Descripción:** Toda No Conformidad debe estar vinculada a una única fuente de origen especificada en el campo `source_type`, cuyos valores permitidos son: `'PRE_CARGA'`, `'POST_LAVADO'`, `'RECEPCION_MERCANCIA'`, `'RECLAMO_CLIENTE'`, `'VIDRIO_PLASTICO'`, `'MANUAL'`.
+- **Descripción:** Toda No Conformidad debe estar vinculada a una única fuente de origen especificada en el campo `source_type`, cuyos valores permitidos son: `'PRE_CARGA'`, `'POST_LAVADO'`, `'RECEPCION_MERCANCIA'`, `'RECLAMO_CLIENTE'`, `'VIDRIO_PLASTICO'`, `'MANUAL'`. A nivel de base de datos se debe aplicar un Constraint SQL de validación:
+
+$$
+\text{num\_non\_nulls}(id\_daily\_inspection, id\_wash\_inspection, id\_reception\_inspection, id\_customer\_complaint, id\_glass\_plastic\_detail) = \begin{cases}
+0 & \text{si } source\_type = 'MANUAL' \\
+1 & \text{si } source\_type \neq 'MANUAL'
+\end{cases}
+$$
+
 - **Comportamiento Global:** Debe existir exactamente una referencia UUID no nula hacia la tabla correspondiente según el source_type. Si source_type = 'MANUAL', todos los campos de referencia (id_daily_inspection, id_wash_inspection, id_reception_inspection, id_customer_complaint, id_glass_plastic_detail) deben ser obligatoriamente NULL. La base de datos/backend/frontend validará esta restricción antes de persistir, vía CHECK constraint en base de datos, middleware en backend y input radio en frontend.
 
 ### BR-QNC-02: Generación Autogestionada por Inspección
 
-- **Descripción:** Al guardar un registro de inspección, el backend generará máximo UN solo registro de No Conformidad (`status = 'ABIERTA'`) si se cumple al menos una de estas condiciones:
-  1. El estatus asignado a la inspección es `APROBADO_CON_NC` o `RECHAZADO` (Aplica a IVI, VLV e IVE).
-  2. La evaluación técnica de la unidad interna (IVI) incluye la marca `has_fumigation_certificate = false` o certificado vencido.
+- **Descripción:** Al guardar un registro de inspección (`IVI`, `VLV`, `IVE`), el backend generará automáticamente un único registro de No Conformidad (`status = 'ABIERTA'`) únicamente si el estatus operativo final asignado a la inspección es `APROBADO_CON_NC` o `RECHAZADO` (lo cual incluye las inspecciones `IVI` donde la ausencia/vencimiento de certificado de fumigación restringió la selección a alguno de estos dos estados).
 - **Comportamiento Global:**
-  - Se creará **un solo registro** de No Conformidad por inspección.
-  - El campo `description` se construirá automáticamente combinando las observaciones del inspector y los hallazgos fuera de norma detectados por el sistema.
-  - El `campo id_created_by` heredará el `id_inspector_user` del registro padre.
-  - Si en una inspección IVI concurren un estatus de rechazo/aprobado con NC y un certificado de fumigación ausente/vencido, ambos motivos se consolidan en la columna `description` de la misma transacción.
+  - Se creará **un solo registro** de No Conformidad por inspección en `quality_non_conformities` con `status = 'ABIERTA'`.
+  - El campo `description` de la No Conformidad se construirá utilizando la siguiente estructura:
+    - Plantilla: `"[Origen: {FOLIO_INSPECCION}] - {CONTEXTO_UNIDAD} - Hallazgos: {FALLOS_DETECTADOS}. Motivo Rechazo: {MOTIVO_RECHAZO}. Observaciones: {OBSERVACIONES_INSPECTOR}"`.
+    - Definición de Variables:
+      - `{FOLIO_INSPECCION}`: Folio autogenerado de la inspección origen (IVI-YY-#####, VLV-YY-#####, IVE-YY-#####).
+      - `{CONTEXTO_UNIDAD}`:
+        - Si es vehículo interno (IVI,VLV o IVE Interna): `"Unidad: {id_vehicle}"`.
+        - Si es vehículo externo (IVE Fletera): `"Fletera: {id_hauler} | Placas: {external_plates} | Chofer: {driver_name}"`.
+      - `{FALLOS_DETECTADOS}`: Lista delimitada por el arreglo acumulativo de las desviaciones detectadas separadas por comas (`"Estatus: {status}"` [si es `RECHAZADO` o `APROBADO_CON_NC`] y/o `"Certificado de Fumigación Vencido/Ausente"`).
+      - `{MOTIVO_RECHAZO}`: Contenido de `rejection_reason`. Si no aplica o está vacío, se coloca `"N/A"`.
+      - `{OBSERVACIONES_INSPECTOR}`: Contenido del campo `notes`. Si está vacío, se registra `"Sin observaciones adicionales"`.
+  - El campo `id_created_by` heredará el `id_inspector_user` del registro padre.
+  - Si en una misma inspección concurren múltiples desviaciones (por ejemplo: rechazo físico y certificado de fumigación ausente), todas las incidencias se consolidan en la columna `description` dentro del mismo bloque transaccional.
 
 ### BR-QNC-03: Formato y Secuencia Anual del Folio
 
@@ -46,7 +61,7 @@ El módulo de **No Conformidades** centraliza la recolección, consolidación y 
 
 ### BR-QNC-07: Restricción de Borrado Lógico (Soft Delete)
 
-- **Descripción:** Los registros de No Conformidad generados automáticamente desde inspecciones (`PRE_CARGA`, `POST_LAVADO`, `RECEPCION_MERCANCIA`) son inmutables en su existencia y no pueden ser eliminados lógicamente (`deleted_at`). El borrado lógico (`deleted_at`) aplica exclusivamente para No Conformidades con `source_type = 'MANUAL'`
+- **Descripción:** Los registros de No Conformidad generados automáticamente desde inspecciones (`PRE_CARGA`, `POST_LAVADO`, `RECEPCION_MERCANCIA`) son inmutables en su existencia y no pueden ser eliminados lógicamente (`deleted_at`). El borrado lógico (`deleted_at`) aplica única y exclusivamente para No Conformidades con `source_type = 'MANUAL'`
 - **Comportamiento Global:** La actualización del campo deleted_at solo estará permitida para No Conformidades con `source_type = 'MANUAL'`, requiriendo autenticación de un usuario del departamento de **CALIDAD** con rol **MANAGER**, el backend registra obligatoriamente el id del usuario en la columna `id_deleted_by`.
 
 ### BR-QNC-08: Atomicidad de la Transacción de Inspección y No Conformidad
@@ -71,7 +86,7 @@ El módulo de **No Conformidades** centraliza la recolección, consolidación y 
     - Si proviene de IVI: `source_type = 'PRE_CARGA'`, asigna `id_daily_inspection`.
     - Si proviene de VLV: `source_type = 'POST_LAVADO'`, asigna `id_wash_inspection`.
     - Si proviene de IVE: `source_type = 'RECEPCION_MERCANCIA'`, asigna `id_reception_inspection`.
-  - **C.A. 1.3:** Disparo por Regla de Negocio Preventiva (Exclusivo IVI). Si una inspección diaria (IVI) se guarda con `has_fumigation_certificate = false`, el backend debe generar la No Conformidad (`source_type = 'PRE_CARGA'`) aun cuando el estatus manual asignado haya sido `APROBADO`.
+  - **C.A. 1.3:** Disparo por Regla de Negocio Preventiva (Exclusivo IVI). Si una inspección diaria (IVI) se guarda con `has_fumigation_certificate = false`, se restringirá el estatus a `APROBADO_CON_NC` o `RECHAZADO` y el backend debe generar la No Conformidad (`source_type = 'PRE_CARGA'`) en la misma transacción.
   - **C.A. 1.4:** Construcción de la Descripción. El backend debe poblar el campo `description` de la No Conformidad utilizando la siguiente estructura:
     - Plantilla: `"[Origen: {FOLIO_INSPECCION}] - {CONTEXTO_UNIDAD} - Hallazgos: {FALLOS_DETECTADOS}. Motivo Rechazo: {MOTIVO_RECHAZO}. Observaciones: {OBSERVACIONES_INSPECTOR}"`.
     - Definición de Variables:
