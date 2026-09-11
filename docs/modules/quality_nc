@@ -33,7 +33,7 @@ $$
       - `{CONTEXTO_UNIDAD}`:
         - Si es vehículo interno (IVI,VLV o IVE Interna): `"Unidad: {id_vehicle}"`.
         - Si es vehículo externo (IVE Fletera): `"Fletera: {id_hauler} | Placas: {external_plates} | Chofer: {driver_name}"`.
-      - `{FALLOS_DETECTADOS}`: Lista delimitada por el arreglo acumulativo de las desviaciones detectadas separadas por comas (`"Estatus: {status}"` [si es `RECHAZADO` o `APROBADO_CON_NC`] y/o `"Certificado de Fumigación Vencido/Ausente"`).
+      - `{FALLOS_DETECTADOS}`: Lista delimitada por comas obtenida de evaluar las columnas booleanas en estado de fallo (por ejemplo: `"Piso con orificios, Presencia de hormigas"`) concatenada con `"Certificado de Fumigación Vencido/Ausente"` (si aplica) y `"Estatus: {status}"`.
       - `{MOTIVO_RECHAZO}`: Contenido de `rejection_reason`. Si no aplica o está vacío, se coloca `"N/A"`.
       - `{OBSERVACIONES_INSPECTOR}`: Contenido del campo `notes`. Si está vacío, se registra `"Sin observaciones adicionales"`.
   - El campo `id_created_by` heredará el `id_inspector_user` del registro padre.
@@ -77,7 +77,7 @@ $$
 
 ### US-QNC-01: Generación Automática de No Conformidad desde Inspecciones
 
-- **Como:** Personal del Departamento de Calidad (USER, LEADER, SUPERVISOR, MANAGER).
+- **Como:** Personal del Departamento de Calidad (`USER`, `LEADER`, `SUPERVISOR`, `MANAGER`).
 - **Quiero:** Que el sistema genere automáticamente la entrada en la Bitácora de No Conformidades cuando una inspección registre desviaciones o sea finalizada con hallazgos.
 - **Para:** Asegurar la trazabilidad centralizada de no conformidades sin requerir una doble captura de datos por parte del usuario.
 - **Criterios de Aceptación:**
@@ -94,7 +94,7 @@ $$
       - `{CONTEXTO_UNIDAD}`:
         - Si es vehículo interno (IVI,VLV o IVE Interna): `"Unidad: {id_vehicle}"`.
         - Si es vehículo externo (IVE Fletera): `"Fletera: {id_hauler} | Placas: {external_plates} | Chofer: {driver_name}"`.
-      - `{FALLOS_DETECTADOS}`: Lista delimitada por el arreglo acumulativo de las desviaciones detectadas separadas por comas (`"Estatus: {status}"` [si es `RECHAZADO` o `APROBADO_CON_NC`] y/o `"Certificado de Fumigación Vencido/Ausente"`).
+      - `{FALLOS_DETECTADOS}`: Lista delimitada por el arreglo acumulativo de las desviaciones detectadas separadas por comas.
       - `{MOTIVO_RECHAZO}`: Contenido de `rejection_reason`. Si no aplica o está vacío, se coloca `"N/A"`.
       - `{OBSERVACIONES_INSPECTOR}`: Contenido del campo `notes`. Si está vacío, se registra `"Sin observaciones adicionales"`.
   - **C.A. 1.5:** Valores Iniciales y Auditoría. El registro nace con `status = 'ABIERTA'`, folio `NC-YY-#####` y hereda `id_created_by = id_inspector_user`.
@@ -102,7 +102,7 @@ $$
 
 ### US-QNC-02: Registro Manual de No Conformidades
 
-- **Como:** Personal del Departamento de Calidad (USER, LEADER, SUPERVISOR, MANAGER).
+- **Como:** Personal del Departamento de Calidad (`USER`, `LEADER`, `SUPERVISOR`, `MANAGER`).
 - **Quiero:** Dar de alta manualmente una No Conformidad especificando la descripción de la incidencia
 - **Para:** Documentar desviaciones u observaciones que no provienen de un checklist de inspección estandarizado
 - **Criterios de Aceptación:**
@@ -111,7 +111,7 @@ $$
 
 ### US-QNC-03: Gestión de Avance y Verificación de No Conformidades
 
-- **Como:** SUPERVISOR / LEADER / USER (Líder Operativo / Responsable de Acción)
+- **Como:** `SUPERVISOR` / `LEADER` / `USER` (Líder Operativo / Responsable de Acción)
 - **Quiero:** Transicionar el estado de la No Conformidad a `EN_PROCESO` y posteriormente a `VERIFICADA`
 - **Para:** Reflejar la ejecución del análisis de causa raíz y la implementación de acciones correctivas
 - **Criterios de Aceptación:**
@@ -121,7 +121,7 @@ $$
 
 ### US-QNC-04: Cierre Formal de No Conformidad por Gerencia
 
-- **Como:** MANAGER (Gerente de Calidad)
+- **Como:** `MANAGER` (Gerente de Calidad)
 - **Quiero:** Evaluar las evidencias depositadas y aprobar el pase final de la No Conformidad a estado `CERRADA`
 - **Para:** Validar oficialmente la efectividad de las acciones correctivas e independizar el cierre del proceso
 - **Criterios de Aceptación:**
