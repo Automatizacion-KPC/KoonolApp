@@ -915,6 +915,11 @@ Table vehicle_reception_inspections {
   
   created_at timestamp [default: `now()`]
 
+  // CHECK (
+  //   (is_internal_vehicle = TRUE AND id_vehicle IS NOT NULL AND id_hauler IS NULL AND external_plates IS NULL AND driver_name IS NULL) OR
+  //   (is_internal_vehicle = FALSE AND id_vehicle IS NULL AND id_hauler IS NOT NULL AND external_plates IS NOT NULL AND driver_name IS NOT NULL)
+  // )
+
 indexes {
     id_inspector_user [name: 'idx_vehicle_reception_inspections_id_inspector_user']
     (inspection_date, inspection_time) [name: 'idx_vehicle_reception_inspections_datetime']
@@ -1298,6 +1303,7 @@ Table quality_non_conformities {
 
   source_type varchar [not null]                   // 'PRE_CARGA', 'POST_LAVADO', 'RECEPCION_MERCANCIA', 'VIDRIO_PLASTICO', 'RECLAMO_CLIENTE', 'MANUAL'
   description text [not null]                      // Detalles del hallazgo
+  id_vehicle uuid          // Relación directa opcional a vehicles.id
 
   // APUNTADORES DE ORIGEN GLOBAL (Nullables)
   id_daily_inspection uuid                         // Viene de vehicles_daily_inspections (Pre-Carga)
@@ -1314,6 +1320,11 @@ Table quality_non_conformities {
   deleted_at timestamp
 
   // Note: 'ARCO EXCLUSIVO: Solo uno de los campos de origen (id_*_inspection, id_customer_complaint, id_glass_plastic_detail) puede contener un valor UUID a la vez.'
+
+  // CHECK (
+  //   (source_type = 'MANUAL' AND num_non_nulls(id_daily_inspection, id_wash_inspection, id_reception_inspection, id_customer_complaint, id_glass_plastic_detail) = 0) OR
+  //   (source_type != 'MANUAL' AND num_non_nulls(id_daily_inspection, id_wash_inspection, id_reception_inspection, id_customer_complaint, id_glass_plastic_detail) = 1)
+  // )
 
   indexes {
     id_updated_by [name: 'idx_quality_non_conformities_id_updated_by']
@@ -1560,6 +1571,7 @@ Ref: quality_non_conformities.id_glass_plastic_detail > quality_glass_plastic_de
 Ref: quality_non_conformities.id_created_by > users.id
 Ref: quality_non_conformities.id_updated_by > users.id
 Ref: quality_non_conformities.id_deleted_by > users.id
+Ref: quality_non_conformities.id_vehicle > vehicles.id
 
 // Relaciones de Notificaciones
 Ref: system_notifications.id_user > users.id
