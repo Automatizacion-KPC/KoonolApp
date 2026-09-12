@@ -1303,7 +1303,8 @@ Table quality_non_conformities {
 
   source_type varchar [not null]                   // 'PRE_CARGA', 'POST_LAVADO', 'RECEPCION_MERCANCIA', 'VIDRIO_PLASTICO', 'RECLAMO_CLIENTE', 'MANUAL'
   description text [not null]                      // Detalles del hallazgo
-  id_vehicle uuid          // Relación directa opcional a vehicles.id
+  id_vehicle uuid                                  // Copia directa de vehicle_id si aplica
+  id_hauler uuid                                   // Copia directa de hauler_id si aplica (IVE Fletera)
 
   // APUNTADORES DE ORIGEN GLOBAL (Nullables)
   id_daily_inspection uuid                         // Viene de vehicles_daily_inspections (Pre-Carga)
@@ -1319,11 +1320,20 @@ Table quality_non_conformities {
   updated_at timestamp
   deleted_at timestamp
 
-  // Note: 'ARCO EXCLUSIVO: Solo uno de los campos de origen (id_*_inspection, id_customer_complaint, id_glass_plastic_detail) puede contener un valor UUID a la vez.'
-
+  // CHECK CONSTRAINTS EXPLICITOS EN BASE DE DATOS:
+  // 1. Arco Exclusivo con Matcheo Estricto de Source Type:
   // CHECK (
-  //   (source_type = 'MANUAL' AND num_non_nulls(id_daily_inspection, id_wash_inspection, id_reception_inspection, id_customer_complaint, id_glass_plastic_detail) = 0) OR
-  //   (source_type != 'MANUAL' AND num_non_nulls(id_daily_inspection, id_wash_inspection, id_reception_inspection, id_customer_complaint, id_glass_plastic_detail) = 1)
+  //   (source_type = 'MANUAL'              AND id_daily_inspection IS NULL AND id_wash_inspection IS NULL AND id_reception_inspection IS NULL AND id_customer_complaint IS NULL AND id_glass_plastic_detail IS NULL) OR
+  //   (source_type = 'PRE_CARGA'            AND id_daily_inspection IS NOT NULL AND id_wash_inspection IS NULL AND id_reception_inspection IS NULL AND id_customer_complaint IS NULL AND id_glass_plastic_detail IS NULL) OR
+  //   (source_type = 'POST_LAVADO'           AND id_daily_inspection IS NULL AND id_wash_inspection IS NOT NULL AND id_reception_inspection IS NULL AND id_customer_complaint IS NULL AND id_glass_plastic_detail IS NULL) OR
+  //   (source_type = 'RECEPCION_MERCANCIA'  AND id_daily_inspection IS NULL AND id_wash_inspection IS NULL AND id_reception_inspection IS NOT NOT NULL AND id_customer_complaint IS NULL AND id_glass_plastic_detail IS NULL) OR
+  //   (source_type = 'RECLAMO_CLIENTE'      AND id_daily_inspection IS NULL AND id_wash_inspection IS NULL AND id_reception_inspection IS NULL AND id_customer_complaint IS NOT NOT NULL AND id_glass_plastic_detail IS NULL) OR
+  //   (source_type = 'VIDRIO_PLASTICO'      AND id_daily_inspection IS NULL AND id_wash_inspection IS NULL AND id_reception_inspection IS NULL AND id_customer_complaint IS NULL AND id_glass_plastic_detail IS NOT NULL)
+  // )
+  //
+  // 2. Proteccion de Borrado Logico:
+  // CHECK (
+  //   (source_type = 'MANUAL') OR (deleted_at IS NULL AND id_deleted_by IS NULL)
   // )
 
   indexes {
@@ -1572,6 +1582,7 @@ Ref: quality_non_conformities.id_created_by > users.id
 Ref: quality_non_conformities.id_updated_by > users.id
 Ref: quality_non_conformities.id_deleted_by > users.id
 Ref: quality_non_conformities.id_vehicle > vehicles.id
+Ref: quality_non_conformities.id_hauler > haulers.id
 
 // Relaciones de Notificaciones
 Ref: system_notifications.id_user > users.id
