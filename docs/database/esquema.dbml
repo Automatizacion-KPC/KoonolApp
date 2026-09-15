@@ -500,6 +500,7 @@ Table vehicles {
   id uuid [primary key, not null]
   id_department uuid [not null]
   id_employee uuid [unique]
+  name varchar
   plates varchar [unique, not null]
   brand varchar [not null]
   model varchar [not null]
